@@ -18,13 +18,13 @@ class Bootstrap extends Utils
     {
         if ('users.php' == $hook) {
             \wp_enqueue_script('tailwindcss', 'https://cdn.tailwindcss.com', array(), '3.4.0');
-            \wp_enqueue_script('users', self::get_plugin_url() . '/assets/js/admin-users.js', array(), self::get_plugin_ver(), true);
+            \wp_enqueue_script('users', Utils::get_plugin_url() . '/assets/js/admin-users.js', array(), Utils::get_plugin_ver(), true);
         }
         if ('user-edit.php' == $hook || 'profile.php' == $hook) {
-            \wp_enqueue_script('user-edit', self::get_plugin_url() . '/assets/js/admin-user-edit.js', array(), self::get_plugin_ver(), true);
+            \wp_enqueue_script('user-edit', Utils::get_plugin_url() . '/assets/js/admin-user-edit.js', array(), Utils::get_plugin_ver(), true);
         }
 
-        \wp_enqueue_style(self::KEBAB . '-css', self::get_plugin_url() . '/assets/css/admin.css', array(), self::get_plugin_ver());
+        \wp_enqueue_style(Utils::KEBAB . '-css', Utils::get_plugin_url() . '/assets/css/admin.css', array(), Utils::get_plugin_ver());
     }
 
 }

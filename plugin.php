@@ -18,7 +18,9 @@
 declare (strict_types = 1);
 namespace J7\PowerMembership;
 
-require_once __DIR__ . '/class-tgm-plugin-activation.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+require_once __DIR__ . '/TGMPlugin/class-tgm-plugin-activation.php';
 require_once __DIR__ . '/utils/index.php';
 
 class Init extends Utils
@@ -148,6 +150,16 @@ class Init extends Utils
         $TGM_instance = \TGM_Plugin_Activation::get_instance();
 
         if ($TGM_instance->is_tgmpa_complete()) {
+            require __DIR__ . '/vendor/autoload.php';
+            $updateChecker = PucFactory::buildUpdateChecker(
+                Utils::GITHUB_REPO,
+                __FILE__,
+                Utils::KEBAB
+            );
+            $updateChecker->setBranch('master');
+            // $updateChecker->setAuthentication(Utils::GITHUB_PAT);
+            $updateChecker->getVcsApi()->enableReleaseAssets();
+
             require_once __DIR__ . '/class/index.php';
             new Bootstrap();
         }
@@ -155,7 +167,7 @@ class Init extends Utils
 
     public function create_member_lv_post_type(): void
     {
-        $post_type = self::MEMBER_LV_POST_TYPE;
+        $post_type = Utils::MEMBER_LV_POST_TYPE;
         if (\post_type_exists($post_type)) {
             return;
         }
@@ -166,7 +178,7 @@ class Init extends Utils
                 'post_title'  => '會員等級',
                 'post_type'   => 'rank-type',
                 'post_status' => 'publish',
-                'post_name'   => self::MEMBER_LV_POST_TYPE,
+                'post_name'   => Utils::MEMBER_LV_POST_TYPE,
                 'meta_input'  => array(
                     '_gamipress_plural_name' => '會員等級',
                 ),

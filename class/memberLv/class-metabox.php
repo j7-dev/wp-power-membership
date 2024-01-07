@@ -23,10 +23,10 @@ class Metabox extends \J7\PowerMembership\Utils
     public function add_metabox(): void
     {
         add_meta_box(
-            self::MEMBER_LV_POST_TYPE . '_condition_metabox',
+            Utils::MEMBER_LV_POST_TYPE . '_condition_metabox',
             '會員等級條件設定',
             array($this, 'render_metabox'),
-            self::MEMBER_LV_POST_TYPE,
+            Utils::MEMBER_LV_POST_TYPE,
             'normal',
             'high'
         );

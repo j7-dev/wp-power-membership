@@ -9,6 +9,7 @@ class Utils
     const SNAKE               = 'power_membership';
     const DEFAULT_IMAGE       = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
     const MEMBER_LV_POST_TYPE = 'member_lv';
+    const GITHUB_REPO         = 'https://github.com/j7-dev/power-membership';
     // const ORDER_META_KEY = 'pp_create_site_responses';
 
     // protected const API_URL            = 'https://cloud.luke.cafe';
@@ -70,13 +71,13 @@ class Utils
 
     public static function get_plugin_url(): string
     {
-        $plugin_url = \untrailingslashit(\plugin_dir_url(self::get_plugin_dir() . '/plugin.php'));
+        $plugin_url = \untrailingslashit(\plugin_dir_url(Utils::get_plugin_dir() . '/plugin.php'));
         return $plugin_url;
     }
 
     public static function get_plugin_ver(): string
     {
-        $plugin_data = \get_plugin_data(self::get_plugin_dir() . '/plugin.php');
+        $plugin_data = \get_plugin_data(Utils::get_plugin_dir() . '/plugin.php');
         $plugin_ver  = $plugin_data[ 'Version' ];
         return $plugin_ver;
     }
