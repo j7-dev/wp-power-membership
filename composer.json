@@ -1,5 +1,10 @@
 {
-    "require": {
-        "yahnis-elsts/plugin-update-checker": "^5.3"
+  "require": {
+    "yahnis-elsts/plugin-update-checker": "^5.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "J7\\PowerMembership\\": "utils/"
     }
+  }
 }

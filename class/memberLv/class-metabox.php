@@ -3,72 +3,54 @@
 declare (strict_types = 1);
 namespace J7\PowerMembership\MemberLv;
 
-class Metabox extends \J7\PowerMembership\Utils
+use J7\PowerMembership\Utils;
+
+class Metabox
 {
+
+    const ACTION   = Utils::SNAKE . '_metabox';
+    const META_KEY = 'threshold';
 
     public function __construct()
     {
-        if (is_admin()) {
-            add_action('load-post.php', [ $this, 'init_metabox' ]);
-            add_action('load-post-new.php', [ $this, 'init_metabox' ]);
-        }
+        \add_action('add_meta_boxes', [ $this, 'add_metabox' ], 100);
+        \add_action('save_post', [ $this, 'save_metabox' ], 100, 2);
     }
 
-    public function init_metabox(): void
-    {
-        add_action('add_meta_boxes', [ $this, 'add_metabox' ]);
-        add_action('save_post', [ $this, 'save_metabox' ], 10, 2);
-    }
-
-    public function add_metabox(): void
+    public function add_metabox()
     {
         add_meta_box(
-            Utils::MEMBER_LV_POST_TYPE . '_condition_metabox',
-            '會員等級條件設定',
-            array($this, 'render_metabox'),
+            Utils::SNAKE . '_metabox',
+            '會員升級門檻',
+            [ $this, 'render_metabox' ],
             Utils::MEMBER_LV_POST_TYPE,
             'normal',
             'high'
         );
+
     }
 
     public function render_metabox($post)
     {
         ?>
-<label for="threshold">會員升級門檻</label>
-<input step="1000" min="0" value="500000" type="number" id="threshold" name="threshold" />
+			<div class="tw-flex tw-items-center">
+					<label for="<?=self::META_KEY?>" class="tw-w-[14rem] tw-block">會員累積消費升級門檻(NT$)</label>
+					<input type="number" name="<?=self::META_KEY?>" min="0" step="1000" class="tw-ml-8" />
+				</div>
 			<?php
-// Add nonce for security and authentication.
-        wp_nonce_field('custom_nonce_action', 'custom_nonce');
-    }
+}
 
     public function save_metabox($post_id, $post)
     {
-        // Add nonce for security and authentication.
-        $nonce_name   = isset($_POST[ 'custom_nonce' ]) ? $_POST[ 'custom_nonce' ] : '';
-        $nonce_action = 'custom_nonce_action';
-
-        // Check if nonce is valid.
-        if (!wp_verify_nonce($nonce_name, $nonce_action)) {
-            return;
-        }
 
         // Check if user has permissions to save data.
         if (!current_user_can('edit_post', $post_id)) {
             return;
         }
-
-        // Check if not an autosave.
-        if (wp_is_post_autosave($post_id)) {
-            return;
-        }
-
-        // Check if not a revision.
-        if (wp_is_post_revision($post_id)) {
-            return;
-        }
+        $value = isset($_POST[ 'threshold' ])?\sanitize_text_field($_POST[ 'threshold' ]) : 0;
+        $value = is_numeric($value) ? $value : 0;
+        \update_post_meta($post_id, self::META_KEY, $value);
     }
-
 }
 
 new Metabox();

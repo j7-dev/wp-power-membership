@@ -3,7 +3,7 @@
 declare (strict_types = 1);
 namespace J7\PowerMembership;
 
-class UserColumns extends Utils
+class UserColumns
 {
 
     public $order_history = 4; // 秀幾個月前的訂單金額
@@ -54,7 +54,7 @@ class UserColumns extends Utils
     {
         for ($i = 0; $i < $this->order_history; $i++) {
             if ($column_name == "ts{$i}") {
-                $order_data = $this->get_order_data_by_user_date($user_id, $i);
+                $order_data = Utils::get_order_data_by_user_date($user_id, $i);
 
                 if (!$order_data[ 'user_is_registered' ]) {
                     return '<span class="bg-gray-200 px-2 py-1 rounded-md text-xs">當時尚未註冊</span>';
@@ -90,7 +90,7 @@ class UserColumns extends Utils
                 'post_type'   => array('shop_order'),
                 'post_status' => array('wc-completed', 'wc-processing'),
             );
-            $order_data = $this->get_order_data_by_user_date($user_id, 0, $args);
+            $order_data = Utils::get_order_data_by_user_date($user_id, 0, $args);
 
             $html = 'NT$ ' . $order_data[ 'total' ] . '<br>訂單' . $order_data[ 'order_num' ] . '筆';
             return $html;

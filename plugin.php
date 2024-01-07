@@ -18,16 +18,31 @@
 declare (strict_types = 1);
 namespace J7\PowerMembership;
 
+use J7\PowerMembership\Utils;
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
+require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/TGMPlugin/class-tgm-plugin-activation.php';
 require_once __DIR__ . '/utils/index.php';
 
-class Init extends Utils
+class Init
 {
 
     public function __construct()
     {
+        /**
+         * wp plugin 更新檢查 update checker
+         */
+
+        $updateChecker = PucFactory::buildUpdateChecker(
+            Utils::GITHUB_REPO,
+            __FILE__,
+            Utils::KEBAB
+        );
+        $updateChecker->setBranch('master');
+        // $updateChecker->setAuthentication(Utils::GITHUB_PAT);
+        $updateChecker->getVcsApi()->enableReleaseAssets();
+
         \add_action('tgmpa_register', [ $this, 'power_membership_register_required_plugins' ]);
         \register_activation_hook(__FILE__, [ $this, 'create_member_lv_post_type' ]);
     }
@@ -43,11 +58,6 @@ class Init extends Utils
             [
                 'name'     => 'WooCommerce',
                 'slug'     => 'woocommerce',
-                'required' => true,
-             ],
-            [
-                'name'     => 'Redux Framework',
-                'slug'     => 'redux-framework',
                 'required' => true,
              ],
          ];
@@ -150,16 +160,6 @@ class Init extends Utils
         $TGM_instance = \TGM_Plugin_Activation::get_instance();
 
         if ($TGM_instance->is_tgmpa_complete()) {
-            require __DIR__ . '/vendor/autoload.php';
-            $updateChecker = PucFactory::buildUpdateChecker(
-                Utils::GITHUB_REPO,
-                __FILE__,
-                Utils::KEBAB
-            );
-            $updateChecker->setBranch('master');
-            // $updateChecker->setAuthentication(Utils::GITHUB_PAT);
-            $updateChecker->getVcsApi()->enableReleaseAssets();
-
             require_once __DIR__ . '/class/index.php';
             new Bootstrap();
         }

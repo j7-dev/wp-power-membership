@@ -25,7 +25,7 @@ class Utils
      * 時間參考
      * @ref https://wisdmlabs.com/blog/query-posts-or-comments-by-date-time/
      */
-    public function get_order_data_by_user_date($user_id, $months_ago = 0, $args = array())
+    public static function get_order_data_by_user_date($user_id, $months_ago = 0, $args = array())
     {
         $user      = get_userdata($user_id);
         $that_date = strtotime("first day of -" . $months_ago . " month", time());
