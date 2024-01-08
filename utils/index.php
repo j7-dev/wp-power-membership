@@ -10,6 +10,16 @@ class Utils
     const DEFAULT_IMAGE       = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
     const MEMBER_LV_POST_TYPE = 'member_lv';
     const GITHUB_REPO         = 'https://github.com/j7-dev/power-membership';
+
+    /**
+     * 處理會員升級相關邏輯
+     *     _gamipress_member_lv_rank: 1026 (會員等級的 post id)
+     * _gamipress_member_lv_previous_rank: 1020 (會員等級的 post id)
+     * _gamipress_member_lv_rank_earned_time: 1704704213 (秒)
+     */
+
+    const CURRENT_MEMBER_LV_META_KEY = '_gamipress_' . self::MEMBER_LV_POST_TYPE . '_rank';
+
     // const ORDER_META_KEY = 'pp_create_site_responses';
 
     // protected const API_URL            = 'https://cloud.luke.cafe';
@@ -56,11 +66,45 @@ class Utils
             $order = wc_get_order($customer_order);
             $total += $order->get_total();
         }
-        $order_data[ 'total' ]              = $total;
-        $order_data[ 'order_num' ]          = count($customer_orders);
-        $order_data[ 'user_is_registered' ] = $is_registered;
+        $order_data[ 'total' ]              = $total; // 金額
+        $order_data[ 'order_num' ]          = count($customer_orders); // N 筆訂單
+        $order_data[ 'user_is_registered' ] = $is_registered; // 是否已註冊
 
         return $order_data;
+    }
+
+    /*
+     * 在 wp_admin 中使用do_shortcode
+     */
+    public static function admin_do_shortcode($content, $ignore_html = false): mixed
+    {
+        global $shortcode_tags;
+
+        if (false === strpos($content, '[')) {
+            return $content;
+        }
+
+        if (empty($shortcode_tags) || !is_array($shortcode_tags)) {
+            return $content;
+        }
+
+        // Find all registered tag names in $content.
+        preg_match_all('@\[([^<>&/\[\]\x00-\x20=]++)@', $content, $matches);
+        $tagnames = array_intersect(array_keys($shortcode_tags), $matches[ 1 ]);
+
+        if (empty($tagnames)) {
+            return $content;
+        }
+
+        $content = do_shortcodes_in_html_tags($content, $ignore_html, $tagnames);
+
+        $pattern = get_shortcode_regex($tagnames);
+        $content = preg_replace_callback("/$pattern/", 'do_shortcode_tag', $content);
+
+        // Always restore square braces so we don't break things like <!--[if IE ]>.
+        $content = unescape_invalid_shortcodes($content);
+
+        return $content;
     }
 
     public static function get_plugin_dir(): string

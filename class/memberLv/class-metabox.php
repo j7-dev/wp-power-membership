@@ -8,8 +8,8 @@ use J7\PowerMembership\Utils;
 class Metabox
 {
 
-    const ACTION   = Utils::SNAKE . '_metabox';
-    const META_KEY = 'threshold';
+    const ACTION             = Utils::SNAKE . '_metabox';
+    const THRESHOLD_META_KEY = 'threshold';
 
     public function __construct()
     {
@@ -34,8 +34,8 @@ class Metabox
     {
         ?>
 			<div class="tw-flex tw-items-center">
-					<label for="<?=self::META_KEY?>" class="tw-w-[14rem] tw-block">會員累積消費升級門檻(NT$)</label>
-					<input type="number" name="<?=self::META_KEY?>" min="0" step="1000" class="tw-ml-8" />
+					<label for="<?=self::THRESHOLD_META_KEY?>" class="tw-w-[14rem] tw-block">會員累積消費升級門檻(NT$)</label>
+					<input type="number" name="<?=self::THRESHOLD_META_KEY?>" min="0" step="1000" class="tw-ml-8" />
 				</div>
 			<?php
 }
@@ -49,7 +49,7 @@ class Metabox
         }
         $value = isset($_POST[ 'threshold' ])?\sanitize_text_field($_POST[ 'threshold' ]) : 0;
         $value = is_numeric($value) ? $value : 0;
-        \update_post_meta($post_id, self::META_KEY, $value);
+        \update_post_meta($post_id, self::THRESHOLD_META_KEY, $value);
     }
 }
 
