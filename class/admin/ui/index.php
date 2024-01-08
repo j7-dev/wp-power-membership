@@ -14,7 +14,7 @@ class UI
 {
     const DEFAULT_UI            = 'default';
     const SIMPLE_UI             = 'simple';
-    const DEFAULT_USER_ADMIN_UI = self::SIMPLE_UI;
+    const DEFAULT_USER_ADMIN_UI = self::SIMPLE_UI; // TODO 之後要改回 default
     const ADMIN_UI_META_KEY     = 'power_admin_ui';
 
     private $user_admin_ui; // 'default' | 'simple'

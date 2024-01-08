@@ -5,6 +5,7 @@ namespace J7\PowerMembership;
 
 require_once __DIR__ . '/admin/index.php';
 require_once __DIR__ . '/memberLv/index.php';
+require_once __DIR__ . '/woocommerce/index.php';
 
 use J7\PowerMembership\Admin\UI;
 use J7\PowerMembership\Utils;
@@ -29,8 +30,6 @@ class Bootstrap
         $screen = \get_current_screen();
         if (in_array($screen->id, $this->tailwind_screen_ids)) {
             \wp_enqueue_script('tailwindcss', 'https://cdn.tailwindcss.com', array(), '3.4.0');
-
-            var_dump(UI::get_user_admin_ui());
         }
         if ('users.php' == $hook) {
             if ('simple' === UI::get_user_admin_ui()) {
