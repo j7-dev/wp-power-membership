@@ -2,7 +2,7 @@
   $(document.body).on("updated_checkout", function () {
     $(".woocommerce-remove-coupon").on("click", function () {
       const coupon = $(this).data("coupon");
-      $('input[value="' + coupon + '"]').prop("checked", false);
+      $(`input[value="${coupon}"]`).prop("checked", false);
       //console.log('coupon', coupon);
     });
 
@@ -17,7 +17,9 @@
     };
     $(".woocommerce-remove-coupon").each(function () {
       $('input[value="' + $(this).data("coupon") + '"]').prop("checked", true);
-      const type = $('input[value="' + $(this).data("coupon") + '"]').data("type");
+      const type = $('input[value="' + $(this).data("coupon") + '"]').data(
+        "type"
+      );
       old_coupon[type] = $(this).data("coupon");
     });
     //console.log('old_coupon', old_coupon);
@@ -37,7 +39,9 @@
       //console.log('coupon_code', newData);
       $.ajax({
         type: "POST",
-        url: wc_checkout_params.wc_ajax_url.toString().replace("%%endpoint%%", "apply_coupon"),
+        url: wc_checkout_params.wc_ajax_url
+          .toString()
+          .replace("%%endpoint%%", "apply_coupon"),
         data: newData,
         success: function (code) {
           $(".woocommerce-error, .woocommerce-message").remove();
@@ -49,7 +53,9 @@
             $(document.body).trigger("update_checkout", {
               update_shipping_method: false,
             });
-            $(document.body).trigger("applied_coupon_in_checkout", [newData.coupon_code]);
+            $(document.body).trigger("applied_coupon_in_checkout", [
+              newData.coupon_code,
+            ]);
           }
         },
         dataType: "html",
@@ -67,7 +73,9 @@
 
         $.ajax({
           type: "POST",
-          url: wc_checkout_params.wc_ajax_url.toString().replace("%%endpoint%%", "remove_coupon"),
+          url: wc_checkout_params.wc_ajax_url
+            .toString()
+            .replace("%%endpoint%%", "remove_coupon"),
           data: oldData,
           success: function (code) {
             $(".woocommerce-error, .woocommerce-message").remove();
@@ -75,13 +83,17 @@
             if (code) {
               $("form.woocommerce-checkout").before(code);
 
-              $(document.body).trigger("removed_coupon_in_checkout", [oldData.coupon]);
+              $(document.body).trigger("removed_coupon_in_checkout", [
+                oldData.coupon,
+              ]);
               $(document.body).trigger("update_checkout", {
                 update_shipping_method: false,
               });
 
               // Remove coupon code from coupon field
-              $("form.checkout_coupon").find('input[name="coupon_code"]').val("");
+              $("form.checkout_coupon")
+                .find('input[name="coupon_code"]')
+                .val("");
               setTimeout(() => {
                 yf_apply_coupon(newCoupon);
               }, 500);

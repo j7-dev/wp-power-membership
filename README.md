@@ -1,7 +1,7 @@
 # Power Membership | 讓每個人都可以輕鬆建立會員制網站👌
 一句話講完 Power Membership :
 
-> Power Membership 是一個 WordPress 套件，安裝後，可以設定會員升級需要的累積消費門檻，並可輕鬆查看會員的消費總覽，針對特定會員等級發放優惠。
+> Power Membership 可以設定會員升級需要的累積消費門檻，並針對特定會員等級發放優惠，也改善介面，可輕鬆查看會員的消費總覽。
 
 <br><br><br>
 
@@ -68,6 +68,7 @@
 
 🔲 後台、註冊 新增生日欄位
 🔲 讓用戶自行決定要不要啟用簡單介面
+🔲 handle coupon 的 js 還要整理
 
 
 
