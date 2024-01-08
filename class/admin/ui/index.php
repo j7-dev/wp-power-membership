@@ -42,9 +42,11 @@ class UI
 
 	public function menu_page()
 	{
+		global $menu;
 		if ('default' === $this->user_admin_ui) {
 			return;
 		}
+		\remove_menu_page('gamipress');
 		\remove_menu_page('gamipress_ranks');
 
 		\add_submenu_page(
