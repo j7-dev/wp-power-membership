@@ -67,8 +67,12 @@
 ## 🗺️ 開發 RoadMap
 
 🔲 後台、註冊 新增生日欄位
-🔲 讓用戶自行決定要不要啟用簡單介面
+
+🔲 讓用戶自行決定要不要啟用簡單介面，新增 option page
+
 🔲 handle coupon 的 js 還要整理
+
+🔲 tailwindcss 打包後重新 enqueue
 
 
 
