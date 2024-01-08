@@ -60,9 +60,9 @@ class View
 			'posts_per_page' => -1,
 			'post_type'      => 'shop_coupon',
 			'post_status'    => 'publish',
+			'fields'         => 'ids',
 			'meta_key'       => 'minimum_amount',
 			'meta_compare'   => 'NOT EXISTS',
-			'fields'         => 'ids',
 		));
 
 		$coupon_ids_with_minimum_amount = get_posts(array(
@@ -72,15 +72,30 @@ class View
 			'order'          => 'ASC',
 			'post_type'      => 'shop_coupon',
 			'post_status'    => 'publish',
+			'fields'         => 'ids',
 			'meta_key'       => 'minimum_amount',
 			'meta_compare'   => 'EXISTS',
-			'fields'         => 'ids',
 		));
 
 		$coupon_ids = array_merge($coupon_ids_without_minimum_amount, $coupon_ids_with_minimum_amount);
 		$coupons    = array_map(function ($coupon_id) {
 			return new \WC_Coupon($coupon_id);
 		}, $coupon_ids);
+
+		// Filter 出 allowed_membership_ids 是 [] 的 coupon (沒有限制)
+		// 或是 allowed_membership_ids 包含 user 的 membership id 的 coupon
+		$coupons = array_filter($coupons, function ($coupon) {
+			$allowed_membership_ids = $coupon->get_meta('allowed_membership_ids');
+			$allowed_membership_ids = is_array($allowed_membership_ids) ? $allowed_membership_ids : [];
+			$user_id                = \get_current_user_id();
+			$user_member_lv_id      = \gamipress_get_user_rank_id($user_id, Utils::MEMBER_LV_POST_TYPE);
+			if (in_array($user_member_lv_id, $allowed_membership_ids)) {
+				return true;
+			}
+
+			return empty($allowed_membership_ids);
+		});
+
 		return $coupons;
 	}
 
@@ -95,31 +110,55 @@ class View
 		}
 		$cart_total = (int) WC()->cart->subtotal;
 
-		// get coupon amount
 
+		$meet_coupons 	 = [];
 		foreach ($coupons as $key => $coupon) {
+			$coupon_id = $coupon->get_id();
 			$minimum_amount = (int) $coupon->get_minimum_amount();
-			// $minimum_amount = !empty($minimum_amount) ? $minimum_amount : 0;
 			if ($cart_total >= $minimum_amount) {
-				$meet[$coupon->get_id()] = abs($cart_total - $minimum_amount);
+				$meet_coupons[] = $coupon;
 			} else {
-				$not_meet[$coupon->get_id()] = abs($cart_total - $minimum_amount);
+				$not_meet[$coupon_id] = abs($cart_total - $minimum_amount);
 			}
 		}
-		$meet     = !empty($meet) ? $meet : [];
 		$not_meet = !empty($not_meet) ? $not_meet : [];
-		asort($meet); //from small to big
 		asort($not_meet); // from small to big
 
-		$biggest_coupon = array_slice($meet, 0, 1, true);
-		$keys           = array_keys($biggest_coupon + $not_meet);
+		$biggest_coupon = $this->get_biggest_coupon($meet_coupons);
+
+		$keys           = [$biggest_coupon->get_id(), ...array_keys($not_meet)];
 		foreach ($coupons as $key => $coupon) {
-			if (!in_array($coupon->get_id(), $keys)) {
+			$coupon_id = $coupon->get_id();
+			if (!in_array($coupon_id, $keys)) {
 				unset($coupons[$key]);
 			}
 		}
 
 		return $coupons;
+	}
+
+	public function get_biggest_coupon($coupons)
+	{
+		// 初始化最大折扣金额
+		$max_discount_amount = 0;
+		// 初始化最大折扣券对象
+		$max_discount_coupon = null;
+
+		// 遍历优惠券数组
+		foreach ($coupons as $coupon) {
+			// 获取折扣金额
+			$discount_amount = $coupon->get_amount();
+
+			// 检查是否是固定折扣券或百分比折扣券
+			// 这里简单地根据折扣金额的正负来判断，你可能需要根据实际情况调整
+			if ($discount_amount > $max_discount_amount) {
+				// 更新最大折扣金额和对应的折扣券对象
+				$max_discount_amount = $discount_amount;
+				$max_discount_coupon = $coupon;
+			}
+		}
+
+		return $max_discount_coupon;
 	}
 
 	public function get_coupon_props($coupon)

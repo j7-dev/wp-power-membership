@@ -20,7 +20,7 @@
     'form#your-profile input[name="clear_already_awarded"]',
     'form#your-profile input[name="yf_award_add"]',
     'form#your-profile textarea[name="yf_award_reason"]',
-    'form#your-profile input[name="first_name"]',
+    // 'form#your-profile input[name="first_name"]',
     'form#your-profile input[name="nickname"]',
     'form#your-profile input[name="billing_phone"]',
     'form#your-profile input[name="email"]',
