@@ -24,6 +24,7 @@ class UI
 	{
 		$this->set_user_admin_ui();
 		\add_action('admin_menu', [$this, 'menu_page'], 10);
+		\add_action('admin_head', [$this, 'remove_metabox'], 200);
 	}
 
 	public static function get_user_admin_ui(): string
@@ -40,9 +41,8 @@ class UI
 		$this->user_admin_ui = $admin_ui;
 	}
 
-	public function menu_page()
+	public function menu_page(): void
 	{
-		global $menu;
 		if ('default' === $this->user_admin_ui) {
 			return;
 		}
@@ -60,6 +60,21 @@ class UI
 		);
 
 		\remove_submenu_page('users.php', 'profile.php');
+	}
+
+	public function remove_metabox(): void
+	{
+		if ('default' === $this->user_admin_ui) {
+			return;
+		}
+		// \remove_meta_box('rank-details', 'member_lv', 'side');
+		\remove_meta_box('rank-template', 'member_lv', 'side');
+		\remove_meta_box('postexcerpt', 'member_lv', 'normal');
+		\remove_meta_box('authordiv', 'member_lv', 'normal');
+		\remove_meta_box('rank-data', 'member_lv', 'advanced');
+		\remove_meta_box('gamipress-requirements-ui', 'member_lv', 'advanced');
+		\remove_meta_box('gamipress-earners', 'member_lv', 'advanced');
+		// \remove_meta_box('gamipress-wc-product-points', 'product', 'side');
 	}
 }
 
