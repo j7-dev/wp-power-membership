@@ -47,5 +47,3 @@ class MembershipUpgrade
 		}
 	}
 }
-
-new MembershipUpgrade();

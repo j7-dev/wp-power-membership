@@ -212,5 +212,3 @@ class UserColumns
 		}
 	}
 }
-
-new UserColumns();

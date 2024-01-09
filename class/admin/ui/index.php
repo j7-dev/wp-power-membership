@@ -77,5 +77,3 @@ class UI
 		// \remove_meta_box('gamipress-wc-product-points', 'product', 'side');
 	}
 }
-
-new UI();

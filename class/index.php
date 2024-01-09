@@ -18,8 +18,16 @@ class Bootstrap
 
 	public function __construct()
 	{
+		$this->init();
 		\add_action('admin_enqueue_scripts', [$this, 'add_static_assets']);
 		\add_action('admin_head', [$this, 'add_tailwind_config'], 1000);
+	}
+
+	private function init()
+	{
+		new Admin\Init();
+		new MemberLv\Init();
+		new WooCommerce\Init();
 	}
 
 	public function add_static_assets($hook)

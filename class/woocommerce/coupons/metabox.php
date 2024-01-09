@@ -6,7 +6,7 @@ namespace J7\PowerMembership\WooCommerce\Coupons;
 
 use J7\PowerMembership\Utils;
 
-class Metabox
+final class Metabox
 {
 	const SELECT_FIELD_NAME = 'allowed_membership_ids';
 
@@ -72,5 +72,3 @@ class Metabox
 		return $is_valid;
 	}
 }
-
-new Metabox();

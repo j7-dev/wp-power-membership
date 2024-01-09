@@ -52,5 +52,3 @@ class Metabox
 		\update_post_meta($post_id, self::THRESHOLD_META_KEY, $value);
 	}
 }
-
-new Metabox();

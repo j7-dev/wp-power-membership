@@ -186,5 +186,3 @@ class View
 		}
 	}
 }
-
-new View();

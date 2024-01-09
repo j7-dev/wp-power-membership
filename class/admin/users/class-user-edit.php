@@ -140,5 +140,3 @@ class UserEdit
 		echo '<span>';
 	}
 }
-
-new UserEdit();

@@ -23,19 +23,39 @@ namespace J7\PowerMembership;
 use J7\PowerMembership\Utils;
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/TGMPlugin/class-tgm-plugin-activation.php';
-require_once __DIR__ . '/utils/index.php';
+
 
 class Init
 {
+	private static $instance;
 
 	public function __construct()
 	{
-		/**
-		 * wp plugin 更新檢查 update checker
-		 */
+		require_once __DIR__ . '/TGMPlugin/class-tgm-plugin-activation.php';
+		require_once __DIR__ . '/vendor/autoload.php';
+		require_once __DIR__ . '/utils/index.php';
+		require_once __DIR__ . '/class/index.php';
 
+		\register_activation_hook(__FILE__, [$this, 'activate']);
+		\register_deactivation_hook(__FILE__, [$this, 'deactivate']);
+		\add_action('tgmpa_register', [$this, 'register_required_plugins']);
+
+		$this->plugin_update_checker();
+	}
+
+	public static function instance()
+	{
+		if (empty(self::$instance)) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * wp plugin 更新檢查 update checker
+	 */
+	public function plugin_update_checker(): void
+	{
 		$updateChecker = PucFactory::buildUpdateChecker(
 			Utils::GITHUB_REPO,
 			__FILE__,
@@ -44,14 +64,9 @@ class Init
 		$updateChecker->setBranch('master');
 		// $updateChecker->setAuthentication(Utils::GITHUB_PAT);
 		$updateChecker->getVcsApi()->enableReleaseAssets();
-
-		\add_action('tgmpa_register', [$this, 'power_membership_register_required_plugins']);
-		\add_action('plugins_loaded', [$this, 'bootstrap']);
-
-		\register_activation_hook(__FILE__, [$this, 'create_member_lv_post_type']);
 	}
 
-	public function power_membership_register_required_plugins(): void
+	public function register_required_plugins(): void
 	{
 		$plugins = [
 			[
@@ -163,19 +178,30 @@ class Init
 		);
 
 		\tgmpa($plugins, $config);
-	}
 
-	public function bootstrap(): void
-	{
 		$TGM_instance = \TGM_Plugin_Activation::get_instance();
 
-		if ($TGM_instance->is_tgmpa_complete()) {
-			require_once __DIR__ . '/class/index.php';
+
+
+		$dependencies_installed = $TGM_instance->is_tgmpa_complete();
+
+		if ($dependencies_installed) {
 			new Bootstrap();
 		}
 	}
 
-	public function create_member_lv_post_type(): void
+
+	public function activate(): void
+	{
+		$this->create_member_lv_post_type();
+	}
+
+	public function deactivate(): void
+	{
+		// 刪除會員等級 post type 或是 transient
+	}
+
+	private function create_member_lv_post_type(): void
 	{
 		$post_type = Utils::MEMBER_LV_POST_TYPE;
 		if (\post_type_exists($post_type)) {
@@ -197,4 +223,4 @@ class Init
 	}
 }
 
-new Init();
+Init::instance();

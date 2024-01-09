@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace J7\PowerMembership;
 
-class Utils
+abstract class Utils
 {
 	const APP_NAME            = 'Power Membership';
 	const KEBAB               = 'power-membership';
