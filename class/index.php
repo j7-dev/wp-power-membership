@@ -25,9 +25,15 @@ class Bootstrap
 
 	private function init()
 	{
-		new Admin\Init();
-		new MemberLv\Init();
-		new WooCommerce\Init();
+		new Admin\UI();
+		new Admin\Users\UserColumns();
+		new Admin\Users\UserEdit();
+
+		new MemberLv\Metabox();
+		new MemberLv\MembershipUpgrade();
+
+		new WooCommerce\Coupons\Metabox();
+		new WooCommerce\Coupons\View();
 	}
 
 	public function add_static_assets($hook)

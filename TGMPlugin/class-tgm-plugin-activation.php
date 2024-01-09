@@ -1135,6 +1135,7 @@ if (!class_exists('TGM_Plugin_Activation')) {
 		 */
 		public function notices()
 		{
+			var_dump('notices');
 			// Remove nag on the install page / Return early if the nag message has been dismissed or user < author.
 			if (($this->is_tgmpa_page() || $this->is_core_update_page()) || get_user_meta(get_current_user_id(), 'tgmpa_dismissed_notice_' . $this->id, true) || !current_user_can(apply_filters('tgmpa_show_admin_notice_capability', 'publish_posts'))) {
 				return;

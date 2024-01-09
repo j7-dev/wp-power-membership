@@ -39,8 +39,14 @@ class Init
 		\register_activation_hook(__FILE__, [$this, 'activate']);
 		\register_deactivation_hook(__FILE__, [$this, 'deactivate']);
 		\add_action('tgmpa_register', [$this, 'register_required_plugins']);
+		\add_action('init', array($this, 'remove_notices'), 20);
 
 		$this->plugin_update_checker();
+	}
+
+	public function remove_notices(): void
+	{
+		\remove_action('admin_notices', array(\TGM_Plugin_Activation::$instance, 'notices'));
 	}
 
 	public static function instance()
@@ -179,15 +185,23 @@ class Init
 
 		\tgmpa($plugins, $config);
 
-		$TGM_instance = \TGM_Plugin_Activation::get_instance();
+		$is_all_plugins_active = $this->is_all_plugins_active($plugins);
 
-
-
-		$dependencies_installed = $TGM_instance->is_tgmpa_complete();
-
-		if ($dependencies_installed) {
+		if ($is_all_plugins_active) {
 			new Bootstrap();
 		}
+	}
+
+	private function is_all_plugins_active($plugins): bool
+	{
+		$is_all_plugins_active = true;
+		foreach ($plugins as $plugin) {
+			if (!\TGM_Plugin_Activation::$instance->is_plugin_active($plugin['slug'])) {
+				$is_all_plugins_active = false;
+				break;
+			}
+		}
+		return $is_all_plugins_active;
 	}
 
 
