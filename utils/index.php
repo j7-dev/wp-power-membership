@@ -11,7 +11,7 @@ abstract class Utils
 	const SNAKE               = 'power_membership';
 	const DEFAULT_IMAGE       = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
 	const MEMBER_LV_POST_TYPE = 'member_lv';
-	const GITHUB_REPO         = 'https://github.com/j7-dev/power-membership';
+	const GITHUB_REPO         = 'https://github.com/j7-dev/wp-power-membership';
 
 	/**
 	 * 處理會員升級相關邏輯

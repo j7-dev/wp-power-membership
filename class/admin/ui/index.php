@@ -23,8 +23,17 @@ class UI
 	public function __construct()
 	{
 		$this->set_user_admin_ui();
+		\add_action('admin_init', [$this, 'remove_gamipress_admin_notices'], 10);
 		\add_action('admin_menu', [$this, 'menu_page'], 10);
 		\add_action('admin_head', [$this, 'remove_metabox'], 200);
+	}
+
+	public function remove_gamipress_admin_notices(): void
+	{
+		if ('default' === $this->user_admin_ui) {
+			return;
+		}
+		\remove_action('admin_notices', 'gamipress_admin_notices');
 	}
 
 	public static function get_user_admin_ui(): string

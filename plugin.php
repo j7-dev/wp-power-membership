@@ -31,7 +31,7 @@ class Init
 
 	public function __construct()
 	{
-		require_once __DIR__ . '/TGMPlugin/class-tgm-plugin-activation.php';
+		require_once __DIR__ . '/required_plugins/index.php';
 		require_once __DIR__ . '/vendor/autoload.php';
 		require_once __DIR__ . '/utils/index.php';
 		require_once __DIR__ . '/class/index.php';

@@ -1,0 +1,47 @@
+.power-plugin-field-select2 .select2-container {
+    min-width: 200px;
+    width: auto;
+}
+
+.power-plugin-field-select2 {
+    max-width: 96%;
+}
+
+/* Make a room for repeatable buttons */
+.repeatable .power-plugin-field-select2 > .power-plugin-select-label > label > .power-plugin-input-container {
+    max-width: 84%;
+}
+
+/* Custom Icons */
+.power-plugin-field-select2 .custom-icon-definitions {
+    display: none;
+}
+.select2-custom-icon-container {
+    vertical-align: top;
+    height: 26px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+    align-items: center;
+
+}
+.select2-custom-icon-container * {
+    box-sizing: border-box;
+}
+.select2-custom-icon-container > * {
+    vertical-align: middle;
+    height: 100%;
+    margin-right: 8px;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+
+}
+
+.select2-custom-icon * {
+    max-height: 24px;
+}
+
