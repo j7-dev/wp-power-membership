@@ -34,7 +34,7 @@ class Bootstrap
 
 		new WooCommerce\Coupons\Metabox();
 		new WooCommerce\Coupons\View();
-		new WooCommerce\Coupons\MenuPage();
+		// new WooCommerce\Coupons\MenuPage();
 	}
 
 	public function add_static_assets($hook)
