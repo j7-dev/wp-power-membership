@@ -87,6 +87,11 @@ class Init
 				'required' => true,
 				'version' => '7.6.1',
 			],
+			[
+				'name'     => 'Metabox',
+				'slug'     => 'meta-box',
+				'required' => true,
+			],
 		];
 
 		/*
