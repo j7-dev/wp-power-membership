@@ -4,7 +4,7 @@
  * Plugin Name:       Power Membership | 讓每個人都可以輕鬆建立會員制網站
  * Plugin URI:        https://cloud.luke.cafe/plugins/power-membership/
  * Description:       Power Membership 可以設定會員升級需要的累積消費門檻，並針對特定會員等級發放優惠，也改善介面，可輕鬆查看會員的消費總覽。
- * Version:           0.0.6
+ * Version:           0.0.7
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            J7
@@ -31,7 +31,6 @@ class Init
 	public static $is_all_plugins_activated = false;
 	const GAMIPRESS_CLASS = 'GamiPress';
 	const WOOCOMMERCE_CLASS = 'WooCommerce';
-	const METABOX_CLASS = 'RW_Meta_Box';
 
 	public function __construct()
 	{
@@ -50,7 +49,7 @@ class Init
 
 	public function check_required_plugins()
 	{
-		self::$is_all_plugins_activated = \class_exists(self::GAMIPRESS_CLASS) && \class_exists(self::WOOCOMMERCE_CLASS) && \class_exists(self::METABOX_CLASS);
+		self::$is_all_plugins_activated = \class_exists(self::GAMIPRESS_CLASS) && \class_exists(self::WOOCOMMERCE_CLASS);
 
 		if (self::$is_all_plugins_activated) {
 			new Bootstrap();
