@@ -28,6 +28,10 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 class Init
 {
 	private static $instance;
+	public static $is_all_plugins_activated = false;
+	const GAMIPRESS_CLASS = 'GamiPress';
+	const WOOCOMMERCE_CLASS = 'WooCommerce';
+	const METABOX_CLASS = 'RW_Meta_Box';
 
 	public function __construct()
 	{
@@ -39,14 +43,18 @@ class Init
 		\register_activation_hook(__FILE__, [$this, 'activate']);
 		\register_deactivation_hook(__FILE__, [$this, 'deactivate']);
 		\add_action('tgmpa_register', [$this, 'register_required_plugins']);
-		\add_action('init', array($this, 'remove_notices'), 20);
+		\add_action('plugins_loaded', [$this, 'check_required_plugins']);
 
 		$this->plugin_update_checker();
 	}
 
-	public function remove_notices(): void
+	public function check_required_plugins()
 	{
-		\remove_action('admin_notices', array(\TGM_Plugin_Activation::$instance, 'notices'));
+		self::$is_all_plugins_activated = \class_exists(self::GAMIPRESS_CLASS) && \class_exists(self::WOOCOMMERCE_CLASS) && \class_exists(self::METABOX_CLASS);
+
+		if (self::$is_all_plugins_activated) {
+			new Bootstrap();
+		}
 	}
 
 	public static function instance()
@@ -189,24 +197,6 @@ class Init
 		);
 
 		\tgmpa($plugins, $config);
-
-		$is_all_plugins_active = $this->is_all_plugins_active($plugins);
-
-		if ($is_all_plugins_active) {
-			new Bootstrap();
-		}
-	}
-
-	private function is_all_plugins_active($plugins): bool
-	{
-		$is_all_plugins_active = true;
-		foreach ($plugins as $plugin) {
-			if (!\TGM_Plugin_Activation::$instance->is_plugin_active($plugin['slug'])) {
-				$is_all_plugins_active = false;
-				break;
-			}
-		}
-		return $is_all_plugins_active;
 	}
 
 

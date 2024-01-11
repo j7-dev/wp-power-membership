@@ -6,7 +6,7 @@ namespace J7\PowerMembership\WooCommerce\Coupons;
 
 use J7\PowerMembership\Utils;
 
-class View
+final class View
 {
 	public $show_one_coupon_only = true; // 隱藏小的 coupons，只顯示一個金額較大的 coupon
 
