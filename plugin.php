@@ -4,7 +4,7 @@
  * Plugin Name:       Power Membership | 讓每個人都可以輕鬆建立會員制網站
  * Plugin URI:        https://cloud.luke.cafe/plugins/power-membership/
  * Description:       Power Membership 可以設定會員升級需要的累積消費門檻，並針對特定會員等級發放優惠，也改善介面，可輕鬆查看會員的消費總覽。
- * Version:           0.0.4
+ * Version:           0.0.5
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            J7
@@ -13,7 +13,7 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       power-partner-server
  * Domain Path:       /languages
- * Tags: member, user, membership, membership site, membership plugin, membership system, membership website, membership management, membership management system, membership management plugin, membership management website, membership management system plugin, membership management system website, membership management plugin wordpress, membership management system wordpress, membership management website wordpress, membership management syste
+ * Tags: member, user, membership, membership site, membership plugin, membership system, membership website, membership management
  */
 
 declare(strict_types=1);
