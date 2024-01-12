@@ -12,14 +12,13 @@ use J7\PowerMembership\Utils;
 
 class MembershipUpgrade
 {
-
 	public function __construct()
 	{
 		\add_action('woocommerce_order_status_completed', [$this, 'membership_check'], 10, 1);
 		\add_action('woocommerce_order_status_processing', [$this, 'membership_check'], 10, 1);
 	}
 
-	public function update_frm_entry_after_wc_order_completed($order_id): void
+	public function membership_check($order_id): void
 	{
 		$order       = new \WC_Order($order_id);
 		$customer_id = $order->get_customer_id(); // Or $order->get_user_id();

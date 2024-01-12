@@ -26,9 +26,17 @@ class UserEdit
 		$user_id          = $user->ID;
 		$rank_earned_time = date('Y-m-d H:i:s', \gamipress_get_rank_earned_time($user_id, Utils::MEMBER_LV_POST_TYPE));
 
-		$orderdata   = Utils::get_order_data_by_user_date($user_id);
-		$sales_total = 'NT$ ' . $orderdata['total'];
-		$sales_total .= ' | 訂單 ' . $orderdata['order_num'] . ' 筆';
+		$args = array(
+			'numberposts' => -1,
+			'meta_key'    => '_customer_user',
+			'meta_value'  => $user_id,
+			'post_type'   => array('shop_order'),
+			'post_status' => array('wc-completed', 'wc-processing'),
+		);
+		$order_data = Utils::get_order_data_by_user_date($user_id, 0, $args);
+
+		$sales_total = 'NT$ ' . $order_data['total'];
+		$sales_total .= ' | 訂單 ' . $order_data['order_num'] . ' 筆';
 
 		$user_registered = date('Y-m-d H:i:s', strtotime($user->user_registered) + 8 * 3600);
 

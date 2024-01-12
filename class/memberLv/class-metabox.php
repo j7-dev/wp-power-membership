@@ -32,10 +32,13 @@ class Metabox
 
 	public function render_metabox($post)
 	{
+
+		$threshold = \get_post_meta($post->ID, self::THRESHOLD_META_KEY, true);
+		$threshold = empty($threshold) ? 0 : (int) $threshold;
 ?>
 		<div class="tw-flex tw-items-center">
 			<label for="<?= self::THRESHOLD_META_KEY ?>" class="tw-w-[14rem] tw-block">會員累積消費升級門檻(NT$)</label>
-			<input type="number" name="<?= self::THRESHOLD_META_KEY ?>" min="0" step="1000" class="tw-ml-8" />
+			<input type="number" value="<?= $threshold ?>" name="<?= self::THRESHOLD_META_KEY ?>" min="0" step="1000" class="tw-ml-8" />
 		</div>
 <?php
 	}
