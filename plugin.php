@@ -4,7 +4,7 @@
  * Plugin Name:       Power Membership | 讓每個人都可以輕鬆建立會員制網站
  * Plugin URI:        https://cloud.luke.cafe/plugins/power-membership/
  * Description:       Power Membership 可以設定會員升級需要的累積消費門檻，並針對特定會員等級發放優惠，也改善介面，可輕鬆查看會員的消費總覽。
- * Version:           0.0.8
+ * Version:           0.0.9
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            J7
@@ -23,14 +23,12 @@ namespace J7\PowerMembership;
 use J7\PowerMembership\Utils;
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-
-
 class Init
 {
 	private static $instance;
 	public static $is_all_plugins_activated = false;
-	const GAMIPRESS_CLASS = 'GamiPress';
-	const WOOCOMMERCE_CLASS = 'WooCommerce';
+	const GAMIPRESS_CLASS                   = 'GamiPress';
+	const WOOCOMMERCE_CLASS                 = 'WooCommerce';
 
 	public function __construct()
 	{
@@ -86,25 +84,22 @@ class Init
 				'name'     => 'GamiPress',
 				'slug'     => 'gamipress',
 				'required' => true,
-				'version' => '6.7.0',
+				'version'  => '6.7.0',
 			],
 			[
 				'name'     => 'WooCommerce',
 				'slug'     => 'woocommerce',
 				'required' => true,
-				'version' => '7.6.1',
+				'version'  => '7.6.1',
+			],
+			[
+				'name'     => 'WP Toolkit',
+				'slug'     => 'wp-toolkit',
+				'source'   => 'https://github.com/j7-dev/wp-toolkit/releases/latest/download/wp-toolkit.zip',
+				'required' => true,
 			],
 		];
 
-		/*
-         * Array of configuration settings. Amend each line as needed.
-         *
-         * TGMPA will start providing localized text strings soon. If you already have translations of our standard
-         * strings available, please help us make TGMPA even better by giving us access to these translations or by
-         * sending in a pull-request with .po file(s) with the translations.
-         *
-         * Only uncomment the strings in the config array if you want to customize the strings.
-         */
 		$config = array(
 			'id'           => 'power-membership', // Unique ID for hashing notices for multiple instances of TGMPA.
 			'default_path' => '', // Default absolute path to bundled plugins.
@@ -192,7 +187,6 @@ class Init
 
 		\tgmpa($plugins, $config);
 	}
-
 
 	public function activate(): void
 	{
