@@ -29,6 +29,7 @@ class Init
 	public static $is_all_plugins_activated = false;
 	const GAMIPRESS_CLASS                   = 'GamiPress';
 	const WOOCOMMERCE_CLASS                 = 'WooCommerce';
+	const WP_TOOLKIT_CLASS                  = 'J7\WpToolkit\Init';
 
 	public function __construct()
 	{
@@ -47,10 +48,13 @@ class Init
 
 	public function check_required_plugins()
 	{
-		self::$is_all_plugins_activated = \class_exists(self::GAMIPRESS_CLASS) && \class_exists(self::WOOCOMMERCE_CLASS);
+		self::$is_all_plugins_activated = \class_exists(self::GAMIPRESS_CLASS) && \class_exists(self::WOOCOMMERCE_CLASS) && \class_exists(self::WP_TOOLKIT_CLASS);
 
 		if (self::$is_all_plugins_activated) {
 			new Bootstrap();
+		} else {
+			$instance = \TGM_Plugin_Activation::get_instance();
+			$instance->has_notices = false;
 		}
 	}
 
@@ -190,33 +194,11 @@ class Init
 
 	public function activate(): void
 	{
-		$this->create_member_lv_post_type();
 	}
 
 	public function deactivate(): void
 	{
 		// 刪除會員等級 post type 或是 transient
-	}
-
-	private function create_member_lv_post_type(): void
-	{
-		$post_type = Utils::MEMBER_LV_POST_TYPE;
-		if (\post_type_exists($post_type)) {
-			return;
-		}
-
-		// create member_lv Rank Type in Gamipress
-		\wp_insert_post(
-			array(
-				'post_title'  => '會員等級',
-				'post_type'   => 'rank-type',
-				'post_status' => 'publish',
-				'post_name'   => Utils::MEMBER_LV_POST_TYPE,
-				'meta_input'  => array(
-					'_gamipress_plural_name' => '會員等級',
-				),
-			)
-		);
 	}
 }
 

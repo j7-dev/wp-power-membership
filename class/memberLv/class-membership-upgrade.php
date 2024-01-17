@@ -16,6 +16,7 @@ class MembershipUpgrade
 	{
 		\add_action('woocommerce_order_status_completed', [$this, 'membership_check'], 10, 1);
 		\add_action('woocommerce_order_status_processing', [$this, 'membership_check'], 10, 1);
+		\add_action('trash_' . Utils::MEMBER_LV_POST_TYPE, [$this, 'remove_user_member_lv'], 10, 3);
 	}
 
 	public function membership_check($order_id): void
@@ -44,5 +45,27 @@ class MembershipUpgrade
 		if ($acc_amount >= $next_rank_threshold) {
 			\update_user_meta($customer_id, Utils::CURRENT_MEMBER_LV_META_KEY, $next_rank_id);
 		}
+	}
+
+	public function remove_user_member_lv(int $post_id, \WP_Post $post, string $old_status): void
+	{
+		$meta_key = Utils::CURRENT_MEMBER_LV_META_KEY;
+		$meta_value = $post_id;
+		$prev_member_id = \gamipress_get_prev_rank_id($post_id);
+		// 如果用戶的等級被刪除，則將其等級設為預設等級
+		$new_meta_value = empty($prev_member_id) ? Metabox::$default_member_lv_id : $prev_member_id;
+
+		global $wpdb;
+		$prefix = $wpdb->prefix;
+		$query = $wpdb->prepare(
+			"UPDATE {$prefix}usermeta
+    SET meta_value = %s
+    WHERE meta_key = %s AND meta_value = %s",
+			$new_meta_value,
+			$meta_key,
+			$meta_value
+		);
+
+		$result = $wpdb->query($query);
 	}
 }

@@ -11,9 +11,9 @@ require_once __DIR__ . '/woocommerce/index.php';
 use J7\PowerMembership\Admin\UI;
 use J7\PowerMembership\Utils;
 
+
 class Bootstrap
 {
-
 	private $tailwind_screen_ids = [Utils::MEMBER_LV_POST_TYPE, 'user-edit', 'users'];
 
 	public function __construct()

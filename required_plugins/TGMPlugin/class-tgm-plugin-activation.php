@@ -1190,9 +1190,10 @@ if (!class_exists('TGM_Plugin_Activation')) {
 
 							if ($this->does_plugin_require_update($slug)) {
 								$message['notice_ask_to_update'][] = $slug;
-							} elseif (false !== $this->does_plugin_have_update($slug)) {
-								$message['notice_ask_to_update_maybe'][] = $slug;
 							}
+							// elseif (false !== $this->does_plugin_have_update($slug)) {
+							// 	$message['notice_ask_to_update_maybe'][] = $slug;
+							// }
 						}
 						if (true === $plugin['required']) {
 							$total_required_action_count++;
