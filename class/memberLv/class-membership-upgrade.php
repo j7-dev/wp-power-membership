@@ -22,6 +22,9 @@ class MembershipUpgrade
 	public function membership_check($order_id): void
 	{
 		$order       = new \WC_Order($order_id);
+		if (empty($order)) {
+			return;
+		}
 		$customer_id = $order->get_customer_id(); // Or $order->get_user_id();
 		if (empty($customer_id)) {
 			return;

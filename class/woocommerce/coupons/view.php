@@ -63,7 +63,7 @@ final class View
 			'fields'         => 'ids',
 			'meta_key'       => 'minimum_amount',
 			'meta_compare'   => 'NOT EXISTS',
-		));
+		)) ?? [];
 
 		$coupon_ids_with_minimum_amount = get_posts(array(
 			'posts_per_page' => -1,
@@ -75,7 +75,7 @@ final class View
 			'fields'         => 'ids',
 			'meta_key'       => 'minimum_amount',
 			'meta_compare'   => 'EXISTS',
-		));
+		)) ?? [];
 
 		$coupon_ids = array_merge($coupon_ids_without_minimum_amount, $coupon_ids_with_minimum_amount);
 		$coupons    = array_map(function ($coupon_id) {
@@ -126,7 +126,7 @@ final class View
 
 		$biggest_coupon = $this->get_biggest_coupon($meet_coupons);
 
-		$keys           = [$biggest_coupon->get_id(), ...array_keys($not_meet)];
+		$keys           = empty($biggest_coupon) ? array_keys($not_meet) : [$biggest_coupon->get_id(), ...array_keys($not_meet)];
 		foreach ($coupons as $key => $coupon) {
 			$coupon_id = $coupon->get_id();
 			if (!in_array($coupon_id, $keys)) {
@@ -137,7 +137,7 @@ final class View
 		return $coupons;
 	}
 
-	public function get_biggest_coupon($coupons)
+	public function get_biggest_coupon(array $coupons): ?\WC_Coupon
 	{
 		// 初始化最大折扣金额
 		$max_discount_amount = 0;
@@ -163,6 +163,9 @@ final class View
 
 	public function get_coupon_props($coupon)
 	{
+		if (empty($coupon)) {
+			return [];
+		}
 		$cart_total     = (int) WC()->cart->subtotal;
 		$coupon_amount  = (int) $coupon->get_amount();
 		$minimum_amount = (int) $coupon->get_minimum_amount();

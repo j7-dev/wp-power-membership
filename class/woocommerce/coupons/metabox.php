@@ -17,8 +17,12 @@ final class Metabox
 		\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_coupon_validation'], 10, 2);
 	}
 
-	public function add_fields($coupon_id, $coupon): void
+	public function add_fields(int $coupon_id, \WC_Coupon $coupon): void
 	{
+		if (empty($coupon)) {
+			echo 'coupon is empty';
+			return;
+		}
 ?>
 		<p class="form-field">
 			<label for="<?= self::SELECT_FIELD_NAME ?>"><?php _e('允許的會員等級', Utils::SNAKE); ?></label>
@@ -42,8 +46,11 @@ final class Metabox
 <?php
 	}
 
-	public function update_fields($coupon_id, $coupon): void
+	public function update_fields(int $coupon_id, \WC_Coupon $coupon): void
 	{
+		if (empty($coupon)) {
+			return;
+		}
 		$allowed_membership_ids = isset($_POST[self::SELECT_FIELD_NAME]) ? (array) $_POST[self::SELECT_FIELD_NAME] : array();
 
 		$coupon->update_meta_data(self::SELECT_FIELD_NAME, $allowed_membership_ids);
@@ -52,6 +59,9 @@ final class Metabox
 
 	public function custom_coupon_validation($is_valid, $coupon)
 	{
+		if (empty($coupon)) {
+			return $is_valid;
+		}
 		$member_lv_ids = $coupon->get_meta(self::SELECT_FIELD_NAME);
 		$member_lv_ids = is_array($member_lv_ids) ? $member_lv_ids : [];
 		if (empty($member_lv_ids)) {
