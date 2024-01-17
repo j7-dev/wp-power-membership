@@ -20,9 +20,9 @@ class Metabox
 		\add_action('plugins_loaded', array($this, 'create_default_member_lv'), 30);
 	}
 
-	public function add_metabox()
+	public function add_metabox(): void
 	{
-		add_meta_box(
+		\add_meta_box(
 			Utils::SNAKE . '_metabox',
 			'會員升級門檻',
 			[$this, 'render_metabox'],
@@ -32,24 +32,24 @@ class Metabox
 		);
 	}
 
-	public function render_metabox($post)
+	public function render_metabox($post): void
 	{
-
 		$threshold = \get_post_meta($post->ID, self::THRESHOLD_META_KEY, true);
 		$threshold = empty($threshold) ? 0 : (int) $threshold;
 ?>
-		<div class="tw-flex tw-items-center">
-			<label for="<?= self::THRESHOLD_META_KEY ?>" class="tw-w-[14rem] tw-block">會員累積消費升級門檻(NT$)</label>
-			<input type="number" value="<?= $threshold ?>" name="<?= self::THRESHOLD_META_KEY ?>" min="0" step="1000" class="tw-ml-8" />
+		<div class="tailwindcss">
+			<div class="flex items-center tailwind">
+				<label for="<?= self::THRESHOLD_META_KEY ?>" class="w-[14rem] block">會員累積消費升級門檻(NT$)</label>
+				<input type="number" value="<?= $threshold ?>" name="<?= self::THRESHOLD_META_KEY ?>" min="0" step="1000" class="ml-8" />
+			</div>
 		</div>
 <?php
 	}
 
-	public function save_metabox($post_id, $post)
+	public function save_metabox($post_id, $post): void
 	{
-
 		// Check if user has permissions to save data.
-		if (!current_user_can('edit_post', $post_id)) {
+		if (!\current_user_can('edit_post', $post_id)) {
 			return;
 		}
 		$value = isset($_POST[self::THRESHOLD_META_KEY]) ? \sanitize_text_field($_POST[self::THRESHOLD_META_KEY]) : 0;
