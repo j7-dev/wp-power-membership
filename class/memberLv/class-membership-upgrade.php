@@ -8,6 +8,7 @@ use J7\PowerMembership\Utils;
 
 /**
  * 處理會員升級相關邏輯
+ * TODO 把累積消費金額存起來? 就不用每次都要算
  */
 
 class MembershipUpgrade

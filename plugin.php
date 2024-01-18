@@ -23,13 +23,13 @@ namespace J7\PowerMembership;
 use J7\PowerMembership\Utils;
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-class Init
+class Plugin
 {
 	private static $instance;
 	public static $is_all_plugins_activated = false;
 	const GAMIPRESS_CLASS                   = 'GamiPress';
 	const WOOCOMMERCE_CLASS                 = 'WooCommerce';
-	const WP_TOOLKIT_CLASS                  = 'J7\WpToolkit\Init';
+	const WP_TOOLKIT_CLASS                  = 'J7\WpToolkit\Plugin';
 
 	public function __construct()
 	{
@@ -77,7 +77,7 @@ class Init
 			Utils::KEBAB
 		);
 		$updateChecker->setBranch('master');
-		// $updateChecker->setAuthentication(Utils::GITHUB_PAT);
+		$updateChecker->setAuthentication(Utils::GITHUB_PAT);
 		$updateChecker->getVcsApi()->enableReleaseAssets();
 	}
 
@@ -105,85 +105,85 @@ class Init
 		];
 
 		$config = array(
-			'id'           => 'power-membership', // Unique ID for hashing notices for multiple instances of TGMPA.
+			'id'           => Utils::KEBAB, // Unique ID for hashing notices for multiple instances of TGMPA.
 			'default_path' => '', // Default absolute path to bundled plugins.
 			'menu'         => 'tgmpa-install-plugins', // Menu slug.
 			'parent_slug'  => 'plugins.php', // Parent menu slug.
 			'capability'   => 'manage_options', // Capability needed to view plugin install page, should be a capability associated with the parent menu used.
 			'has_notices'  => true, // Show admin notices or not.
 			'dismissable'  => false, // If false, a user cannot dismiss the nag message.
-			'dismiss_msg'  => __('這個訊息將在依賴套件被安裝並啟用後消失。Power Membership 沒有這些依賴套件的情況下將無法運作！', 'power_membership'), // If 'dismissable' is false, this message will be output at top of nag.
+			'dismiss_msg'  => __('這個訊息將在依賴套件被安裝並啟用後消失。' . Utils::APP_NAME . ' 沒有這些依賴套件的情況下將無法運作！', Utils::SNAKE), // If 'dismissable' is false, this message will be output at top of nag.
 			'is_automatic' => true, // Automatically activate plugins after installation or not.
 			'message'      => '', // Message to output right before the plugins table.
 			'strings'      => array(
-				'page_title'                      => __('安裝依賴套件', 'power_membership'),
-				'menu_title'                      => __('安裝依賴套件', 'power_membership'),
-				'installing'                      => __('安裝套件: %s', 'power_membership'), // translators: %s: plugin name.
-				'updating'                        => __('更新套件: %s', 'power_membership'), //translators: %s: plugin name.
-				'oops'                            => __('OOPS! plugin API 出錯了', 'power_membership'),
+				'page_title'                      => __('安裝依賴套件', Utils::SNAKE),
+				'menu_title'                      => __('安裝依賴套件', Utils::SNAKE),
+				'installing'                      => __('安裝套件: %s', Utils::SNAKE), // translators: %s: plugin name.
+				'updating'                        => __('更新套件: %s', Utils::SNAKE), //translators: %s: plugin name.
+				'oops'                            => __('OOPS! plugin API 出錯了', Utils::SNAKE),
 				'notice_can_install_required'     => _n_noop(
 					//translators: 1: plugin name(s).
-					'Power Membership 依賴套件: %1$s.',
-					'Power Membership 依賴套件: %1$s.',
-					'power_membership'
+					Utils::APP_NAME . ' 依賴套件: %1$s.',
+					Utils::APP_NAME . ' 依賴套件: %1$s.',
+					Utils::SNAKE
 				),
 				'notice_can_install_recommended'  => _n_noop(
 					// translators: 1: plugin name(s).
-					'Power Membership 推薦套件: %1$s.',
-					'Power Membership 推薦套件: %1$s.',
-					'power_membership'
+					Utils::APP_NAME . ' 推薦套件: %1$s.',
+					Utils::APP_NAME . ' 推薦套件: %1$s.',
+					Utils::SNAKE
 				),
 				'notice_ask_to_update'            => _n_noop(
 					// translators: 1: plugin name(s).
-					'以下套件需要更新到最新版本來兼容 Power Membership: %1$s.',
-					'以下套件需要更新到最新版本來兼容 Power Membershipe: %1$s.',
-					'power_membership'
+					'以下套件需要更新到最新版本來兼容 ' . Utils::APP_NAME . ': %1$s.',
+					'以下套件需要更新到最新版本來兼容 ' . Utils::APP_NAME . ': %1$s.',
+					Utils::SNAKE
 				),
 				'notice_ask_to_update_maybe'      => _n_noop(
 					// translators: 1: plugin name(s).
 					'以下套件有更新: %1$s.',
 					'以下套件有更新: %1$s.',
-					'power_membership'
+					Utils::SNAKE
 				),
 				'notice_can_activate_required'    => _n_noop(
 					// translators: 1: plugin name(s).
 					'以下依賴套件目前為停用狀態: %1$s.',
 					'以下依賴套件目前為停用狀態: %1$s.',
-					'power_membership'
+					Utils::SNAKE
 				),
 				'notice_can_activate_recommended' => _n_noop(
 					// translators: 1: plugin name(s).
 					'以下推薦套件目前為停用狀態: %1$s.',
 					'以下推薦套件目前為停用狀態: %1$s.',
-					'power_membership'
+					Utils::SNAKE
 				),
 				'install_link'                    => _n_noop(
 					'安裝套件',
 					'安裝套件',
-					'power_membership'
+					Utils::SNAKE
 				),
 				'update_link'                     => _n_noop(
 					'更新套件',
 					'更新套件',
-					'power_membership'
+					Utils::SNAKE
 				),
 				'activate_link'                   => _n_noop(
 					'啟用套件',
 					'啟用套件',
-					'power_membership'
+					Utils::SNAKE
 				),
-				'return'                          => __('回到安裝依賴套件', 'power_membership'),
-				'plugin_activated'                => __('套件啟用成功', 'power_membership'),
-				'activated_successfully'          => __('以下套件已成功啟用:', 'power_membership'),
+				'return'                          => __('回到安裝依賴套件', Utils::SNAKE),
+				'plugin_activated'                => __('套件啟用成功', Utils::SNAKE),
+				'activated_successfully'          => __('以下套件已成功啟用:', Utils::SNAKE),
 				// translators: 1: plugin name.
-				'plugin_already_active'           => __('沒有執行任何動作 %1$s 已啟用', 'power_membership'),
+				'plugin_already_active'           => __('沒有執行任何動作 %1$s 已啟用', Utils::SNAKE),
 				// translators: 1: plugin name.
-				'plugin_needs_higher_version'     => __('Power Membership 未啟用。Power Membership 需要新版本的 %s 。請更新套件。', 'power_membership'),
+				'plugin_needs_higher_version'     => __(Utils::APP_NAME . ' 未啟用。' . Utils::APP_NAME . ' 需要新版本的 %s 。請更新套件。', Utils::SNAKE),
 				// translators: 1: dashboard link.
-				'complete'                        => __('所有套件已成功安裝跟啟用 %1$s', 'power_membership'),
-				'dismiss'                         => __('關閉通知', 'power_membership'),
-				'notice_cannot_install_activate'  => __('有一個或以上的依賴/推薦套件需要安裝/更新/啟用', 'power_membership'),
-				'contact_admin'                   => __('請聯繫網站管理員', 'power_membership'),
+				'complete'                        => __('所有套件已成功安裝跟啟用 %1$s', Utils::SNAKE),
+				'dismiss'                         => __('關閉通知', Utils::SNAKE),
+				'notice_cannot_install_activate'  => __('有一個或以上的依賴/推薦套件需要安裝/更新/啟用', Utils::SNAKE),
+				'contact_admin'                   => __('請聯繫網站管理員', Utils::SNAKE),
 
 				'nag_type'                        => 'error', // Determines admin notice type - can only be one of the typical WP notice classes, such as 'updated', 'update-nag', 'notice-warning', 'notice-info' or 'error'. Some of which may not work as expected in older WP versions.
 			),
@@ -202,4 +202,4 @@ class Init
 	}
 }
 
-Init::instance();
+Plugin::instance();
