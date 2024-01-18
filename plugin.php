@@ -77,7 +77,7 @@ class Plugin
 			Utils::KEBAB
 		);
 		$updateChecker->setBranch('master');
-		$updateChecker->setAuthentication(Utils::GITHUB_PAT);
+		// $updateChecker->setAuthentication(Utils::GITHUB_PAT);
 		$updateChecker->getVcsApi()->enableReleaseAssets();
 	}
 
