@@ -49,10 +49,10 @@ final class Settings
 			'allow_sub_menu'            => false,
 
 			// The text to appear in the admin menu.
-			'menu_title'                => esc_html__(Utils::APP_NAME, Utils::SNAKE),
+			'menu_title'                => esc_html__(Utils::APP_NAME, Utils::TEXT_DOMAIN),
 
 			// The text to appear on the page title.
-			'page_title'                => esc_html__(Utils::APP_NAME, Utils::SNAKE),
+			'page_title'                => esc_html__(Utils::APP_NAME, Utils::TEXT_DOMAIN),
 
 			// Disable to create your own Google fonts loader.
 			'disable_google_fonts_link' => false,
@@ -202,7 +202,7 @@ final class Settings
 				$v = str_replace('-', '_', $args['opt_name']);
 			}
 		}
-		$args['intro_text'] = '<p>' . sprintf(esc_html__('可以到 %1$s 查看主要功能與套件特色', Utils::SNAKE), '<a href="' . Utils::GITHUB_REPO . '" target="_blank"><i class="el el-github"></i> Github 頁面</a>') . '<p>';
+		$args['intro_text'] = '<p>' . sprintf(esc_html__('可以到 %1$s 查看主要功能與套件特色', Utils::TEXT_DOMAIN), '<a href="' . Utils::GITHUB_REPO . '" target="_blank"><i class="el el-github"></i> Github 頁面</a>') . '<p>';
 
 
 		// Add content after the form.
@@ -218,47 +218,47 @@ final class Settings
 	private function set_sections(): void
 	{
 		$this->sections[] = [
-			'title'            => esc_html__('一般設定', Utils::SNAKE),
+			'title'            => esc_html__('一般設定', Utils::TEXT_DOMAIN),
 			'id'               => 'general',
 			'icon'             => 'el el-home',
 			'fields' => [
 				[
 					'id'       => self::ENABLE_SIMPLE_ADMIN_UI_FIELD,
 					'type'     => 'switch',
-					'title'    => esc_html__('啟用簡易後台', Utils::SNAKE),
-					'subtitle' => esc_html__('關閉後，會顯示 Gamipress 的外掛選單和所有設定項', Utils::SNAKE),
-					'on'       => esc_html__('啟用', Utils::SNAKE),
-					'off'      => esc_html__('關閉', Utils::SNAKE),
+					'title'    => esc_html__('啟用簡易後台', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('關閉後，會顯示 Gamipress 的外掛選單和所有設定項', Utils::TEXT_DOMAIN),
+					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
+					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
 					'default'  => 1,
 				],
 			],
 		];
 
 		$this->sections[] = [
-			'title'            => esc_html__('優惠設定', Utils::SNAKE),
+			'title'            => esc_html__('優惠設定', Utils::TEXT_DOMAIN),
 			'id'               => 'coupons',
 			'icon'             => 'el el-tag',
 			'fields' => [
 				[
 					'id'       => self::ENABLE_FIRST_PURCHASE_COUPON_FIELD,
 					'type'     => 'switch',
-					'title'    => esc_html__('啟用首次購買優惠', Utils::SNAKE),
-					'subtitle' => esc_html__('如果此用戶已登入，且從沒有在你網站買過東西，就享有折扣', Utils::SNAKE),
-					'on'       => esc_html__('啟用', Utils::SNAKE),
-					'off'      => esc_html__('關閉', Utils::SNAKE),
+					'title'    => esc_html__('啟用首次購買優惠', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('如果此用戶已登入，且從沒有在你網站買過東西，就享有折扣', Utils::TEXT_DOMAIN),
+					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
+					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
 					'default'  => 0,
 				],
 				[
 					'id'       => self::COUPON_AMOUNT_FIELD,
-					'title'    => esc_html__('首次購買優惠金額', Utils::SNAKE),
+					'title'    => esc_html__('首次購買優惠金額', Utils::TEXT_DOMAIN),
 					'type'     => 'text',
 					'required' => array('first_purchase_coupon', 'equals', true),
 				],
 				[
 					'id'       => self::MIN_CART_AMOUNT_FIELD,
 					'type'     => 'text',
-					'title'    => esc_html__('最小訂購金額需要', Utils::SNAKE),
-					'subtitle' => esc_html__('滿足首次購買優惠的最小訂購金額，如果不想限制，維持空白即可', Utils::SNAKE),
+					'title'    => esc_html__('最小訂購金額需要', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('滿足首次購買優惠的最小訂購金額，如果不想限制，維持空白即可', Utils::TEXT_DOMAIN),
 					'required' => array('first_purchase_coupon', 'equals', true),
 				],
 			],

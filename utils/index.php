@@ -9,10 +9,12 @@ abstract class Utils
 	const APP_NAME            = 'Power Membership';
 	const KEBAB               = 'power-membership';
 	const SNAKE               = 'power_membership';
+	const TEXT_DOMAIN         = Utils::SNAKE;
+
 	const DEFAULT_IMAGE       = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
 	const MEMBER_LV_POST_TYPE = 'member_lv';
 	const GITHUB_REPO         = 'https://github.com/j7-dev/wp-power-membership';
-	const CACHE_TIME 				= 24 * HOUR_IN_SECONDS;
+	const CACHE_TIME 			  	= 24 * HOUR_IN_SECONDS;
 
 	/**
 	 * 處理會員升級相關邏輯

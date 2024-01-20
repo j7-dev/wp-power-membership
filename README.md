@@ -83,11 +83,12 @@
 
 ## 🗺️ 開發 RoadMap
 
-🔲 首次購買優惠
 
 🔲 後台、註冊 新增生日欄位
 
-🔲 新增 option page，讓用戶自行決定要不要啟用簡單介面;決定訂單什麼狀態才判斷;設定預設會員功能
+🔲 決定訂單什麼狀態才判斷
+
+🔲 讓用戶決定快取的時間
 
 🔲 handle coupon 的 js 還要整理
 
@@ -101,6 +102,8 @@
  ## 💻 依賴套件
 1. [Gamipress](https://tw.wordpress.org/plugins/gamipress/)
 2. [WooCommerce](https://tw.wordpress.org/plugins/woocommerce/)
+3. [WP-Toolkit](https://github.com/j7-dev/wp-toolkit)
+
 
 <br><br><br>
 

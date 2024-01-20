@@ -226,6 +226,6 @@ final class View
 		}
 
 		$discount =  (int) $power_membership_settings[Settings::COUPON_AMOUNT_FIELD];
-		$cart->add_fee(__("首次消費折 {$discount} 元", Utils::SNAKE), -$discount);
+		$cart->add_fee(__("首次消費折 {$discount} 元", Utils::TEXT_DOMAIN), -$discount);
 	}
 }

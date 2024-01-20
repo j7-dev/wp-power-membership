@@ -12,7 +12,6 @@ use J7\PowerMembership\Utils;
 
 final class UserColumns
 {
-	const CACHE_TIME       = 60 * MINUTE_IN_SECONDS;
 	const TRANSIENT_KEY    = 'user_amount_by_member_lv';
 	private $order_history = 4; // 秀幾個月前的訂單金額
 
@@ -78,7 +77,7 @@ final class UserColumns
 			$user_amount_by_member_lv[$member_lv->ID] = $user_count;
 		}
 
-		\set_transient(self::TRANSIENT_KEY, $user_amount_by_member_lv, self::CACHE_TIME);
+		\set_transient(self::TRANSIENT_KEY, $user_amount_by_member_lv, Utils::CACHE_TIME);
 		return $user_amount_by_member_lv;
 	}
 

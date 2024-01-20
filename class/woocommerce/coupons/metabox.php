@@ -41,7 +41,7 @@ final class Metabox
 				}
 				?>
 			</select>
-			<?php echo wc_help_tip(__('只有指定的會員等級才可以使用此優惠', Utils::SNAKE)); ?>
+			<?php echo wc_help_tip(__('只有指定的會員等級才可以使用此優惠', Utils::TEXT_DOMAIN)); ?>
 		</p>
 <?php
 	}
@@ -76,7 +76,7 @@ final class Metabox
 		$member_lv_id = \gamipress_get_user_rank_id($user_id, Utils::MEMBER_LV_POST_TYPE);
 		if (!in_array($member_lv_id, $member_lv_ids)) {
 			$is_valid = false;
-			$coupon->add_coupon_message(__('此優惠僅限指定會員等級使用', Utils::SNAKE));
+			$coupon->add_coupon_message(__('此優惠僅限指定會員等級使用', Utils::TEXT_DOMAIN));
 		}
 
 		return $is_valid;
