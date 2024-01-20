@@ -7,28 +7,36 @@
 
 ## ⚡ 主要功能
 
-#### 所有用戶消費數據一覽無遺
+#### 1. 所有用戶消費數據一覽無遺
 
 使用者列表頁面 新增用戶的消費數據欄位 & 會員等級欄位
+
+⚠ 會員消費數據並非即時，為了性能優化有做 `transient` 快取，快取時間為 24 小時
 
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/71bcf616-e497-4d64-b017-2067e3f245da)
 
 
 會員等級篩選器 & 顯示會員等級的使用者有多少數量
-⚠ 會員等級的使用者數量為了性能優化有快取，快取時間為 1 小時
+
+⚠ 會員等級的使用者數量並非即時，為了性能優化有做 `transient` 快取，快取時間為 24 小時
 
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/4c4c58da-d2a4-4830-8af2-ab83ac66a2dc)
 
 
 
-#### 更簡潔的會員頁面
+#### 2. 更簡潔的會員頁面
 
 揮別預設的 WordPress 會員介面
 
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/021542b2-8968-40f1-a4f5-5f36050719e7)
 
+此套件依賴 Gamipress 套件，如果你希望使用 Gamipress 的其他功能，可以關閉 `簡易後台` 選項
 
-#### 累積消費滿額自動升級會員等級
+![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/84d85bb5-9516-4dd5-baf7-169089a87a6b)
+
+
+
+#### 3. 累積消費滿額自動升級會員等級
 
 在 `會員等級` 頁面，可以設定用戶需要 `累積消費` 到多少金額才可以升級到這個等級
 
@@ -38,14 +46,23 @@
 
 
 
-#### 針對特定會員等級發放折價券
+#### 4. 針對特定會員等級發放折價券
 
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/2e55581d-032d-42b6-968d-f92fe29e5d20)
 
 
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/c575cd1c-5494-4d22-8a34-5da58b336c17)
 
-#### 結帳頁折價券優化
+#### 5. 可以設定首次購買優惠
+
+功能:
+ - 用戶必須登入，且為首次購買
+ - 可與其他優惠一起使用
+
+![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/2c182256-b386-4796-8e82-01c02df9b32b)
+
+
+#### 6. 結帳頁折價券優化
 
 1. 會自動顯示可用的折價券
 2. 如果有多筆可用的折價券，只會顯示一筆最大的折價券
@@ -54,7 +71,7 @@
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/fa1a2ae0-0770-4ed3-80b0-1c306dda4ac2)
 
 
- #### 會員頁面整修
+
 
 <br><br><br>
 
