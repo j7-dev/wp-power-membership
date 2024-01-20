@@ -94,6 +94,7 @@
 
 🔲 tailwindcss 打包後重新 enqueue
 
+🔲 直接用 sql 計算業績，並保存在用戶身上
 
 
 <br><br><br>
