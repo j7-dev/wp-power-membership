@@ -6,7 +6,7 @@ namespace J7\PowerMembership\Admin\Users;
 
 use J7\PowerMembership\Utils;
 
-class UserEdit
+final class UserEdit
 {
 
 	public function __construct()
@@ -21,7 +21,7 @@ class UserEdit
 		\add_action('gamipress_after_render_log', [$this, 'add_closetag_to_gamipress_log'], 10, 2);
 	}
 
-	public function add_fields($user): void
+	public function add_fields(\WP_User $user): void
 	{
 		$user_id          = $user->ID;
 		$rank_earned_time = date('Y-m-d H:i:s', \gamipress_get_rank_earned_time($user_id, Utils::MEMBER_LV_POST_TYPE));
@@ -118,7 +118,7 @@ class UserEdit
 <?php
 	}
 
-	public function update_fields($user_id): void
+	public function update_fields(int $user_id): void
 	{
 		if (!\current_user_can('edit_user', $user_id)) {
 			return;

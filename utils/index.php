@@ -12,6 +12,7 @@ abstract class Utils
 	const DEFAULT_IMAGE       = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
 	const MEMBER_LV_POST_TYPE = 'member_lv';
 	const GITHUB_REPO         = 'https://github.com/j7-dev/wp-power-membership';
+	const CACHE_TIME 				= 24 * HOUR_IN_SECONDS;
 
 	/**
 	 * 處理會員升級相關邏輯
@@ -37,7 +38,20 @@ abstract class Utils
 	 * 時間參考
 	 * @ref https://wisdmlabs.com/blog/query-posts-or-comments-by-date-time/
 	 */
-	public static function get_order_data_by_user_date($user_id, $months_ago = 0, $args = array())
+
+	public static function get_order_data_by_user_date(int $user_id, int $months_ago = 0, array $args = array(), string $transient_key = ''): array
+	{
+		// get transient
+		$key = self::get_transient_key($user_id, $months_ago, $transient_key);
+		$order_data = \get_transient($key);
+		if (empty($order_data)) {
+			$order_data = self::query_order_data_by_user_date($user_id, $months_ago, $args, $transient_key);
+		}
+
+		return $order_data;
+	}
+
+	public static function query_order_data_by_user_date(int $user_id, int $months_ago = 0, array $args = array(), string $transient_key = ''): array
 	{
 		$user      = get_userdata($user_id);
 		$that_date = strtotime("first day of -" . $months_ago . " month", time());
@@ -72,7 +86,17 @@ abstract class Utils
 		$order_data['order_num']          = count($customer_orders); // N 筆訂單
 		$order_data['user_is_registered'] = $is_registered; // 是否已註冊
 
+
+		$key = self::get_transient_key($user_id, $months_ago, $transient_key);
+		\set_transient($key, $order_data, self::CACHE_TIME);
+
+
 		return $order_data;
+	}
+
+	public static function get_transient_key(int $user_id, int $months_ago, string $transient_key): string
+	{
+		return "order_data_user_id_{$user_id}_months_ago_{ $months_ago}_transient_key_{$transient_key}";
 	}
 
 	/*

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace J7\PowerMembership\WooCommerce\Coupons;
 
 use J7\PowerMembership\Utils;
+use J7\PowerMembership\Admin\Menu\Settings;
 
 final class View
 {
@@ -14,6 +15,7 @@ final class View
 	{
 		\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 		\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
+		\add_action('woocommerce_cart_calculate_fees', [$this, 'first_purchase_coupon']);
 	}
 
 	public function enqueue_assets(): void
@@ -187,5 +189,43 @@ final class View
 			$props['disabled_bg']  = "";
 			return $props;
 		}
+	}
+
+	/**
+	 * 首次購買自動折價
+	 * 自動套用優惠
+	 * @param \WC_Cart $cart
+	 * @return void
+	 */
+	public function first_purchase_coupon(\WC_Cart $cart): void
+	{
+
+		$user_id   = \get_current_user_id();
+		if (!$user_id) {
+			return;
+		}
+		$order_data = Utils::get_order_data_by_user_date($user_id);
+		$order_num = $order_data['order_num']; // 訂單數量
+
+		// // 如果不是第一次消費  甚麼也不做
+		// var_dump($order_num);
+		if ($order_num > 0) {
+			return;
+		}
+
+		global $power_membership_settings;
+
+		if (!$power_membership_settings[Settings::ENABLE_FIRST_PURCHASE_COUPON_FIELD]) {
+			return;
+		}
+		$subtotal = (int) $cart->get_subtotal();
+		$min_cart_amount = (int) $power_membership_settings[Settings::MIN_CART_AMOUNT_FIELD];
+
+		if (!empty($min_cart_amount) && $subtotal < $min_cart_amount) {
+			return;
+		}
+
+		$discount =  (int) $power_membership_settings[Settings::COUPON_AMOUNT_FIELD];
+		$cart->add_fee(__("首次消費折 {$discount} 元", Utils::SNAKE), -$discount);
 	}
 }

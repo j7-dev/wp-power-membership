@@ -52,9 +52,6 @@ class Plugin
 
 		if (self::$is_all_plugins_activated) {
 			new Bootstrap();
-		} else {
-			$instance = \TGM_Plugin_Activation::get_instance();
-			$instance->has_notices = false;
 		}
 	}
 

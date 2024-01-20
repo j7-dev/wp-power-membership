@@ -6,7 +6,11 @@ namespace J7\PowerMembership\Admin\Users;
 
 use J7\PowerMembership\Utils;
 
-class UserColumns
+/**
+ * TODO 排序好像沒有作用
+ */
+
+final class UserColumns
 {
 	const CACHE_TIME       = 60 * MINUTE_IN_SECONDS;
 	const TRANSIENT_KEY    = 'user_amount_by_member_lv';
