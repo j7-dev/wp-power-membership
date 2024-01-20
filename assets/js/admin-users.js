@@ -29,7 +29,7 @@
 
   const html = `
     <input type="checkbox" name="advance_setting_checkbox" id="advance_setting_checkbox" />
-    <label for="advance_setting_checkbox">啟用進階選項</label>
+    <label for="advance_setting_checkbox">顯示進階選項</label>
 `;
 
   //render
