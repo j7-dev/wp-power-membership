@@ -59,16 +59,34 @@
  - 用戶必須登入，且為首次購買
  - 可與其他優惠一起使用
 
-![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/2c182256-b386-4796-8e82-01c02df9b32b)
+![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/fc51e958-cd32-4570-bf36-b239cfc92834)
 
 
-#### 6. 結帳頁折價券優化
+#### 6. 可以設定購買數量限制
 
-1. 會自動顯示可用的折價券
+功能:
+ - 可以實現 `滿XX件打XX折` 的優惠
+ - 可與其他條件並行，ex 滿 3 件，消費 500元 以上打9折
+ - 🚩 限制購買 N 件特定商品功能尚未實現，如果你與 限制商品一起使用，條件會是 "只要購物車含有該特定商品，且總件數達標" 就可以使用優惠
+
+![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/c429eb76-40e9-4482-bc16-8cbac72739cb)
+
+
+
+
+#### 7. 結帳頁折價券優化
+
+1. 會自動顯示可用的折價券，折價金額由大排到小
 2. 如果有多筆可用的折價券，只會顯示一筆最大的折價券
-3. 會顯示後續等級的折價券，讓用戶知道下個等級還差多少金額可以升級
+3. 會顯示後續等級的折價券，讓用戶知道下個等級還差多少金額可以升級，條件金額由小排到大
 
-![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/fa1a2ae0-0770-4ed3-80b0-1c306dda4ac2)
+![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/852d70a2-9e07-453b-a955-90e6f16e0371)
+
+後台自訂選項
+1. 只顯示一張最大張的折價券 - 關閉後，checkout 頁面將顯示所有 "可用" 的折價券
+2. 顯示更高消費門檻的折價券 - 關閉後，checkout 頁面將隱藏所有 "不可用" 的折價券
+
+![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/ef950608-0c63-4c07-a624-ba7a4b581f37)
 
 
 
@@ -77,17 +95,17 @@
 
  ## 🐞 Bug 回報
 
-請至 [ISSUE](https://github.com/j7-dev/wp-power-membership/issues) 描述遭遇的問題，並幫我付上外掛還有WP版本資訊
+請至 [ISSUE](https://github.com/j7-dev/wp-power-membership/issues) 描述遭遇的問題，並幫我付上外掛還有 WP 版本資訊
+
+有建議功能的話也可以開 ISSUE
 
 <br><br><br>
 
 ## 🗺️ 開發 RoadMap
 
-🔲 首次購買設定，改道折價券限制條件裡面
-
 🔲 後台、註冊 新增生日欄位
 
-🔲 決定訂單什麼狀態才判斷
+🔲 後台可以決定訂單什麼狀態才判斷
 
 🔲 讓用戶決定快取的時間
 
@@ -103,7 +121,7 @@
 
 🔲 批次調整會員等級
 
-🔲 移除員等級 前端頁面!?
+🔲 移除員等級 前端頁面
 
 
 <br><br><br>
