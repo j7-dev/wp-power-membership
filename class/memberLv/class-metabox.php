@@ -83,7 +83,7 @@ final class Metabox
 	public function create_default_member_lv(): void
 	{
 		$post_type = Utils::MEMBER_LV_POST_TYPE;
-		if (\post_type_exists($post_type)) {
+		if (!\post_type_exists($post_type)) {
 			$this->create_member_lv_post_type();
 		}
 

@@ -22,7 +22,6 @@ final class Bootstrap
 		$this->init();
 		\add_action('admin_enqueue_scripts', [$this, 'add_static_assets']);
 		\add_action('admin_head', [$this, 'add_tailwind_config'], 1000);
-		\add_action('init', array($this, 'remove_notices'), 20);
 	}
 
 	private function init()
@@ -89,10 +88,5 @@ final class Bootstrap
 			</script>
 <?php
 		endif;
-	}
-
-	public function remove_notices(): void
-	{
-		\remove_action('admin_notices', array(\TGM_Plugin_Activation::$instance, 'notices'));
 	}
 }
