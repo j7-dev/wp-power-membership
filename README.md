@@ -57,8 +57,8 @@
 
 功能:
  - 用戶必須登入，且為首次購買
- - 可與其他優惠一起使用
-
+ - 可與其他條件並行，ex 消費 500元 且為首購，且必須包含特定商品 以上打9折
+   
 ![image](https://github.com/j7-dev/wp-power-membership/assets/9213776/fc51e958-cd32-4570-bf36-b239cfc92834)
 
 
