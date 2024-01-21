@@ -45,7 +45,7 @@ final class Bootstrap
 		}
 
 		global $power_membership_settings;
-		$is_admin_ui_simple = $power_membership_settings[Settings::ENABLE_SIMPLE_ADMIN_UI_FIELD];
+		$is_admin_ui_simple = $power_membership_settings[Settings::ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME];
 
 		$screen = \get_current_screen();
 

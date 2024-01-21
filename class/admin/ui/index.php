@@ -18,7 +18,7 @@ final class UI
 	{
 		global $power_membership_settings;
 
-		if ($power_membership_settings[Settings::ENABLE_SIMPLE_ADMIN_UI_FIELD]) {
+		if ($power_membership_settings[Settings::ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME]) {
 			\add_action('admin_init', [$this, 'remove_gamipress_admin_notices'], 10);
 			\add_action('admin_menu', [$this, 'menu_page'], 10);
 			\add_action('admin_head', [$this, 'remove_metabox'], 200);

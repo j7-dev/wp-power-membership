@@ -9,13 +9,12 @@ use J7\PowerMembership\Admin\Menu\Settings;
 
 final class View
 {
-	public $show_one_coupon_only = true; // 隱藏小的 coupons，只顯示一個金額較大的 coupon
 
 	public function __construct()
 	{
 		\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 		\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
-		\add_action('woocommerce_cart_calculate_fees', [$this, 'first_purchase_coupon']);
+		// \add_action('woocommerce_cart_calculate_fees', [$this, 'first_purchase_coupon']);
 	}
 
 	public function enqueue_assets(): void
@@ -34,7 +33,11 @@ final class View
 		<?php
 		$coupons = $this->get_coupons(); //取得網站一般優惠
 		if (!empty($coupons)) :
-			$coupons = $this->handle_show_one_coupon_only($coupons);
+			global $power_membership_settings;
+			// var_dump($power_membership_settings);
+			if ($power_membership_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
+				$coupons = $this->filter_by_biggest_coupon_only($coupons);
+			}
 		?>
 			<div class="power-coupon">
 				<h2 class="">消費滿額折扣</h2>
@@ -55,7 +58,7 @@ final class View
 <?php
 	}
 
-	public function get_coupons()
+	public function get_coupons(): array
 	{
 
 		$coupon_ids_without_minimum_amount = get_posts(array(
@@ -86,49 +89,79 @@ final class View
 
 		// Filter 出 allowed_membership_ids 是 [] 的 coupon (沒有限制)
 		// 或是 allowed_membership_ids 包含 user 的 membership id 的 coupon
-		$coupons = array_filter($coupons, function ($coupon) {
-			$allowed_membership_ids = $coupon->get_meta('allowed_membership_ids');
-			$allowed_membership_ids = is_array($allowed_membership_ids) ? $allowed_membership_ids : [];
-			$user_id                = \get_current_user_id();
-			$user_member_lv_id      = \gamipress_get_user_rank_id($user_id, Utils::MEMBER_LV_POST_TYPE);
-			if (in_array($user_member_lv_id, $allowed_membership_ids)) {
-				return true;
-			}
+		$coupons = array_filter($coupons, function (\WC_Coupon $coupon): bool {
+			$condition_by_membership_ids = $this->filter_condition_by_membership_ids($coupon);
+			$condition_by_first_purchase = $this->filter_condition_by_first_purchase($coupon);
 
-			return empty($allowed_membership_ids);
+			return $condition_by_membership_ids && $condition_by_first_purchase;
 		});
 
 		return $coupons;
+	}
+
+	private function filter_condition_by_membership_ids(\WC_Coupon $coupon): bool
+	{
+		// 或是 allowed_membership_ids 包含 user 的 membership id 的 coupon
+		$allowed_membership_ids = $coupon->get_meta(Metabox::SELECT_FIELD_NAME);
+		$allowed_membership_ids = is_array($allowed_membership_ids) ? $allowed_membership_ids : [];
+		$user_id                = \get_current_user_id();
+		$user_member_lv_id      = \gamipress_get_user_rank_id($user_id, Utils::MEMBER_LV_POST_TYPE);
+		if (in_array($user_member_lv_id, $allowed_membership_ids)) {
+			return true;
+		}
+
+		// Filter 出 allowed_membership_ids 是 [] 的 coupon (沒有限制)
+		return empty($allowed_membership_ids);
+	}
+
+	private function filter_condition_by_first_purchase(\WC_Coupon $coupon): bool
+	{
+		$value = $coupon->get_meta(Metabox::FIRST_PURCHASE_COUPON_FIELD_NAME);
+		if ("yes" === $value) {
+			return $this->is_first_purchase();
+		}
+
+		return true;
 	}
 
 	/**
 	 * 隱藏小的coupon
 	 * 只出現大的coupon
 	 */
-	public function handle_show_one_coupon_only($coupons)
+	public function filter_by_biggest_coupon_only(array $coupons): array
 	{
-		if (!$this->show_one_coupon_only) {
-			return $coupons;
-		}
+		global $power_membership_settings;
 		$cart_total = (int) WC()->cart->subtotal;
 
-
-		$meet_coupons 	 = [];
+		$available_coupons 	 = [];
 		foreach ($coupons as $key => $coupon) {
 			$coupon_id = $coupon->get_id();
 			$minimum_amount = (int) $coupon->get_minimum_amount();
 			if ($cart_total >= $minimum_amount) {
-				$meet_coupons[] = $coupon;
+				if ($coupon->is_valid_for_cart()) {
+					$available_coupons[$coupon_id] = $coupon;
+				}
 			} else {
-				$not_meet[$coupon_id] = abs($cart_total - $minimum_amount);
+				$further_coupons[$coupon_id] = abs($cart_total - $minimum_amount);
 			}
 		}
-		$not_meet = !empty($not_meet) ? $not_meet : [];
-		asort($not_meet); // from small to big
 
-		$biggest_coupon = $this->get_biggest_coupon($meet_coupons);
+		// 如果啟用顯示 further coupons
+		if ($power_membership_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME]) {
+			$further_coupons = !empty($further_coupons) ? $further_coupons : [];
+			asort($further_coupons); // from small to big
+		} else {
+			$further_coupons = [];
+		}
 
-		$keys           = empty($biggest_coupon) ? array_keys($not_meet) : [$biggest_coupon->get_id(), ...array_keys($not_meet)];
+		// 如果啟用只顯示最大折扣券
+		if ($power_membership_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
+			$biggest_coupon = $this->get_biggest_coupon($available_coupons);
+			$keys           = empty($biggest_coupon) ? array_keys($further_coupons) : [$biggest_coupon->get_id(), ...array_keys($further_coupons)];
+		} else {
+			$keys           = array_keys($available_coupons);
+		}
+
 		foreach ($coupons as $key => $coupon) {
 			$coupon_id = $coupon->get_id();
 			if (!in_array($coupon_id, $keys)) {
@@ -138,6 +171,7 @@ final class View
 
 		return $coupons;
 	}
+
 
 	public function get_biggest_coupon(array $coupons): ?\WC_Coupon
 	{
@@ -163,7 +197,7 @@ final class View
 		return $max_discount_coupon;
 	}
 
-	public function get_coupon_props($coupon)
+	public function get_coupon_props(\WC_Coupon $coupon): array
 	{
 		if (empty($coupon)) {
 			return [];
@@ -178,9 +212,9 @@ final class View
 			$d                       = $minimum_amount - $cart_total;
 			$shop_url                = site_url('shop');
 			$props['is_available'] = false;
-			$props['reason']       = "，<span class='text-danger'>還差 ${d} 元</span>，<a href='${shop_url}'>再去多買幾件 》</a>";
+			$props['reason']       = "，<span class='text-red-400'>還差 ${d} 元</span>，<a href='${shop_url}'>再去多買幾件 》</a>";
 			$props['disabled']     = "disabled";
-			$props['disabled_bg']  = "bg-light cursor-not-allowed";
+			$props['disabled_bg']  = "bg-gray-100 cursor-not-allowed";
 			return $props;
 		} else {
 			$props['is_available'] = true;
@@ -191,41 +225,32 @@ final class View
 		}
 	}
 
-	/**
-	 * 首次購買自動折價
-	 * 自動套用優惠
-	 * @param \WC_Cart $cart
-	 * @return void
-	 */
-	public function first_purchase_coupon(\WC_Cart $cart): void
+	public static function get_order_quantity_by_user(int $user_id = 0): int
 	{
-
-		$user_id   = \get_current_user_id();
-		if (!$user_id) {
-			return;
+		if (empty($user_id)) {
+			$user_id   = \get_current_user_id();
 		}
-		$order_data = Utils::get_order_data_by_user_date($user_id);
-		$order_num = $order_data['order_num']; // 訂單數量
+		global $wpdb;
+		$query = $wpdb->prepare("SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'shop_order' AND post_status IN ('wc-completed', 'wc-processing') AND post_author = %d", $user_id);
 
-		// // 如果不是第一次消費  甚麼也不做
-		// var_dump($order_num);
-		if ($order_num > 0) {
-			return;
-		}
+		$order_count = (int) $wpdb->get_var($query);
 
-		global $power_membership_settings;
-
-		if (!$power_membership_settings[Settings::ENABLE_FIRST_PURCHASE_COUPON_FIELD]) {
-			return;
-		}
-		$subtotal = (int) $cart->get_subtotal();
-		$min_cart_amount = (int) $power_membership_settings[Settings::MIN_CART_AMOUNT_FIELD];
-
-		if (!empty($min_cart_amount) && $subtotal < $min_cart_amount) {
-			return;
-		}
-
-		$discount =  (int) $power_membership_settings[Settings::COUPON_AMOUNT_FIELD];
-		$cart->add_fee(__("首次消費折 {$discount} 元", Utils::TEXT_DOMAIN), -$discount);
+		return $order_count;
 	}
+
+	private function is_first_purchase(int $user_id = 0): bool
+	{
+		if (empty($user_id)) {
+			$user_id   = \get_current_user_id();
+		}
+		$count = self::get_order_quantity_by_user($user_id);
+
+		return $count === 0;
+	}
+
+
+	// public function add_fee(\WC_Cart $cart): void
+	// {
+	// 	$cart->add_fee(__("首次消費折 {$discount} 元", Utils::TEXT_DOMAIN), -$discount);
+	// }
 }

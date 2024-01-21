@@ -9,10 +9,10 @@ use J7\PowerMembership\Utils;
 final class Settings
 {
 	const OPT_NAME = Utils::SNAKE . '_settings';
-	const ENABLE_SIMPLE_ADMIN_UI_FIELD = 'enable_simple_admin_ui';
-	const ENABLE_FIRST_PURCHASE_COUPON_FIELD = 'first_purchase_coupon';
-	const COUPON_AMOUNT_FIELD = 'coupon_amount';
-	const MIN_CART_AMOUNT_FIELD = 'min_cart_amount';
+	const ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME = 'power_enable_simple_admin_ui';
+	const ENABLE_BIGGEST_COUPON_FIELD_NAME = Utils::SNAKE . '_biggest_coupon';
+	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME = Utils::SNAKE . '_show_further_coupons';
+
 	private $args;
 	private $sections = [];
 
@@ -223,7 +223,7 @@ final class Settings
 			'icon'             => 'el el-home',
 			'fields' => [
 				[
-					'id'       => self::ENABLE_SIMPLE_ADMIN_UI_FIELD,
+					'id'       => self::ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME,
 					'type'     => 'switch',
 					'title'    => esc_html__('啟用簡易後台', Utils::TEXT_DOMAIN),
 					'subtitle' => esc_html__('關閉後，會顯示 Gamipress 的外掛選單和所有設定項', Utils::TEXT_DOMAIN),
@@ -235,31 +235,27 @@ final class Settings
 		];
 
 		$this->sections[] = [
-			'title'            => esc_html__('優惠設定', Utils::TEXT_DOMAIN),
-			'id'               => 'coupons',
+			'title'            => Utils::APP_NAME,
+			'id'               => Utils::KEBAB,
 			'icon'             => 'el el-tag',
 			'fields' => [
 				[
-					'id'       => self::ENABLE_FIRST_PURCHASE_COUPON_FIELD,
+					'id'       => self::ENABLE_BIGGEST_COUPON_FIELD_NAME,
 					'type'     => 'switch',
-					'title'    => esc_html__('啟用首次購買優惠', Utils::TEXT_DOMAIN),
-					'subtitle' => esc_html__('如果此用戶已登入，且從沒有在你網站買過東西，就享有折扣', Utils::TEXT_DOMAIN),
+					'title'    => esc_html__('只顯示一張最大張的折價券', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('關閉後，checkout 頁面將顯示所有 "可用" 的折價券', Utils::TEXT_DOMAIN),
 					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
 					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
-					'default'  => 0,
+					'default'  => 1,
 				],
 				[
-					'id'       => self::COUPON_AMOUNT_FIELD,
-					'title'    => esc_html__('首次購買優惠金額', Utils::TEXT_DOMAIN),
-					'type'     => 'text',
-					'required' => array('first_purchase_coupon', 'equals', true),
-				],
-				[
-					'id'       => self::MIN_CART_AMOUNT_FIELD,
-					'type'     => 'text',
-					'title'    => esc_html__('最小訂購金額需要', Utils::TEXT_DOMAIN),
-					'subtitle' => esc_html__('滿足首次購買優惠的最小訂購金額，如果不想限制，維持空白即可', Utils::TEXT_DOMAIN),
-					'required' => array('first_purchase_coupon', 'equals', true),
+					'id'       => self::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME,
+					'type'     => 'switch',
+					'title'    => esc_html__('顯示更高消費門檻的折價券', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('關閉後，checkout 頁面將隱藏所有 "不可用" 的折價券', Utils::TEXT_DOMAIN),
+					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
+					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
+					'default'  => 1,
 				],
 			],
 		];
