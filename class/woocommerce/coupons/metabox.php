@@ -17,7 +17,6 @@ final class Metabox
 	{
 		\add_action('woocommerce_coupon_options_usage_restriction', [$this, 'add_fields'], 10, 2);
 		\add_action('woocommerce_coupon_options_save', [$this, 'update_fields'], 10, 2);
-		\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_coupon_validation'], 10, 2);
 	}
 
 	public function add_fields(int $coupon_id, \WC_Coupon $coupon): void
@@ -83,9 +82,9 @@ final class Metabox
 			<p class="form-field">
 				<label for="<?= self::MIN_QUANTITY_FIELD_NAME ?>"><?php _e('最少購買數量限制', Utils::SNAKE); ?></label>
 
-				<input type="number" class="" name="<?= self::MIN_QUANTITY_FIELD_NAME ?>" id="<?= self::MIN_QUANTITY_FIELD_NAME ?>" value="<?= $value ?>">
+				<input type="text" class="short wc_input_price" name="<?= self::MIN_QUANTITY_FIELD_NAME ?>" id="<?= self::MIN_QUANTITY_FIELD_NAME ?>" placeholder="無數量限制" value="<?= $value ?>">
 
-				<span class="description"><?php _e('使用此功能可以實現：買2件9折、買3件折200 等優惠方案', Utils::TEXT_DOMAIN); ?></span>
+				<span class="description"><?php _e('使用此功能可以實現：買2件9折、買3件折200 等優惠方案<br />填 0 的話則不會做任何現制', Utils::TEXT_DOMAIN); ?></span>
 
 			</p>
 		</div>
@@ -100,6 +99,7 @@ final class Metabox
 
 		$this->update_allowed_membership_field($coupon_id, $coupon);
 		$this->update_first_purchase_field($coupon_id, $coupon);
+		$this->update_min_quantity_field($coupon_id, $coupon);
 
 		$coupon->save();
 	}
@@ -122,28 +122,11 @@ final class Metabox
 		}
 	}
 
-	public function custom_coupon_validation($is_valid, $coupon)
+	private function update_min_quantity_field(int $coupon_id, \WC_Coupon $coupon): void
 	{
-		if (empty($coupon)) {
-			return $is_valid;
+		if (isset($_POST[self::MIN_QUANTITY_FIELD_NAME])) {
+			$value = (int) \sanitize_text_field($_POST[self::MIN_QUANTITY_FIELD_NAME]);
+			$coupon->update_meta_data(self::MIN_QUANTITY_FIELD_NAME, $value);
 		}
-		$member_lv_ids = $coupon->get_meta(self::SELECT_FIELD_NAME);
-		$member_lv_ids = is_array($member_lv_ids) ? $member_lv_ids : [];
-		if (empty($member_lv_ids)) {
-			return $is_valid;
-		}
-
-		$user_id = \get_current_user_id();
-		if (empty($user_id)) {
-			return false;
-		}
-
-		$member_lv_id = \gamipress_get_user_rank_id($user_id, Utils::MEMBER_LV_POST_TYPE);
-		if (!in_array($member_lv_id, $member_lv_ids)) {
-			$is_valid = false;
-			$coupon->add_coupon_message(__('此優惠僅限指定會員等級使用', Utils::TEXT_DOMAIN));
-		}
-
-		return $is_valid;
 	}
 }

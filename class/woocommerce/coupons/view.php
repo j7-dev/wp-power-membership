@@ -14,6 +14,8 @@ final class View
 	{
 		\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 		\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
+		\add_filter('woocommerce_coupon_validate_minimum_amount', [$this, 'modify_minimum_amount_condition'], 200, 3);
+		\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_condition'], 200, 3);
 		// \add_action('woocommerce_cart_calculate_fees', [$this, 'first_purchase_coupon']);
 	}
 
@@ -35,9 +37,7 @@ final class View
 		if (!empty($coupons)) :
 			global $power_membership_settings;
 			// var_dump($power_membership_settings);
-			if ($power_membership_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
-				$coupons = $this->filter_by_biggest_coupon_only($coupons);
-			}
+			$coupons = $this->sort_coupons($coupons);
 		?>
 			<div class="power-coupon">
 				<h2 class="">消費滿額折扣</h2>
@@ -72,7 +72,6 @@ final class View
 
 		$coupon_ids_with_minimum_amount = get_posts(array(
 			'posts_per_page' => -1,
-			'meta_key'       => 'minimum_amount',
 			'orderby'        => 'meta_value_num',
 			'order'          => 'ASC',
 			'post_type'      => 'shop_coupon',
@@ -83,20 +82,30 @@ final class View
 		)) ?? [];
 
 		$coupon_ids = array_merge($coupon_ids_without_minimum_amount, $coupon_ids_with_minimum_amount);
+
 		$coupons    = array_map(function ($coupon_id) {
 			return new \WC_Coupon($coupon_id);
 		}, $coupon_ids);
 
-		// Filter 出 allowed_membership_ids 是 [] 的 coupon (沒有限制)
-		// 或是 allowed_membership_ids 包含 user 的 membership id 的 coupon
-		$coupons = array_filter($coupons, function (\WC_Coupon $coupon): bool {
-			$condition_by_membership_ids = $this->filter_condition_by_membership_ids($coupon);
-			$condition_by_first_purchase = $this->filter_condition_by_first_purchase($coupon);
+		$discounts = new \WC_Discounts(WC()->cart);
 
-			return $condition_by_membership_ids && $condition_by_first_purchase;
-		});
+		foreach ($coupons as $key => $coupon) {
+			$valid = $discounts->is_coupon_valid($coupon);
+			if (is_wp_error($valid)) {
+				unset($coupons[$key]);
+			}
+		}
 
 		return $coupons;
+	}
+
+	public function custom_condition(bool $is_valid, \WC_Coupon $coupon, \WC_Discounts $discounts): bool
+	{
+		$condition_by_membership_ids = $this->filter_condition_by_membership_ids($coupon);
+		$condition_by_first_purchase = $this->filter_condition_by_first_purchase($coupon);
+		$condition_by_min_quantity = $this->filter_condition_by_min_quantity($coupon);
+
+		return $condition_by_membership_ids && $condition_by_first_purchase && $condition_by_min_quantity && $is_valid;
 	}
 
 	private function filter_condition_by_membership_ids(\WC_Coupon $coupon): bool
@@ -124,52 +133,52 @@ final class View
 		return true;
 	}
 
+	private function filter_condition_by_min_quantity(\WC_Coupon $coupon): bool
+	{
+		$min_quantity = (int) $coupon->get_meta(Metabox::MIN_QUANTITY_FIELD_NAME);
+		if (!empty($min_quantity)) {
+			$cart = \WC()->cart;
+			$cart_item_quantities = (int) array_sum($cart->get_cart_item_quantities());
+			return $cart_item_quantities >= $min_quantity;
+		}
+
+		return true;
+	}
+
 	/**
 	 * 隱藏小的coupon
 	 * 只出現大的coupon
 	 */
-	public function filter_by_biggest_coupon_only(array $coupons): array
+	public function sort_coupons(array $coupons): array
 	{
 		global $power_membership_settings;
 		$cart_total = (int) WC()->cart->subtotal;
 
 		$available_coupons 	 = [];
+		$further_coupons 	 = [];
 		foreach ($coupons as $key => $coupon) {
-			$coupon_id = $coupon->get_id();
 			$minimum_amount = (int) $coupon->get_minimum_amount();
 			if ($cart_total >= $minimum_amount) {
-				if ($coupon->is_valid_for_cart()) {
-					$available_coupons[$coupon_id] = $coupon;
-				}
+				$available_coupons[] = $coupon;
 			} else {
-				$further_coupons[$coupon_id] = abs($cart_total - $minimum_amount);
+				$further_coupons[] = $coupon;
 			}
 		}
 
-		// 如果啟用顯示 further coupons
-		if ($power_membership_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME]) {
-			$further_coupons = !empty($further_coupons) ? $further_coupons : [];
-			asort($further_coupons); // from small to big
-		} else {
-			$further_coupons = [];
-		}
+		usort($available_coupons, function ($a, $b) {
+			return (int) $b->get_amount() - (int) $a->get_amount();
+		});
+		usort($further_coupons, function ($a, $b) {
+			return (int) $a->get_minimum_amount() - (int) $a->get_minimum_amount();
+		});
 
 		// 如果啟用只顯示最大折扣券
 		if ($power_membership_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
-			$biggest_coupon = $this->get_biggest_coupon($available_coupons);
-			$keys           = empty($biggest_coupon) ? array_keys($further_coupons) : [$biggest_coupon->get_id(), ...array_keys($further_coupons)];
+			$result = array_merge([$available_coupons[0]], $further_coupons);
 		} else {
-			$keys           = array_keys($available_coupons);
+			$result = array_merge($available_coupons, $further_coupons);
 		}
-
-		foreach ($coupons as $key => $coupon) {
-			$coupon_id = $coupon->get_id();
-			if (!in_array($coupon_id, $keys)) {
-				unset($coupons[$key]);
-			}
-		}
-
-		return $coupons;
+		return $result;
 	}
 
 
@@ -246,6 +255,17 @@ final class View
 		$count = self::get_order_quantity_by_user($user_id);
 
 		return $count === 0;
+	}
+
+	public function modify_minimum_amount_condition($not_valid, $coupon, $subtotal): bool
+	{
+		global $power_membership_settings;
+
+		if ($power_membership_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME]) {
+			return false;
+		}
+
+		return $not_valid;
 	}
 
 

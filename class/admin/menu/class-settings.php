@@ -202,7 +202,7 @@ final class Settings
 				$v = str_replace('-', '_', $args['opt_name']);
 			}
 		}
-		$args['intro_text'] = '<p>' . sprintf(esc_html__('可以到 %1$s 查看主要功能與套件特色', Utils::TEXT_DOMAIN), '<a href="' . Utils::GITHUB_REPO . '" target="_blank"><i class="el el-github"></i> Github 頁面</a>') . '<p>';
+
 
 
 		// Add content after the form.
@@ -237,6 +237,7 @@ final class Settings
 		$this->sections[] = [
 			'title'            => Utils::APP_NAME,
 			'id'               => Utils::KEBAB,
+			'desc'             => '<p><span class="dashicons dashicons-info" style="color: #52accc;"></span>' . sprintf(esc_html__('可以到 %1$s 查看主要功能與使用方式', Utils::TEXT_DOMAIN), '<a href="' . Utils::GITHUB_REPO . '" target="_blank">Github 頁面</a>') . '<p>',
 			'icon'             => 'el el-tag',
 			'fields' => [
 				[
