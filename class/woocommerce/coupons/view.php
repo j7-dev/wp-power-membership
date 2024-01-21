@@ -58,16 +58,14 @@ final class View
 			<div class="power-coupon">
 				<h2 class="">消費滿額折扣</h2>
 				<div class="mb-2 py-2">
-					<?php foreach ($coupons as $coupon) :
+					<?php foreach ($coupons as $coupon) {
 						$props = $this->get_coupon_props($coupon);
+						\load_template(__DIR__ . '/templates/basic.php', false, [
+							'coupon' => $coupon,
+							'props' => $props,
+						]);
+					}
 					?>
-						<label class="block px-2 py-1 <?= $props['disabled_bg'] ?>">
-
-							<input data-type="normal_coupon" id="coupon-<?= $coupon->get_id(); ?>" name="yf_normal_coupon" class="mr-2 normal_coupon" type="radio" value="<?= $coupon->get_code(); ?>" <?= $props['disabled'] ?>>
-							<span class="dashicons dashicons-tag <?= $props['disabled'] === 'disabled' ? 'text-gray-400' : 'text-red-400' ?>"></span>
-							<?= $coupon->get_code() . $coupon->get_description() . $props['reason']; ?>
-						</label>
-					<?php endforeach; ?>
 				</div>
 			</div>
 		<?php endif; ?>
