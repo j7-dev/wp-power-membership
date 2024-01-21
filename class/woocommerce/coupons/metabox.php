@@ -8,7 +8,7 @@ use J7\PowerMembership\Utils;
 
 final class Metabox
 {
-	const SELECT_FIELD_NAME = Utils::SNAKE . '_allowed_membership_ids';
+	const ALLOWED_MEMBER_LV_FIELD_NAME = Utils::SNAKE . '_allowed_membership_ids';
 	const FIRST_PURCHASE_COUPON_FIELD_NAME = Utils::SNAKE . '_first_purchase_coupon';
 	const MIN_QUANTITY_FIELD_NAME = Utils::SNAKE . '_min_quantity';
 
@@ -35,13 +35,13 @@ final class Metabox
 ?>
 		<div class="options_group">
 			<p class="form-field">
-				<label for="<?= self::SELECT_FIELD_NAME ?>"><?php _e('允許的會員等級', Utils::SNAKE); ?></label>
-				<select id="<?= self::SELECT_FIELD_NAME ?>" name="<?= self::SELECT_FIELD_NAME . '[]' ?>" style="width: 50%;" class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e('無須會員等級', Utils::SNAKE); ?>">
+				<label for="<?= self::ALLOWED_MEMBER_LV_FIELD_NAME ?>"><?php _e('允許的會員等級', Utils::SNAKE); ?></label>
+				<select id="<?= self::ALLOWED_MEMBER_LV_FIELD_NAME ?>" name="<?= self::ALLOWED_MEMBER_LV_FIELD_NAME . '[]' ?>" style="width: 50%;" class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e('無須會員等級', Utils::SNAKE); ?>">
 					<?php
 					$member_lvs = gamipress_get_ranks([
 						'post_type' => Utils::MEMBER_LV_POST_TYPE,
 					]);
-					$member_lv_ids = $coupon->get_meta(self::SELECT_FIELD_NAME);
+					$member_lv_ids = $coupon->get_meta(self::ALLOWED_MEMBER_LV_FIELD_NAME);
 					$member_lv_ids = is_array($member_lv_ids) ? $member_lv_ids : [];
 
 					if ($member_lvs) {
@@ -106,9 +106,9 @@ final class Metabox
 
 	private function update_allowed_membership_field(int $coupon_id, \WC_Coupon $coupon): void
 	{
-		$allowed_membership_ids = isset($_POST[self::SELECT_FIELD_NAME]) ? (array) $_POST[self::SELECT_FIELD_NAME] : array();
+		$allowed_membership_ids = isset($_POST[self::ALLOWED_MEMBER_LV_FIELD_NAME]) ? (array) $_POST[self::ALLOWED_MEMBER_LV_FIELD_NAME] : array();
 
-		$coupon->update_meta_data(self::SELECT_FIELD_NAME, $allowed_membership_ids);
+		$coupon->update_meta_data(self::ALLOWED_MEMBER_LV_FIELD_NAME, $allowed_membership_ids);
 	}
 
 	private function update_first_purchase_field(int $coupon_id, \WC_Coupon $coupon): void

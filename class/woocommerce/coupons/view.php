@@ -10,13 +10,29 @@ use J7\PowerMembership\Admin\Menu\Settings;
 final class View
 {
 
+	public $further_coupons = [];
+
 	public function __construct()
 	{
-		\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
-		\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
-		\add_filter('woocommerce_coupon_validate_minimum_amount', [$this, 'modify_minimum_amount_condition'], 200, 3);
-		\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_condition'], 200, 3);
+		global $power_membership_settings;
+
+		if ($power_membership_settings[Settings::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME]) {
+			\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+			\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
+			\add_filter('woocommerce_coupon_validate_minimum_amount', [$this, 'modify_minimum_amount_condition'], 200, 3);
+			\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_condition'], 200, 3);
+		}
+
+		if (!$power_membership_settings[Settings::ENABLE_SHOW_COUPON_FORM_FIELD_NAME]) {
+			\add_action('init', [$this, 'remove_wc_coupon_form'], 20);
+		}
+
 		// \add_action('woocommerce_cart_calculate_fees', [$this, 'first_purchase_coupon']);
+	}
+
+	public function remove_wc_coupon_form(): void
+	{
+		\remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10);
 	}
 
 	public function enqueue_assets(): void
@@ -33,7 +49,7 @@ final class View
 		<script src="https://cdn.tailwindcss.com"></script>
 
 		<?php
-		$coupons = $this->get_coupons(); //取得網站一般優惠
+		$coupons = $this->get_valid_coupons(); //取得網站一般優惠
 		if (!empty($coupons)) :
 			global $power_membership_settings;
 			// var_dump($power_membership_settings);
@@ -58,7 +74,7 @@ final class View
 <?php
 	}
 
-	public function get_coupons(): array
+	public function get_valid_coupons(): array
 	{
 
 		$coupon_ids_without_minimum_amount = get_posts(array(
@@ -111,10 +127,12 @@ final class View
 	private function filter_condition_by_membership_ids(\WC_Coupon $coupon): bool
 	{
 		// 或是 allowed_membership_ids 包含 user 的 membership id 的 coupon
-		$allowed_membership_ids = $coupon->get_meta(Metabox::SELECT_FIELD_NAME);
+		$allowed_membership_ids = $coupon->get_meta(Metabox::ALLOWED_MEMBER_LV_FIELD_NAME);
 		$allowed_membership_ids = is_array($allowed_membership_ids) ? $allowed_membership_ids : [];
 		$user_id                = \get_current_user_id();
 		$user_member_lv_id      = \gamipress_get_user_rank_id($user_id, Utils::MEMBER_LV_POST_TYPE);
+
+
 		if (in_array($user_member_lv_id, $allowed_membership_ids)) {
 			return true;
 		}
@@ -149,21 +167,11 @@ final class View
 	 * 隱藏小的coupon
 	 * 只出現大的coupon
 	 */
-	public function sort_coupons(array $coupons): array
+	public function sort_coupons(array $available_coupons): array
 	{
 		global $power_membership_settings;
-		$cart_total = (int) WC()->cart->subtotal;
 
-		$available_coupons 	 = [];
-		$further_coupons 	 = [];
-		foreach ($coupons as $key => $coupon) {
-			$minimum_amount = (int) $coupon->get_minimum_amount();
-			if ($cart_total >= $minimum_amount) {
-				$available_coupons[] = $coupon;
-			} else {
-				$further_coupons[] = $coupon;
-			}
-		}
+		$further_coupons 	 = $this->further_coupons;
 
 		usort($available_coupons, function ($a, $b) {
 			return (int) $b->get_amount() - (int) $a->get_amount();
@@ -261,8 +269,8 @@ final class View
 	{
 		global $power_membership_settings;
 
-		if ($power_membership_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME]) {
-			return false;
+		if ($power_membership_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME] && $not_valid) {
+			$this->further_coupons[] = $coupon;
 		}
 
 		return $not_valid;

@@ -12,6 +12,8 @@ final class Settings
 	const ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME = 'power_enable_simple_admin_ui';
 	const ENABLE_BIGGEST_COUPON_FIELD_NAME = Utils::SNAKE . '_biggest_coupon';
 	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME = Utils::SNAKE . '_show_further_coupons';
+	const ENABLE_SHOW_COUPON_FORM_FIELD_NAME = Utils::SNAKE . '_show_coupon_form';
+	const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME = Utils::SNAKE . '_show_available_coupons';
 
 	private $args;
 	private $sections = [];
@@ -241,6 +243,24 @@ final class Settings
 			'icon'             => 'el el-tag',
 			'fields' => [
 				[
+					'id'       => self::ENABLE_SHOW_COUPON_FORM_FIELD_NAME,
+					'type'     => 'switch',
+					'title'    => esc_html__('顯示 Woocommerce 預設的輸入折價碼功能', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('啟用後，checkout 頁面將顯示 Woocommerce 預設的輸入折價碼功能', Utils::TEXT_DOMAIN),
+					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
+					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
+					'default'  => 0,
+				],
+				[
+					'id'       => self::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME,
+					'type'     => 'switch',
+					'title'    => esc_html__('自動顯示可用的折價券', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('啟用後，checkout 頁面將顯示所有能用的折價券，為了得到最好的購物體驗，強烈建議開啟此項', Utils::TEXT_DOMAIN),
+					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
+					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
+					'default'  => 1,
+				],
+				[
 					'id'       => self::ENABLE_BIGGEST_COUPON_FIELD_NAME,
 					'type'     => 'switch',
 					'title'    => esc_html__('只顯示一張最大張的折價券', Utils::TEXT_DOMAIN),
@@ -248,6 +268,7 @@ final class Settings
 					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
 					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
 					'default'  => 1,
+					'required' => [self::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME, 'equals', 1]
 				],
 				[
 					'id'       => self::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME,
@@ -257,6 +278,7 @@ final class Settings
 					'on'       => esc_html__('啟用', Utils::TEXT_DOMAIN),
 					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
 					'default'  => 1,
+					'required' => [self::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME, 'equals', 1]
 				],
 			],
 		];
