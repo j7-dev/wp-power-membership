@@ -178,11 +178,15 @@ final class View
 			return (int) $a->get_minimum_amount() - (int) $a->get_minimum_amount();
 		});
 
+		// 只保留前 N 個 further_coupons
+		$show_further_coupons_qty = $power_membership_settings[Settings::SHOW_FURTHER_COUPONS_QTY_FIELD_NAME] ?? 3;
+		$sliced_further_coupons = array_slice($further_coupons, 0, $show_further_coupons_qty);
+
 		// 如果啟用只顯示最大折扣券
 		if ($power_membership_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
-			$result = array_merge([$available_coupons[0]], $further_coupons);
+			$result = array_merge([$available_coupons[0]], $sliced_further_coupons);
 		} else {
-			$result = array_merge($available_coupons, $further_coupons);
+			$result = array_merge($available_coupons, $sliced_further_coupons);
 		}
 		return $result;
 	}

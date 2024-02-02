@@ -12,6 +12,7 @@ final class Settings
 	const ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME = 'power_enable_simple_admin_ui';
 	const ENABLE_BIGGEST_COUPON_FIELD_NAME = Utils::SNAKE . '_biggest_coupon';
 	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME = Utils::SNAKE . '_show_further_coupons';
+	const SHOW_FURTHER_COUPONS_QTY_FIELD_NAME = Utils::SNAKE . '_show_further_coupons_qty';
 	const ENABLE_SHOW_COUPON_FORM_FIELD_NAME = Utils::SNAKE . '_show_coupon_form';
 	const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME = Utils::SNAKE . '_show_available_coupons';
 
@@ -279,6 +280,14 @@ final class Settings
 					'off'      => esc_html__('關閉', Utils::TEXT_DOMAIN),
 					'default'  => 1,
 					'required' => [self::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME, 'equals', 1]
+				],
+				[
+					'id'       => self::SHOW_FURTHER_COUPONS_QTY_FIELD_NAME,
+					'type'     => 'text',
+					'title'    => esc_html__('顯示多少個更高消費門檻的折價券', Utils::TEXT_DOMAIN),
+					'subtitle' => esc_html__('預設為 3 個，不建議太多，會影響結帳頁的畫面', Utils::TEXT_DOMAIN),
+					'default'  => 3,
+					'required' => [self::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME, 'equals', 1]
 				],
 			],
 		];
