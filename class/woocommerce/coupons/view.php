@@ -6,6 +6,7 @@ namespace J7\PowerMembership\WooCommerce\Coupons;
 
 use J7\PowerMembership\Utils;
 use J7\PowerMembership\Admin\Menu\Settings;
+use J7\PowerMembership\WooCommerce\Coupons\Metabox;
 
 final class View
 {
@@ -74,28 +75,26 @@ final class View
 
 	public function get_valid_coupons(): array
 	{
-
-		$coupon_ids_without_minimum_amount = get_posts(array(
-			'posts_per_page' => -1,
-			'post_type'      => 'shop_coupon',
-			'post_status'    => 'publish',
-			'fields'         => 'ids',
-			'meta_key'       => 'minimum_amount',
-			'meta_compare'   => 'NOT EXISTS',
-		)) ?? [];
-
-		$coupon_ids_with_minimum_amount = get_posts(array(
+		$coupon_ids = get_posts(array(
 			'posts_per_page' => -1,
 			'orderby'        => 'meta_value_num',
 			'order'          => 'ASC',
 			'post_type'      => 'shop_coupon',
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
-			'meta_key'       => 'minimum_amount',
-			'meta_compare'   => 'EXISTS',
+			'meta_query'     => array(
+				'relation' => 'OR',
+				[
+					'key'     => Metabox::HIDE_THIS_COUPON_FIELD_NAME,
+					'compare' => 'NOT EXISTS',
+				],
+				[
+					'key'     => Metabox::HIDE_THIS_COUPON_FIELD_NAME,
+					'value'   => 'yes',
+					'compare' => '!=',
+				],
+			),
 		)) ?? [];
-
-		$coupon_ids = array_merge($coupon_ids_without_minimum_amount, $coupon_ids_with_minimum_amount);
 
 		$coupons    = array_map(function ($coupon_id) {
 			return new \WC_Coupon($coupon_id);
@@ -169,10 +168,12 @@ final class View
 	{
 		global $power_membership_settings;
 
+
+
 		$further_coupons 	 = $this->further_coupons;
 
 		usort($available_coupons, function ($a, $b) {
-			return (int) $b->get_amount() - (int) $a->get_amount();
+			return (int) $this->get_coupon_amount($b) - (int) $this->get_coupon_amount($a);
 		});
 		usort($further_coupons, function ($a, $b) {
 			return (int) $a->get_minimum_amount() - (int) $a->get_minimum_amount();
@@ -189,6 +190,15 @@ final class View
 			$result = array_merge($available_coupons, $sliced_further_coupons);
 		}
 		return $result;
+	}
+
+	public function get_coupon_amount(\WC_Coupon $coupon): int
+	{
+		if ($coupon->is_type(array('percent'))) {
+			$cart = WC()->cart;
+			return (int) $coupon->get_amount() * (int) $cart->subtotal / 100;
+		}
+		return (int) $coupon->get_amount();
 	}
 
 

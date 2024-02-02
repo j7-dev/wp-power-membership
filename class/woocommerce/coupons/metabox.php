@@ -11,15 +11,27 @@ final class Metabox
 	const ALLOWED_MEMBER_LV_FIELD_NAME = Utils::SNAKE . '_allowed_membership_ids';
 	const FIRST_PURCHASE_COUPON_FIELD_NAME = Utils::SNAKE . '_first_purchase_coupon';
 	const MIN_QUANTITY_FIELD_NAME = Utils::SNAKE . '_min_quantity';
+	const HIDE_THIS_COUPON_FIELD_NAME = Utils::SNAKE . '_hide_this_coupon';
+
 
 
 	public function __construct()
 	{
-		\add_action('woocommerce_coupon_options_usage_restriction', [$this, 'add_fields'], 10, 2);
+		\add_action('woocommerce_coupon_options', [$this, 'add_general_fields'], 10, 2);
+		\add_action('woocommerce_coupon_options_usage_restriction', [$this, 'add_restriction_fields'], 10, 2);
 		\add_action('woocommerce_coupon_options_save', [$this, 'update_fields'], 10, 2);
 	}
 
-	public function add_fields(int $coupon_id, \WC_Coupon $coupon): void
+	public function add_general_fields(int $coupon_id, \WC_Coupon $coupon): void
+	{
+		if (empty($coupon)) {
+			echo 'coupon is empty';
+			return;
+		}
+		$this->add_hide_this_coupon_field($coupon_id, $coupon);
+	}
+
+	public function add_restriction_fields(int $coupon_id, \WC_Coupon $coupon): void
 	{
 		if (empty($coupon)) {
 			echo 'coupon is empty';
@@ -30,9 +42,22 @@ final class Metabox
 		$this->add_min_quantity_field($coupon_id, $coupon);
 	}
 
+	private function add_hide_this_coupon_field(int $coupon_id, \WC_Coupon $coupon): void
+	{
+		$value = $coupon->get_meta(self::HIDE_THIS_COUPON_FIELD_NAME);
+		$value = $value === 'yes' ? 'yes' : 'no';
+?>
+		<p class="form-field">
+			<label for="<?= self::HIDE_THIS_COUPON_FIELD_NAME ?>">不自動顯示此優惠券</label>
+			<input type="checkbox" class="checkbox" name="<?= self::HIDE_THIS_COUPON_FIELD_NAME ?>" id="<?= self::HIDE_THIS_COUPON_FIELD_NAME ?>" value="yes" <?php checked($value, 'yes') ?>>
+			<span class="description">因為使用 Power Membership 會自動將所有用戶可用的優惠券顯示出來，當你想要發給特定用戶輸入折價碼的時候，可以勾選此選項。</span>
+		</p>
+	<?php
+	}
+
 	private function add_allowed_membership_field(int $coupon_id, \WC_Coupon $coupon): void
 	{
-?>
+	?>
 		<div class="options_group">
 			<p class="form-field">
 				<label for="<?= self::ALLOWED_MEMBER_LV_FIELD_NAME ?>"><?php _e('允許的會員等級', Utils::SNAKE); ?></label>
@@ -96,12 +121,23 @@ final class Metabox
 		if (empty($coupon)) {
 			return;
 		}
-
+		$this->update_hide_this_coupon_field($coupon_id, $coupon);
 		$this->update_allowed_membership_field($coupon_id, $coupon);
 		$this->update_first_purchase_field($coupon_id, $coupon);
 		$this->update_min_quantity_field($coupon_id, $coupon);
 
 		$coupon->save();
+	}
+
+	private function update_hide_this_coupon_field(int $coupon_id, \WC_Coupon $coupon): void
+	{
+		$value = $_POST[self::HIDE_THIS_COUPON_FIELD_NAME] ?? '';
+
+		if ("yes" === $value) {
+			$coupon->update_meta_data(self::HIDE_THIS_COUPON_FIELD_NAME, $value);
+		} else {
+			$coupon->update_meta_data(self::HIDE_THIS_COUPON_FIELD_NAME, "no");
+		}
 	}
 
 	private function update_allowed_membership_field(int $coupon_id, \WC_Coupon $coupon): void
