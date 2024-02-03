@@ -15,20 +15,23 @@ final class View
 
 	public function __construct()
 	{
-		global $power_membership_settings;
+		\add_action('plugins_loaded', [$this, 'init'], 110);
+	}
 
-		if ($power_membership_settings[Settings::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME]) {
+	public function init(): void
+	{
+		global $power_plugins_settings;
+
+		if ($power_plugins_settings[Settings::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME]) {
 			\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 			\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
 			\add_filter('woocommerce_coupon_validate_minimum_amount', [$this, 'modify_minimum_amount_condition'], 200, 3);
 			\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_condition'], 200, 3);
 		}
 
-		if (!$power_membership_settings[Settings::ENABLE_SHOW_COUPON_FORM_FIELD_NAME]) {
+		if (!$power_plugins_settings[Settings::ENABLE_SHOW_COUPON_FORM_FIELD_NAME]) {
 			\add_action('init', [$this, 'remove_wc_coupon_form'], 20);
 		}
-
-		// \add_action('woocommerce_cart_calculate_fees', [$this, 'first_purchase_coupon']);
 	}
 
 	public function remove_wc_coupon_form(): void
@@ -52,8 +55,8 @@ final class View
 		<?php
 		$coupons = $this->get_valid_coupons(); //取得網站一般優惠
 		if (!empty($coupons)) :
-			global $power_membership_settings;
-			// var_dump($power_membership_settings);
+			global $power_plugins_settings;
+			// var_dump($power_plugins_settings);
 			$coupons = $this->sort_coupons($coupons);
 		?>
 			<div class="power-coupon">
@@ -166,7 +169,7 @@ final class View
 	 */
 	public function sort_coupons(array $available_coupons): array
 	{
-		global $power_membership_settings;
+		global $power_plugins_settings;
 
 
 
@@ -180,11 +183,11 @@ final class View
 		});
 
 		// 只保留前 N 個 further_coupons
-		$show_further_coupons_qty = $power_membership_settings[Settings::SHOW_FURTHER_COUPONS_QTY_FIELD_NAME] ?? 3;
+		$show_further_coupons_qty = $power_plugins_settings[Settings::SHOW_FURTHER_COUPONS_QTY_FIELD_NAME] ?? 3;
 		$sliced_further_coupons = array_slice($further_coupons, 0, $show_further_coupons_qty);
 
 		// 如果啟用只顯示最大折扣券
-		if ($power_membership_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
+		if ($power_plugins_settings[Settings::ENABLE_BIGGEST_COUPON_FIELD_NAME]) {
 			$result = array_merge([$available_coupons[0]], $sliced_further_coupons);
 		} else {
 			$result = array_merge($available_coupons, $sliced_further_coupons);
@@ -279,9 +282,9 @@ final class View
 
 	public function modify_minimum_amount_condition($not_valid, $coupon, $subtotal): bool
 	{
-		global $power_membership_settings;
+		global $power_plugins_settings;
 
-		if ($power_membership_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME] && $not_valid) {
+		if ($power_plugins_settings[Settings::ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME] && $not_valid) {
 			$this->further_coupons[] = $coupon;
 		}
 
@@ -294,3 +297,5 @@ final class View
 	// 	$cart->add_fee(__("首次消費折 {$discount} 元", Utils::TEXT_DOMAIN), -$discount);
 	// }
 }
+
+new View();

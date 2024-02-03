@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace J7\PowerMembership;
 
-require_once __DIR__ . '/admin/index.php';
-require_once __DIR__ . '/memberLv/index.php';
-require_once __DIR__ . '/woocommerce/index.php';
-
 use J7\PowerMembership\Utils;
 use J7\PowerMembership\MemberLv\Metabox;
 use J7\PowerMembership\Admin\Menu\Settings;
@@ -19,24 +15,15 @@ final class Bootstrap
 
 	public function __construct()
 	{
-		$this->init();
+		require_once __DIR__ . '/admin/index.php';
+		require_once __DIR__ . '/memberLv/index.php';
+		require_once __DIR__ . '/woocommerce/index.php';
+
 		\add_action('admin_enqueue_scripts', [$this, 'add_static_assets']);
 		\add_action('admin_head', [$this, 'add_tailwind_config'], 1000);
 	}
 
-	private function init()
-	{
-		new Admin\Menu\Settings();
-		new Admin\UI();
-		new Admin\Users\UserColumns();
-		new Admin\Users\UserEdit();
 
-		new MemberLv\Metabox();
-		new MemberLv\MembershipUpgrade();
-
-		new WooCommerce\Coupons\Metabox();
-		new WooCommerce\Coupons\View();
-	}
 
 	public function add_static_assets($hook): void
 	{
@@ -44,8 +31,8 @@ final class Bootstrap
 			return;
 		}
 
-		global $power_membership_settings;
-		$is_admin_ui_simple = $power_membership_settings[Settings::ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME];
+		global $power_plugins_settings;
+		$is_simple_admin = $power_plugins_settings[Settings::ENABLE_SIMPLE_ADMIN_FIELD_NAME];
 
 		$screen = \get_current_screen();
 
@@ -53,14 +40,14 @@ final class Bootstrap
 			\wp_enqueue_script('tailwindcss', 'https://cdn.tailwindcss.com', array(), '3.4.0');
 		}
 		if ('users.php' == $hook) {
-			if ($is_admin_ui_simple) {
+			if ($is_simple_admin) {
 				\wp_enqueue_script('users', Utils::get_plugin_url() . '/assets/js/admin-users.js', array(), Utils::get_plugin_ver(), [
 					'strategy' => 'async'
 				]);
 			}
 		}
 		if ('user-edit.php' == $hook || 'profile.php' == $hook) {
-			if ($is_admin_ui_simple) {
+			if ($is_simple_admin) {
 				\wp_enqueue_script('user-edit', Utils::get_plugin_url() . '/assets/js/admin-user-edit.js', array(), Utils::get_plugin_ver(), [
 					'strategy' => 'async'
 				]);

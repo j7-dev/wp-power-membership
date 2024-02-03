@@ -43,7 +43,7 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 			\register_activation_hook(__FILE__, [$this, 'activate']);
 			\register_deactivation_hook(__FILE__, [$this, 'deactivate']);
 			\add_action('tgmpa_register', [$this, 'register_required_plugins']);
-			\add_action('plugins_loaded', [$this, 'check_required_plugins']);
+			\add_action('plugins_loaded', [$this, 'check_required_plugins'], 50);
 
 			$this->plugin_update_checker();
 		}
@@ -101,6 +101,7 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 					'slug'     => 'wp-toolkit',
 					'source'   => 'https://github.com/j7-dev/wp-toolkit/releases/latest/download/wp-toolkit.zip',
 					'required' => true,
+					'version'  => '0.3.1',
 				],
 			];
 

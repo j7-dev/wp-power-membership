@@ -215,3 +215,5 @@ final class UserColumns
 		}
 	}
 }
+
+new UserColumns();

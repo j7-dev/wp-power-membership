@@ -16,9 +16,14 @@ final class UI
 {
 	public function __construct()
 	{
-		global $power_membership_settings;
+		\add_action('plugins_loaded', [$this, 'init'], 110);
+	}
 
-		if ($power_membership_settings[Settings::ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME]) {
+	public function init(): void
+	{
+		global $power_plugins_settings;
+
+		if ($power_plugins_settings[Settings::ENABLE_SIMPLE_ADMIN_FIELD_NAME]) {
 			\add_action('admin_init', [$this, 'remove_gamipress_admin_notices'], 10);
 			\add_action('admin_menu', [$this, 'menu_page'], 10);
 			\add_action('admin_head', [$this, 'remove_metabox'], 200);
@@ -61,3 +66,5 @@ final class UI
 		// \remove_meta_box('gamipress-wc-product-points', 'product', 'side');
 	}
 }
+
+new UI();

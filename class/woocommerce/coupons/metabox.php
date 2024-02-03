@@ -166,3 +166,5 @@ final class Metabox
 		}
 	}
 }
+
+new Metabox();

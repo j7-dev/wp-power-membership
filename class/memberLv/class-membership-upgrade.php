@@ -72,3 +72,5 @@ final class MembershipUpgrade
 		$result = $wpdb->query($query);
 	}
 }
+
+new MembershipUpgrade();

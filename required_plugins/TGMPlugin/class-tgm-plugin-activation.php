@@ -268,11 +268,11 @@ if (!class_exists('TGM_Plugin_Activation')) {
 			 * {@internal IMPORTANT! If this code changes, review the regex in the custom TGMPA
 			 * generator on the website.}}
 			 */
-			add_action('init', array($this, 'load_textdomain'), 5);
+			add_action('plugins_loaded', array($this, 'load_textdomain'), 15);
 			add_filter('load_textdomain_mofile', array($this, 'overload_textdomain_mofile'), 10, 2);
 
 			// When the rest of WP has loaded, kick-start the rest of the class.
-			add_action('init', array($this, 'init'));
+			add_action('plugins_loaded', array($this, 'init'), 20);
 		}
 
 		/**
