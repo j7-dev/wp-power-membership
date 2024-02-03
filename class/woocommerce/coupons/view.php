@@ -15,7 +15,7 @@ final class View
 
 	public function __construct()
 	{
-		\add_action('plugins_loaded', [$this, 'init'], 110);
+		\add_action('setup_theme', [$this, 'init'], 110);
 	}
 
 	public function init(): void

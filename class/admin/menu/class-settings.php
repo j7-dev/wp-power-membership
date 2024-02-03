@@ -18,11 +18,11 @@ class Settings extends PowerPlugins
 
 	public function __construct()
 	{
-		$this->set_sections();
+		\add_action('setup_theme', [$this, 'set_sections'], 10);
 		parent::__construct();
 	}
 
-	private function set_sections(): void
+	public function set_sections(): void
 	{
 		$this->sections[] = [
 			'title'            => Utils::APP_NAME,
