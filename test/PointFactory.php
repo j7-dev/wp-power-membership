@@ -1,6 +1,6 @@
 <?php
 /**
- * PointBase class
+ * PointFactory class
  * 能輕鬆創建點數
  *
  * @package J7\WpUtils
@@ -8,9 +8,9 @@
 
 namespace J7\WpUtils\Classes;
 
-use J7\WpUtils\Classes\LogBase;
+use J7\WpUtils\Classes\LogFactory;
 
-if ( class_exists( 'PointBase' ) ) {
+if ( class_exists( 'PointFactory' ) ) {
 	return;
 }
 
@@ -18,28 +18,29 @@ if ( class_exists( 'PointBase' ) ) {
 /**
  * Class Point
  */
-abstract class PointBase {
+final class PointFactory {
 	/**
 	 * Points slug
 	 *
 	 * @var string
 	 */
-	public $points_slug;
+	public $point_slug;
 
 	/**
 	 * Log instance
 	 *
-	 * @var LogBase
+	 * @var LogFactory
 	 */
 	public $log_instance;
 
 	/**
 	 * Constructor
 	 *
-	 * @param string $points_slug  Points slug
+	 * @param string     $point_slug  Points slug
+	 * @param LogFactory $log_instance Log instance
 	 */
-	public function __construct( string $points_slug, LogBase $log_instance ) {
-		$this->points_slug  = $points_slug;
+	public function __construct( string $point_slug, LogFactory $log_instance ) {
+		$this->point_slug   = $point_slug;
 		$this->log_instance = $log_instance;
 	}
 
@@ -62,8 +63,8 @@ abstract class PointBase {
 		if ( ! $user_id ) {
 			$user_id = \get_current_user_id();
 		}
-		$points_slug    = $this->points_slug;
-		$current_points = (float) \get_user_meta( $user_id, $points_slug, true );
+		$point_slug     = $this->point_slug;
+		$current_points = (float) \get_user_meta( $user_id, $point_slug, true );
 		$points         = $current_points + $points;
 
 		return $this->update_user_points( $user_id, $args, $points );
@@ -87,8 +88,8 @@ abstract class PointBase {
 		if ( ! $user_id ) {
 			$user_id = \get_current_user_id();
 		}
-		$points_slug    = $this->points_slug;
-		$current_points = (float) \get_user_meta( $user_id, $points_slug, true );
+		$point_slug     = $this->point_slug;
+		$current_points = (float) \get_user_meta( $user_id, $point_slug, true );
 		$points         = $current_points + $points;
 
 		return $this->update_user_points( $user_id, $args, $points );
@@ -120,13 +121,13 @@ abstract class PointBase {
 			$user_id = \get_current_user_id();
 		}
 
-		$points_slug = $this->points_slug;
+		$point_slug = $this->point_slug;
 
-		$before_points = (float) \get_user_meta( $user_id, $points_slug, true );
+		$before_points = (float) \get_user_meta( $user_id, $point_slug, true );
 		$after_points  = $points;
 		$point_changed = $after_points - $before_points;
 
-		\update_user_meta( $user_id, $points_slug, $points );
+		\update_user_meta( $user_id, $point_slug, $points );
 		$args['new_balance']   = $points;
 		$args['point_changed'] = $point_changed;
 
@@ -144,6 +145,6 @@ abstract class PointBase {
 	 * @return void
 	 */
 	public function create_user_log( $user_id = 0, $args = array(), $points = 0 ) {
-		$this->log_instance->insert_user_log( $user_id, $args, $points, $this->points_slug );
+		$this->log_instance->insert_user_log( $user_id, $args, $points, $this->point_slug );
 	}
 }

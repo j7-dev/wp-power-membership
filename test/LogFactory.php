@@ -1,23 +1,21 @@
 <?php
 /**
- * LogBase class
+ * LogFactory class
  * 能輕鬆創建 & 操作 log table
- *
- * TODO logo meta table
  *
  * @package J7\WpUtils
  */
 
 namespace J7\WpUtils\Classes;
 
-if ( class_exists( 'LogBase' ) ) {
+if ( class_exists( 'LogFactory' ) ) {
 	return;
 }
 
 /**
- * Class LogBase
+ * Class LogFactory
  */
-abstract class LogBase {
+abstract class LogFactory {
 
 	/**
 	 * Log table name
@@ -202,50 +200,6 @@ abstract class LogBase {
 			if ( ! $result ) {
 				throw new \WP_Error( 'insert_log_error', '插入 LOG 失敗' );
 			}
-		} catch ( \Throwable $th ) {
-			throw new \Exception( $th->getMessage() );
-		}
-	}
-
-	/**
-	 * Create database log table
-	 *
-	 * @return void
-	 * @throws \Exception Exception.
-	 */
-	protected function create_table() {
-		$this->create_table_command();
-	}
-
-	/**
-	 * Create database log table
-	 *
-	 * @return void
-	 * @throws \Exception Exception.
-	 */
-	private function create_table_command() {
-		try {
-			global $wpdb;
-
-			$table_name = $wpdb->prefix . $this->table_name;
-
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (
-									id mediumint(9) NOT NULL AUTO_INCREMENT,
-									title text NOT NULL,
-									type tinytext NOT NULL,
-									user_id bigint(20) NOT NULL,
-									point_slug tinytext NOT NULL,
-									point_changed tinytext NOT NULL,
-									new_balance tinytext NOT NULL,
-									modified_by bigint(20) NOT NULL,
-									date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-									PRIMARY KEY  (id)
-							) $charset_collate;";
-
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-			$result = \dbDelta( $sql );
 		} catch ( \Throwable $th ) {
 			throw new \Exception( $th->getMessage() );
 		}
