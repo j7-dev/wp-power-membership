@@ -1,0 +1,36 @@
+{
+  "name": "j7-dev/power-membership",
+  "description": "This is a boilerplate for creating a WordPress plugin with vite",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-only",
+  "authors": [
+    {
+      "name": "JerryLiu",
+      "email": "j7.dev.gg@gmail.com",
+      "homepage": "https://github.com/j7-dev",
+      "role": "Developer"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    }
+  ],
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "@stable",
+    "wp-coding-standards/wpcs": "@stable",
+    "dealerdirect/phpcodesniffer-composer-installer": "@stable"
+  },
+  "scripts": {
+    "lint": "phpcs"
+  },
+  "require": {
+    "j7-dev/wp-utils": "0.0.14"
+  }
+}
