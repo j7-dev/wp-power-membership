@@ -17,6 +17,8 @@ final class Init {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
 	const POST_TYPE = 'member_lv';
+	// 存 timestamp 秒 10位數
+	const MEMBER_LV_EARNED_TIME_META_KEY = self::POST_TYPE . '_earned_time';
 
 	/**
 	 * Default member_lv id
@@ -31,7 +33,7 @@ final class Init {
 	public function __construct() {
 		\add_action( 'init', array( $this, 'init' ), 30 );
 		\add_action( 'admin_menu', array( $this, 'menu_page' ), 10 );
-		\add_action( 'save_post_' . self::POST_TYPE, array( $this, 'delete_transient', 100, 3 ) );
+		\add_action( 'save_post_' . self::POST_TYPE, array( $this, 'delete_transient' ), 100, 3 );
 	}
 
 	/**
@@ -52,7 +54,7 @@ final class Init {
 	private function create_default_member_lv(): void {
 		$post_type = self::POST_TYPE;
 
-		$slug = 'default';
+		$slug = 'default_member_lv';
 
 		$page = \get_page_by_path( $slug, OBJECT, $post_type );
 		if ( $page ) {
@@ -91,10 +93,10 @@ final class Init {
 		//phpcs:enable
 
 		foreach ( $user_ids as $user_id ) {
-			$member_lv = \get_user_meta( $user_id, Base::CURRENT_MEMBER_LV_META_KEY );
+			$member_lv = \get_user_meta( $user_id, MemberLvInit::POST_TYPE );
 			if ( empty( $member_lv ) ) {
-				\update_user_meta( $user_id, Base::CURRENT_MEMBER_LV_META_KEY, $default_member_lv_id );
-				\update_user_meta( $user_id, Base::MEMBER_LV_EARNED_TIME_META_KEY, time() );
+				\update_user_meta( $user_id, MemberLvInit::POST_TYPE, $default_member_lv_id );
+				\update_user_meta( $user_id, MemberLvInit::MEMBER_LV_EARNED_TIME_META_KEY, time() );
 			}
 		}
 	}

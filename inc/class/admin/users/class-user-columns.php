@@ -71,7 +71,7 @@ final class UserColumns {
 	private function count_users_by_member_lv(): array {
 		global $wpdb;
 		$table_name               = $wpdb->prefix . 'usermeta';
-		$meta_key                 = Base::CURRENT_MEMBER_LV_META_KEY;
+		$meta_key                 = MemberLvInit::POST_TYPE;
 		$user_amount_by_member_lv = array();
 
 		$member_lvs = \get_posts(
@@ -127,9 +127,9 @@ final class UserColumns {
 	 */
 	public function set_users_column_titles( $columns ): array {
 		// $columns['user_id'] = 'User ID';
-		$order                                = ( @$_REQUEST['ts_all'] == 'DESC' ) ? 'ASC' : 'DESC';
+		$order                              = ( @$_REQUEST['ts_all'] == 'DESC' ) ? 'ASC' : 'DESC';
 		$columns[ MemberLvInit::POST_TYPE ] = '會員等級';
-		$columns['total_order_amount']        = "<a title='用戶註冊後至今累積總消費金額' href='?ts_all={$order}'>全部</a>";
+		$columns['total_order_amount']      = "<a title='用戶註冊後至今累積總消費金額' href='?ts_all={$order}'>全部</a>";
 
 		for ( $i = 0; $i < $this->order_history; $i++ ) {
 			$order    = ( @$_REQUEST[ "ts{$i}" ] == 'DESC' ) ? 'ASC' : 'DESC';
@@ -198,7 +198,7 @@ final class UserColumns {
 		if ( $column_name === MemberLvInit::POST_TYPE ) {
 			$value = '';
 
-			$member_lv_id = \get_user_meta( $user_id, Base::CURRENT_MEMBER_LV_META_KEY, true );
+			$member_lv_id = \get_user_meta( $user_id, MemberLvInit::POST_TYPE, true );
 
 			$value = \get_the_title( $member_lv_id );
 			return $value;
@@ -260,7 +260,7 @@ final class UserColumns {
 				$value      = $_GET[ MemberLvInit::POST_TYPE ];
 				$meta_query = array(
 					array(
-						'key'     => Base::CURRENT_MEMBER_LV_META_KEY,
+						'key'     => MemberLvInit::POST_TYPE,
 						'value'   => $value,
 						'compare' => '=',
 					),

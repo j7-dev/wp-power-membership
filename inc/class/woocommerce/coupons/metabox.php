@@ -9,6 +9,7 @@ namespace J7\PowerMembership\WooCommerce\Coupons;
 
 use J7\PowerMembership\Plugin;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
+use J7\PowerMembership\Resources\MemberLv\Utils as MemberLvUtils;
 
 /**
  * Class Metabox
@@ -74,6 +75,7 @@ final class Metabox {
 	 */
 	public function add_restriction_fields( int $coupon_id, \WC_Coupon $coupon ): void {
 		$this->render_allowed_membership_field( $coupon_id, $coupon );
+
 		$this->render_first_purchase_field( $coupon_id, $coupon );
 		$this->render_min_quantity_field( $coupon_id, $coupon );
 	}
@@ -93,20 +95,16 @@ final class Metabox {
 		?>
 		<div class="options_group">
 			<p class="form-field">
-				<label for="<?php echo self::ALLOWED_MEMBER_LV_FIELD_NAME; ?>"><?php _e( '允許的會員等級', Plugin::$snake ); ?></label>
+				<label for="<?php echo self::ALLOWED_MEMBER_LV_FIELD_NAME; ?>"><?php \_e( '允許的會員等級', Plugin::$snake ); ?></label>
 				<select id="<?php echo self::ALLOWED_MEMBER_LV_FIELD_NAME; ?>" name="<?php echo self::ALLOWED_MEMBER_LV_FIELD_NAME . '[]'; ?>" style="width: 50%;" class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( '無須會員等級', Plugin::$snake ); ?>">
 		<?php
-		$member_lvs    = gamipress_get_ranks(
-			[
-				'post_type' => MemberLvInit::POST_TYPE,
-			]
-		);
+		$member_lvs    = MemberLvUtils::get_member_lvs();
 		$member_lv_ids = $coupon->get_meta( self::ALLOWED_MEMBER_LV_FIELD_NAME );
 		$member_lv_ids = is_array( $member_lv_ids ) ? $member_lv_ids : [];
 
 		if ( $member_lvs ) {
 			foreach ( $member_lvs as $member_lv ) {
-				echo '<option value="' . esc_attr( $member_lv->ID ) . '"' . wc_selected( $member_lv->ID, $member_lv_ids ) . '>' . esc_html( $member_lv->post_title ) . '</option>';
+				echo '<option value="' . \esc_attr( $member_lv['id'] ) . '"' . \wc_selected( $member_lv['id'], $member_lv_ids ) . '>' . \esc_html( $member_lv['name'] ) . '</option>';
 			}
 		}
 		?>

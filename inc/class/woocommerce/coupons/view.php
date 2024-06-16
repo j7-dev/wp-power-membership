@@ -202,7 +202,7 @@ final class View {
 		$allowed_membership_ids = $coupon->get_meta( Metabox::ALLOWED_MEMBER_LV_FIELD_NAME );
 		$allowed_membership_ids = is_array( $allowed_membership_ids ) ? $allowed_membership_ids : array();
 		$user_id                = \get_current_user_id();
-		$user_member_lv_id      = \get_user_meta( $user_id, Base::CURRENT_MEMBER_LV_META_KEY, true );
+		$user_member_lv_id      = \get_user_meta( $user_id, MemberLvInit::POST_TYPE, true );
 		if ( in_array( $user_member_lv_id, $allowed_membership_ids ) ) {
 			return true;
 		}

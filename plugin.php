@@ -19,16 +19,16 @@ declare (strict_types = 1);
 
 namespace J7\PowerMembership;
 
-use J7\WpUtils\Classes\LogFactory;
-use J7\WpUtils\Classes\PointFactory;
+use J7\WpUtils\Classes\WPULogUtils;
+use J7\WpUtils\Classes\WPUPointUtils;
 
 if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 	require_once __DIR__ . '/vendor/autoload.php';
 
-	// DELETE
-	require_once __DIR__ . '/test/LogTableCreationTrait.php';
-	require_once __DIR__ . '/test/LogFactory.php';
-	require_once __DIR__ . '/test/PointFactory.php';
+	// // DELETE
+	// require_once __DIR__ . '/test/LogTableCreationTrait.php';
+	// require_once __DIR__ . '/test/WPULogUtils.php';
+	// require_once __DIR__ . '/test/WPUPointUtils.php';
 
 
 	/**
@@ -37,33 +37,33 @@ if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 	final class Plugin {
 		use \J7\WpUtils\Traits\PluginTrait;
 		use \J7\WpUtils\Traits\SingletonTrait;
-		use \J7\WpUtils\Classes\LogTableCreationTrait;
+		use \J7\WpUtils\Traits\LogTableCreationTrait;
 
 		const LOG_TABLE_NAME = 'power_logs';
 		const POINT_SLUG     = 'pm_points';
 
 
 		/**
-		 * Log instance
+		 * Log Utils instance
 		 *
-		 * @var LogFactory
+		 * @var WPULogUtils
 		 */
-		public LogFactory $log_instance;
+		public WPULogUtils $log_utils_instance;
 
 		/**
-		 * Point instance
+		 * Point Utils instance
 		 *
-		 * @var PointFactory
+		 * @var WPUPointUtils
 		 */
-		public PointFactory $point_instance;
+		public WPUPointUtils $point_utils_instance;
 
 		/**
 		 * Constructor
 		 */
 		public function __construct() {
-			$this->log_instance   = new LogFactory( table_name: self::LOG_TABLE_NAME );
-			$this->point_instance = new PointFactory( point_slug: self::POINT_SLUG, log_instance: $this->log_instance );
-
+			$this->log_utils_instance   = new WPULogUtils( table_name: self::LOG_TABLE_NAME );
+			$this->point_utils_instance = new WPUPointUtils();
+			$this->point_utils_instance->init( $this->log_utils_instance );
 			require_once __DIR__ . '/inc/class/class-bootstrap.php';
 
 			$this->required_plugins = array(

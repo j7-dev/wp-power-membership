@@ -17,17 +17,6 @@ abstract class Base {
 	const CACHE_TIME    = 24 * HOUR_IN_SECONDS;
 
 	/**
-	 * 處理會員升級相關邏輯
-	 * _gamipress_member_lv_rank: 1026 (會員等級的 post id)
-	 * _gamipress_member_lv_previous_rank: 1020 (會員等級的 post id)
-	 * _gamipress_member_lv_rank_earned_time: 1704704213 (秒)
-	 */
-
-	const CURRENT_MEMBER_LV_META_KEY = MemberLvInit::POST_TYPE;
-	// 存 timestamp 秒 10位數
-	const MEMBER_LV_EARNED_TIME_META_KEY = MemberLvInit::POST_TYPE . '_earned_time';
-
-	/**
 	 * 取得客戶訂單資料
 	 * 時間參考
 	 *

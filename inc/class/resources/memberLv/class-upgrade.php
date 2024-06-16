@@ -73,7 +73,7 @@ final class Upgrade {
 		$next_member_lv_threshold = (int) $next_member_lv['threshold'];
 
 		if ( $acc_amount >= $next_member_lv_threshold ) {
-			\update_user_meta( $customer_id, Base::CURRENT_MEMBER_LV_META_KEY, $next_member_lv_id );
+			\update_user_meta( $customer_id, MemberLvInit::POST_TYPE, $next_member_lv_id );
 		}
 	}
 
@@ -86,7 +86,7 @@ final class Upgrade {
 	 * @return void
 	 */
 	public function remove_user_member_lv( int $post_id, \WP_Post $post, string $old_status ): void {
-		$meta_key   = Base::CURRENT_MEMBER_LV_META_KEY;
+		$meta_key   = MemberLvInit::POST_TYPE;
 		$meta_value = $post_id;
 
 		$prev_member_lv = Utils::get_prev_member_lv_by( 'member_lv_id', $post_id );

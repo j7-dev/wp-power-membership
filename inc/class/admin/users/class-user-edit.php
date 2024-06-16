@@ -14,12 +14,17 @@ namespace J7\PowerMembership\Admin\Users;
 
 use J7\PowerMembership\Utils\Base;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
+use J7\PowerMembership\Plugin;
+
 
 /**
  * Class UserEdit
  */
 final class UserEdit {
 	use \J7\WpUtils\Traits\SingletonTrait;
+
+	const REASON_FIELD_NAME = 'pm_reason';
+
 
 	/**
 	 * Constructor
@@ -40,7 +45,7 @@ final class UserEdit {
 	public function add_fields( \WP_User $user ): void {
 		$user_id = $user->ID;
 
-		$member_lv_earned_time = \get_user_meta( $user_id, Base::MEMBER_LV_EARNED_TIME_META_KEY, true );
+		$member_lv_earned_time = \get_user_meta( $user_id, MemberLvInit::MEMBER_LV_EARNED_TIME_META_KEY, true );
 		$member_lv_earned_time = $member_lv_earned_time ? gmdate( 'Y-m-d H:i:s', $member_lv_earned_time + 8 * 3600 ) : '-';
 
 		$args       = array(
@@ -57,7 +62,7 @@ final class UserEdit {
 
 		$user_registered = gmdate( 'Y-m-d H:i:s', strtotime( $user->user_registered ) + 8 * 3600 );
 
-		$user_member_lv_id = \get_user_meta( $user_id, Base::CURRENT_MEMBER_LV_META_KEY, true );
+		$user_member_lv_id = \get_user_meta( $user_id, MemberLvInit::POST_TYPE, true );
 		// TODO
 		$birthday = \get_user_meta( $user_id, 'birthday', true );
 
@@ -71,10 +76,13 @@ final class UserEdit {
 			)
 		);
 
-		if ( ! ! $member_lvs ) {
+		if ( ! $member_lvs ) {
 			echo '<p>請先建立會員等級</p>';
 			return;
 		}
+
+		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+
 //phpcs:disable
 		?>
 		<h2>自訂欄位</h2>
@@ -124,6 +132,54 @@ final class UserEdit {
 					</td>
 				</tr>
 
+
+<?php foreach($all_points as $point):
+			$user_points = (float) \get_user_meta( $user_id, $point->slug, true );
+			?>
+			<tr>
+				<th><label for="<?php echo $point->slug; // phpcs:ignore ?>"><?php echo '直接修改' . $point->name; // phpcs:ignore ?></label></th>
+				<td>
+				<?php
+				\woocommerce_wp_text_input(
+					array(
+						'id'          => $point->slug,
+						'style'       => 'width:25rem;',
+						'class' => 'show',
+						'label'       => '',
+						'type'        => 'number',
+						'value'       => $user_points,
+						'data_type'   => 'decimal',
+						'placeholder' => '',
+					)
+				);
+				?>
+					<p>目前用戶有 <?php echo $point->name; // phpcs:ignore ?> 數量:
+				<?php echo number_format( $user_points, 2 ); ?></p>
+				</td>
+			</tr>
+
+			<tr id="<?php echo $point->slug . '_reason'; // phpcs:ignore ?>">
+				<th><label for="<?php echo $point->slug . '_reason'; // phpcs:ignore ?>"><?php echo $point->name; // phpcs:ignore ?>調整原因</label></th>
+				<td>
+				<?php
+				\woocommerce_wp_textarea_input(
+					array(
+				'id'          => $point->slug . '_reason',
+				'style'       => 'width:25rem;',
+				'class' => 'show',
+				'label'       => '',
+				'value'       => '',
+				'placeholder' => '',
+				'rows'        => 5,
+					)
+				);
+				?>
+				</td>
+			</tr>
+
+					<?php endforeach; ?>
+
+
 			</tbody>
 		</table>
 
@@ -160,9 +216,31 @@ final class UserEdit {
 
 		//phpcs:disable
 		if ( isset( $_POST[ MemberLvInit::POST_TYPE ] ) ) {
-			\update_user_meta( $user_id, Base::CURRENT_MEMBER_LV_META_KEY, $_POST[ MemberLvInit::POST_TYPE ] );
-			\update_user_meta( $user_id, Base::MEMBER_LV_EARNED_TIME_META_KEY, time() );
+			\update_user_meta( $user_id, MemberLvInit::POST_TYPE, $_POST[ MemberLvInit::POST_TYPE ] );
+			\update_user_meta( $user_id, MemberLvInit::MEMBER_LV_EARNED_TIME_META_KEY, time() );
 		}
+
+		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+
+		foreach ( $all_points as $point ) {
+			if ( isset( $_POST[ $point->slug ] ) ) {
+				$points = (float) $_POST[ $point->slug ];
+				$reason = $_POST[ $point->slug . '_reason' ] ?? '';
+				$reason = \sanitize_text_field( $reason );
+
+				$point->update_user_points(
+					$user_id,
+					array(
+						'title' => '[手動修改] ' . $reason,
+						'type'  => 'manual',
+					) ,
+					$points
+				);
+
+
+			}
+		}
+
 		//phpcs:enabled
 	}
 }

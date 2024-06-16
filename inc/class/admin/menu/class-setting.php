@@ -16,11 +16,13 @@ use J7\WpToolkit\PowerPlugins;
 final class Setting {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
-	const ENABLE_BIGGEST_COUPON_FIELD_NAME         = 'pm_biggest_coupon';
-	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME   = 'pm_show_further_coupons';
-	const SHOW_FURTHER_COUPONS_QTY_FIELD_NAME      = 'pm_show_further_coupons_qty';
-	const ENABLE_SHOW_COUPON_FORM_FIELD_NAME       = 'pm_show_coupon_form';
-	const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME = 'pm_show_available_coupons';
+	const ENABLE_BIGGEST_COUPON_FIELD_NAME             = 'pm_biggest_coupon';
+	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME       = 'pm_show_further_coupons';
+	const SHOW_FURTHER_COUPONS_QTY_FIELD_NAME          = 'pm_show_further_coupons_qty';
+	const ENABLE_SHOW_COUPON_FORM_FIELD_NAME           = 'pm_show_coupon_form';
+	const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME     = 'pm_show_available_coupons';
+	const REWARD_POINTS_AFTER_USER_REGISTER_FIELD_NAME = 'pm_reward_points_after_user_register';
+
 
 	/**
 	 * Constructor
@@ -94,6 +96,15 @@ final class Setting {
 					'attributes' => array(
 						'min' => 0,
 						'max' => 30,
+					),
+				),
+				array(
+					'id'         => self::REWARD_POINTS_AFTER_USER_REGISTER_FIELD_NAME,
+					'type'       => 'number',
+					'title'      => \esc_html__( '註冊會員完成就送購物金', 'power-membership' ),
+					'default'    => 0,
+					'attributes' => array(
+						'min' => 0,
 					),
 				),
 			),

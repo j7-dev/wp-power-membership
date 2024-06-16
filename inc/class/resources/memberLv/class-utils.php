@@ -20,6 +20,10 @@ abstract class Utils {
 	 * 取得所有的會員等級，按照 menu_order 排序
 	 *
 	 * @return array
+	 * - id: int
+	 * - name: string
+	 * - threshold: int
+	 * - order: int
 	 */
 	public static function get_member_lvs(): array {
 		$member_lvs = \get_transient( self::MEMBER_LVS_BY_ORDER_TRANSIENT_KEY );
@@ -61,7 +65,7 @@ abstract class Utils {
 
 		switch ( $field ) {
 			case 'user_id':
-				$member_lv_id      = \get_user_meta( $value, Base::CURRENT_MEMBER_LV_META_KEY, true );
+				$member_lv_id      = \get_user_meta( $value, MemberLvInit::POST_TYPE, true );
 				$current_member_lv = self::get_member_lv( (int) $member_lv_id, $member_lvs );
 				break;
 			case 'member_lv_id':
@@ -107,7 +111,7 @@ abstract class Utils {
 
 		switch ( $field ) {
 			case 'user_id':
-				$member_lv_id   = \get_user_meta( $value, Base::CURRENT_MEMBER_LV_META_KEY, true );
+				$member_lv_id   = \get_user_meta( $value, MemberLvInit::POST_TYPE, true );
 				$next_member_lv = self::get_next_member_lv( (int) $member_lv_id, $member_lvs );
 				break;
 			case 'member_lv_id':
@@ -166,7 +170,7 @@ abstract class Utils {
 
 		switch ( $field ) {
 			case 'user_id':
-				$member_lv_id   = \get_user_meta( $value, Base::CURRENT_MEMBER_LV_META_KEY, true );
+				$member_lv_id   = \get_user_meta( $value, MemberLvInit::POST_TYPE, true );
 				$prev_member_lv = self::get_prev_member_lv( (int) $member_lv_id, $member_lvs );
 				break;
 			case 'member_lv_id':
