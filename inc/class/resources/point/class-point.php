@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace J7\PowerMembership\Resources\Point;
 
 use J7\PowerMembership\Plugin;
-use J7\WpUtils\Classes\WPUPointUtils;
-use J7\PowerMembership\Resources\MemberLv\Metabox;
+use J7\WpUtils\Classes\WPUPoint;
+use J7\PowerMembership\Resources\Point\Metabox;
 use J7\PowerMembership\Resources\MemberLv\Utils;
 
 
@@ -101,8 +101,7 @@ final class Point {
 				continue;
 			}
 
-			// TODO $allow_bday_reward = allow_bday_reward( $user_id );
-			$allow_bday_reward = true;
+			$allow_bday_reward = self::allow_bday_reward( $user_id, $point );
 
 			if ( $allow_bday_reward ) {
 				// Award the points to the user
@@ -115,12 +114,37 @@ final class Point {
 					$award_points
 				);
 
-				\update_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', date( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
+				\update_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
 
 			}
 			// else 不發放生日禮金
 
 		}
+	}
+
+	/**
+	 * Allow birthday reward
+	 *
+	 * @param int      $user_id - user id
+	 * @param WPUPoint $point - point
+	 * @return bool
+	 */
+	public static function allow_bday_reward( int $user_id, WPUPoint $point ): bool {
+		$last_awarded_on = \get_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', true );
+		if ( ! $last_awarded_on ) {
+			return true;
+		}
+
+		$last_awarded_on = strtotime( $last_awarded_on );
+		$today           = strtotime( gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
+
+		$diff = $today - $last_awarded_on;
+
+		$days = $diff / ( 60 * 60 * 24 );
+
+		$allow = $days >= 330; // 365天後才能再次發放，太嚴格，這邊只抓330天，避免有人調整天數盜領點數
+
+		return $allow;
 	}
 }
 

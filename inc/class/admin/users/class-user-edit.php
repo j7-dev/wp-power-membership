@@ -14,6 +14,7 @@ namespace J7\PowerMembership\Admin\Users;
 
 use J7\PowerMembership\Utils\Base;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
+use J7\PowerMembership\Resources\MemberLv\Utils;
 use J7\PowerMembership\Plugin;
 
 
@@ -65,24 +66,10 @@ final class UserEdit {
 
 		$user_registered = gmdate( 'Y-m-d H:i:s', strtotime( $user->user_registered ) + 8 * 3600 );
 
-		$user_member_lv_id = \get_user_meta( $user_id, MemberLvInit::POST_TYPE, true );
-
 		$birthday = \get_user_meta( $user_id, self::BDAY_FIELD_NAME, true );
 
-		$member_lvs = \get_posts(
-			array(
-				'post_type'      => MemberLvInit::POST_TYPE,
-				'posts_per_page' => -1,
-				'post_status'    => 'publish',
-				'orderby'        => 'menu_order',
-				'order'          => 'ASC',
-			)
-		);
-
-		if ( ! $member_lvs ) {
-			echo '<p>請先建立會員等級</p>';
-			return;
-		}
+		$member_lvs     = Utils::get_member_lvs();
+		$user_member_lv = Utils::get_member_lv_by( 'user_id', $user_id );
 
 		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
 
@@ -96,13 +83,13 @@ final class UserEdit {
 						<label for="<?php echo MemberLvInit::POST_TYPE; ?>">會員等級</label>
 					</th>
 					<td>
-						<select name="<?php echo MemberLvInit::POST_TYPE; ?>" id="<?php echo MemberLvInit::POST_TYPE; ?>" class="regular-text" value="<?php echo $user_member_lv_id; ?>">
+						<select name="<?php echo MemberLvInit::POST_TYPE; ?>" id="<?php echo MemberLvInit::POST_TYPE; ?>" class="regular-text" value="<?php echo $user_member_lv?->id; ?>">
 							<option value="">請選擇</option>
 		<?php
 
 		foreach ( $member_lvs as $member_lv ) {
-			$selected = ( $user_member_lv_id === $member_lv->ID ) ? 'selected' : '';
-			echo '<option value="' . $member_lv->ID . '" ' . $selected . '>' . $member_lv->post_title . '</option>';
+			$selected = ( $user_member_lv?->id === $member_lv?->id ) ? 'selected' : '';
+			echo '<option value="' . $member_lv->id . '" ' . $selected . '>' . $member_lv->name . '</option>';
 		}
 		?>
 						</select>
@@ -227,9 +214,6 @@ final class UserEdit {
 		}
 
 		//phpcs:disable
-		ob_start();
-		var_dump($_POST[ MemberLvInit::POST_TYPE ]);
-		\J7\WpUtils\Classes\Log::info('' . ob_get_clean());
 		if ( isset( $_POST[ MemberLvInit::POST_TYPE ] ) ) {
 			\update_user_meta( $user_id, MemberLvInit::POST_TYPE, \sanitize_text_field($_POST[ MemberLvInit::POST_TYPE ]) );
 			\update_user_meta( $user_id, MemberLvInit::MEMBER_LV_EARNED_TIME_META_KEY, time() );
@@ -237,8 +221,6 @@ final class UserEdit {
 		if ( isset( $_POST[ self::BDAY_FIELD_NAME ] ) ) {
 			\update_user_meta( $user_id, self::BDAY_FIELD_NAME, \sanitize_text_field($_POST[ self::BDAY_FIELD_NAME ]) );
 		}
-
-
 
 		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
 
