@@ -18,13 +18,15 @@ final class Metabox {
 
 	const ACTION = 'pm_metabox';
 	// 會員升級金額門檻
-	const THRESHOLD_META_KEY = 'pm_threshold';
+	const THRESHOLD_META_KEY                = 'pm_threshold';
+	const AWARD_POINTS_USER_BDAY_FIELD_NAME = 'pm_award_points_user_birthday';
+
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		\add_action( 'add_meta_boxes', array( $this, 'add_metabox' ), 10 );
+		\add_action( 'add_meta_boxes', array( $this, 'add_metabox' ), 10, 2 );
 		\add_action( 'save_post', array( $this, 'save_metabox' ), 10, 2 );
 	}
 
@@ -33,15 +35,30 @@ final class Metabox {
 	 *
 	 * @return void
 	 */
-	public function add_metabox(): void {
+	public function add_metabox( string $post_type, \WP_Post $post ): void {
 		\add_meta_box(
 			Plugin::$snake . '_metabox',
-			'會員升級門檻',
+			'設定',
 			array( $this, 'render_metabox' ),
 			MemberLvInit::POST_TYPE,
 			'normal',
 			'high'
 		);
+
+		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+
+		foreach ( $all_points as $point ) {
+			\add_meta_box(
+				Plugin::$snake . '_point_' . $point->slug . '_metabox',
+				$point->name . '設定',
+				function () use ( $post, $point ) {
+					$this->render_point_metabox( $post, $point );
+				},
+				MemberLvInit::POST_TYPE,
+				'normal',
+				'low'
+			);
+		}
 	}
 
 	/**
@@ -51,17 +68,60 @@ final class Metabox {
 	 * @return void
 	 */
 	public function render_metabox( $post ): void {
-		$threshold = \get_post_meta( $post->ID, self::THRESHOLD_META_KEY, true );
-		$threshold = ! ! $threshold ? 0 : (int) $threshold;
+
+		$basic_fields = array(
+			array(
+				'label' => '會員累積消費升級門檻(NT$)',
+				'name'  => self::THRESHOLD_META_KEY,
+			),
+			array(
+				// TODO
+				'label' => '🚧會員等級到期時間',
+				'name'  => 'pm_expire_time',
+			),
+		);
+
 		// phpcs:disable
 		?>
-		<div class="tailwindcss">
-			<div class="flex items-center tailwind">
-				<label for="<?php echo self::THRESHOLD_META_KEY; ?>" class="w-[14rem] block">會員累積消費升級門檻(NT$)</label>
-				<input type="number" value="<?php echo $threshold; ?>" name="<?php echo self::THRESHOLD_META_KEY; ?>" min="0" step="1000" class="ml-8" />
-			</div>
+		<div class="grid grid-cols-2 gap-4">
+			<?php foreach($basic_fields as $field):
+				$value = \get_post_meta( $post->ID, $field['name'], true );
+				?>
+				<label for="<?php echo $field['name']; ?>" class="w-[14rem] block"><?= $field['label'] ?></label>
+				<input type="number" value="<?php echo $value; ?>" name="<?php echo $field['name']; ?>" min="0" class="" />
+			<?php endforeach; ?>
 		</div>
-		會員等級到期時間
+		<?php
+		// phpcs:enable
+	}
+
+
+	/**
+	 * Render point metabox
+	 *
+	 * @param \WP_Post  $post Post.
+	 * @param \WPUPoint $point Point.
+	 * @return void
+	 */
+	public function render_point_metabox( $post, $point ): void {
+
+		$basic_fields = array(
+			array(
+				'label' => '會員生日當月1號就送',
+				'name'  => self::AWARD_POINTS_USER_BDAY_FIELD_NAME . '_' . $point->slug,
+			),
+		);
+
+		// phpcs:disable
+		?>
+		<div class="grid grid-cols-2 gap-4">
+			<?php foreach($basic_fields as $field):
+				$value = \get_post_meta( $post->ID, $field['name'], true );
+				?>
+				<label for="<?php echo $field['name']; ?>" class="w-[14rem] block"><?= $field['label'] ?></label>
+				<input type="number" value="<?php echo $value; ?>" name="<?php echo $field['name']; ?>" min="0" class="" />
+			<?php endforeach; ?>
+		</div>
 		<?php
 		// phpcs:enable
 	}
@@ -78,11 +138,26 @@ final class Metabox {
 		if ( ! \current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		// phpcs:disable
-		$value = isset( $_POST[ self::THRESHOLD_META_KEY ] ) ? \sanitize_text_field( $_POST[ self::THRESHOLD_META_KEY ] ) : 0;
-		$value = is_numeric( $value ) ? $value : 0;
-		\update_post_meta( $post_id, self::THRESHOLD_META_KEY, $value );
-		// phpcs:enable
+		$all_point_fields = array();
+		$all_points       = Plugin::instance()->point_utils_instance->get_all_points();
+
+		foreach ( $all_points as $point ) {
+			$all_point_fields[] = self::AWARD_POINTS_USER_BDAY_FIELD_NAME . '_' . $point->slug;
+		}
+
+		$basic_fields = array(
+			self::THRESHOLD_META_KEY,
+		);
+
+		$fields = array_merge( $basic_fields, $all_point_fields );
+
+		foreach ( $fields as $field ) {
+			// phpcs:disable
+			if(isset( $_POST[ $field ] )){
+				\update_post_meta( $post_id, $field, \sanitize_text_field( $_POST[ $field ] ) );
+					}
+			// phpcs:enable
+		}
 	}
 }
 

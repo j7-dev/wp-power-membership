@@ -101,9 +101,27 @@ final class Bootstrap {
 
 		$screen = \get_current_screen();
 
-		// TODO 案須載入
 		if ( in_array( $screen->id, array( MemberLvInit::POST_TYPE, 'user-edit', 'users' ), true ) ) {
-			\wp_enqueue_script( 'tailwindcss', 'https://cdn.tailwindcss.com', array(), '3.4.0' );
+			// TODO 有空再打包成靜態檔案
+			\wp_enqueue_script(
+				'tailwindcss',
+				'https://cdn.tailwindcss.com',
+				array(),
+				'3.4.0',
+				array(
+					'strategy'  => 'async',
+					'in_footer' => true,
+				)
+			);
+			\wp_add_inline_script(
+				'tailwindcss',
+				'tailwind.config = {
+					corePlugins: {
+						columns: false,
+						container: false,
+					}
+				}'
+			);
 		}
 		if ( 'users.php' === $hook ) {
 			if ( $is_simple_admin ) {

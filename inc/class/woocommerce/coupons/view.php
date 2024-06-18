@@ -85,6 +85,7 @@ final class View {
 	 * @return void
 	 */
 	public function show_available_coupons( $checkout ): void {
+		// TODO
 		?>
 <script src="https://cdn.tailwindcss.com"></script>
 

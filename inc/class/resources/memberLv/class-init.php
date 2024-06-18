@@ -33,7 +33,6 @@ final class Init {
 	public function __construct() {
 		\add_action( 'init', array( $this, 'init' ), 30 );
 		\add_action( 'admin_menu', array( $this, 'menu_page' ), 10 );
-		\add_action( 'save_post_' . self::POST_TYPE, array( $this, 'delete_transient' ), 100, 3 );
 	}
 
 	/**
@@ -116,18 +115,6 @@ final class Init {
 			'',
 			200
 		);
-	}
-
-	/**
-	 * 刪除快取
-	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post Post.
-	 * @param bool     $update Whether this is an existing post being updated.
-	 * @return void
-	 */
-	public function delete_transient( int $post_id, \WP_Post $post, bool $update ): void {
-		\delete_transient( Utils::MEMBER_LVS_BY_ORDER_TRANSIENT_KEY );
 	}
 }
 

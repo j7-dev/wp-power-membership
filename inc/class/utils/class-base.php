@@ -99,4 +99,37 @@ abstract class Base {
 	public static function get_transient_key( int $user_id, int $months_ago, string $transient_key ): string {
 		return "order_data_user_id_{$user_id}_months_ago_{ $months_ago}_transient_key_{$transient_key}";
 	}
+
+
+	/**
+	 * 取得特定月份生日的用戶 IDs
+	 *
+	 * @param ?string $month 月份 (01 ~ 12) (預設為當月)
+	 * @return array int[]
+	 */
+	public static function get_user_ids_by_bday_month( ?string $month = '' ): array {
+		global $wpdb;
+
+		if ( ! $month ) {
+			$month = gmdate( 'm', time() + 8 * 3600 );
+		}
+
+		$records = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'birthday' AND meta_value LIKE %s",
+				'%' . $month . '%'
+			),
+			ARRAY_A
+		);
+		if ( ! $records ) {
+			return array();
+		}
+
+		$user_ids = array();
+		foreach ( $records as $record ) {
+			$user_ids[] = (int) $record['user_id'];
+		}
+
+		return $user_ids;
+	}
 }

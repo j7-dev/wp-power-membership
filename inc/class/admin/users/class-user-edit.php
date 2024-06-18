@@ -17,6 +17,7 @@ use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
 use J7\PowerMembership\Plugin;
 
 
+
 /**
  * Class UserEdit
  */
@@ -24,6 +25,8 @@ final class UserEdit {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
 	const REASON_FIELD_NAME = 'pm_reason';
+	const BDAY_FIELD_NAME   = 'birthday';
+
 
 
 	/**
@@ -63,8 +66,8 @@ final class UserEdit {
 		$user_registered = gmdate( 'Y-m-d H:i:s', strtotime( $user->user_registered ) + 8 * 3600 );
 
 		$user_member_lv_id = \get_user_meta( $user_id, MemberLvInit::POST_TYPE, true );
-		// TODO
-		$birthday = \get_user_meta( $user_id, 'birthday', true );
+
+		$birthday = \get_user_meta( $user_id, self::BDAY_FIELD_NAME, true );
 
 		$member_lvs = \get_posts(
 			array(
@@ -177,6 +180,15 @@ final class UserEdit {
 				</td>
 			</tr>
 
+			<tr class="<?= self::BDAY_FIELD_NAME ?>">
+					<th>
+						<label for="<?= self::BDAY_FIELD_NAME ?>">生日</label>
+					</th>
+					<td>
+						<input type="date" value="<?php echo $birthday; ?>" id="<?= self::BDAY_FIELD_NAME ?>" name="<?= self::BDAY_FIELD_NAME ?>" class="regular-text">
+					</td>
+				</tr>
+
 					<?php endforeach; ?>
 
 
@@ -215,10 +227,18 @@ final class UserEdit {
 		}
 
 		//phpcs:disable
+		ob_start();
+		var_dump($_POST[ MemberLvInit::POST_TYPE ]);
+		\J7\WpUtils\Classes\Log::info('' . ob_get_clean());
 		if ( isset( $_POST[ MemberLvInit::POST_TYPE ] ) ) {
-			\update_user_meta( $user_id, MemberLvInit::POST_TYPE, $_POST[ MemberLvInit::POST_TYPE ] );
+			\update_user_meta( $user_id, MemberLvInit::POST_TYPE, \sanitize_text_field($_POST[ MemberLvInit::POST_TYPE ]) );
 			\update_user_meta( $user_id, MemberLvInit::MEMBER_LV_EARNED_TIME_META_KEY, time() );
 		}
+		if ( isset( $_POST[ self::BDAY_FIELD_NAME ] ) ) {
+			\update_user_meta( $user_id, self::BDAY_FIELD_NAME, \sanitize_text_field($_POST[ self::BDAY_FIELD_NAME ]) );
+		}
+
+
 
 		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
 
@@ -236,8 +256,6 @@ final class UserEdit {
 					) ,
 					$points
 				);
-
-
 			}
 		}
 

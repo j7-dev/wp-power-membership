@@ -10,6 +10,7 @@ namespace J7\PowerMembership\Admin\Users;
 
 use J7\PowerMembership\Utils\Base;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
+use J7\PowerMembership\Plugin;
 
 /**
 	* Class UserColumns
@@ -32,8 +33,11 @@ final class UserColumns {
 	public function __construct() {
 		// 設定欄位標題
 		\add_filter( 'manage_users_columns', array( $this, 'set_users_column_titles' ), 10, 1 );
+		\add_filter( 'manage_users_columns', array( $this, 'add_points_column_head' ), 10, 1 );
+
 		// 設定欄位值
 		\add_filter( 'manage_users_custom_column', array( $this, 'set_users_column_values' ), 10, 3 );
+		\add_filter( 'manage_users_custom_column', array( $this, 'add_points_column_values' ), 10, 3 );
 
 		// 排序
 		\add_filter(
@@ -144,6 +148,23 @@ final class UserColumns {
 	/**
 	 * 設定 users page 的欄位值
 	 *
+	 * @param array $columns 欄位
+	 *
+	 * @return array
+	 */
+	public function add_points_column_head( array $columns ): array {
+		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+
+		foreach ( $all_points as $point ) {
+			$columns[ $point->slug ] = $point->name;
+		}
+
+		return $columns;
+	}
+
+	/**
+	 * 設定 users page 的欄位值
+	 *
 	 * @param string $default_value 預設值
 	 * @param string $column_name 欄位名稱
 	 * @param int    $user_id 用戶 ID
@@ -202,6 +223,28 @@ final class UserColumns {
 
 			$value = \get_the_title( $member_lv_id );
 			return $value;
+		}
+
+		return $default_value;
+	}
+
+	/**
+	 * 設定 users page 的欄位值
+	 *
+	 * @param string $default_value 預設值
+	 * @param string $column_name 欄位名稱
+	 * @param int    $user_id 用戶 ID
+	 *
+	 * @return string
+	 */
+	public function add_points_column_values( $default_value, $column_name, $user_id ) {
+		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+
+		foreach ( $all_points as $point ) {
+			if ( $column_name === $point->slug ) {
+				$points = (float) \get_user_meta( $user_id, $point->slug, true );
+				return $points;
+			}
 		}
 
 		return $default_value;
