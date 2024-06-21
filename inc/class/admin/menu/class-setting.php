@@ -16,13 +16,13 @@ use J7\WpToolkit\PowerPlugins;
 final class Setting {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
-	const ENABLE_BIGGEST_COUPON_FIELD_NAME         = 'pm_biggest_coupon';
-	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME   = 'pm_show_further_coupons';
-	const SHOW_FURTHER_COUPONS_QTY_FIELD_NAME      = 'pm_show_further_coupons_qty';
-	const ENABLE_SHOW_COUPON_FORM_FIELD_NAME       = 'pm_show_coupon_form';
-	const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME = 'pm_show_available_coupons';
-	const ENABLE_BONUS_ON_CERTAIN_DAY_FIELD_NAME   = 'pm_bonus_on_certain_day';
-	const DEDUCT_LIMIT_PERCENTAGE_FIELD_NAME       = 'pm_deduct_limit_percentage'; // 購物金使用上限
+	public const ENABLE_BIGGEST_COUPON_FIELD_NAME         = 'pm_biggest_coupon';
+	public const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME   = 'pm_show_further_coupons';
+	public const SHOW_FURTHER_COUPONS_QTY_FIELD_NAME      = 'pm_show_further_coupons_qty';
+	public const ENABLE_SHOW_COUPON_FORM_FIELD_NAME       = 'pm_show_coupon_form';
+	public const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME = 'pm_show_available_coupons';
+	public const ENABLE_BONUS_ON_CERTAIN_DAY_FIELD_NAME   = 'pm_bonus_on_certain_day';
+	public const DEDUCT_LIMIT_PERCENTAGE_FIELD_NAME       = 'pm_deduct_limit_percentage'; // 購物金使用上限
 
 
 
@@ -39,6 +39,8 @@ final class Setting {
 	 * @return void
 	 */
 	public function set_redux_menu(): void {
+		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+
 		$power_plugins_instance = PowerPlugins::get_instance();
 		$section                = array(
 			'title'  => Plugin::$app_name,

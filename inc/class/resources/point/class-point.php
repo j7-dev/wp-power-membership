@@ -21,6 +21,9 @@ final class Point {
 
 	use \J7\WpUtils\Traits\SingletonTrait;
 
+
+	public const FEE_NAME_PREFIX = '購物金折抵';
+
 	/**
 	 * Constructor
 	 */
@@ -28,7 +31,10 @@ final class Point {
 		\add_action( 'wpu_point_update_user_points', array( $this, 'create_user_log' ), 100, 4 );
 
 		\add_action( 'user_register', array( $this, 'award_after_user_register' ), 10, 2 );
+
+		// 結帳頁使用購物金
 		\add_action( 'woocommerce_cart_calculate_fees', array( $this, 'apply_points_for_deduction' ) );
+		\add_action( 'woocommerce_order_status_completed', array( $this, 'deduct_user_point' ) );
 	}
 
 	/**
@@ -149,6 +155,7 @@ final class Point {
 
 	/**
 	 * Apply points for deduction
+	 * PENDING 未來可以做成，勾選後再套用
 	 *
 	 * @param WC_Cart $cart - cart
 	 * @return void
@@ -162,8 +169,17 @@ final class Point {
 
 		$discount_price = $this->get_discount( $cart );
 
-		$woocommerce->cart->add_fee( '購物金折抵', $discount_price, true, 'standard' );
+		if ( ! $deduct_limit_percentage || ! $discount_price ) {
+			return;
+		}
+
+		$woocommerce->cart->add_fee(
+			name: self::FEE_NAME_PREFIX . " {$deduct_limit_percentage}%",
+			amount: $discount_price,
+		);
 	}
+
+
 
 	/**
 	 * Get deduct limit percentage
@@ -202,6 +218,30 @@ final class Point {
 		$deduct_amount = \min( $max_deduct_amount, $user_points );
 
 		return -1 * $deduct_amount;
+	}
+
+	public function deduct_user_point( $order_id ): void {
+		$order = \wc_get_order( $order_id );
+
+		$default_point = Plugin::instance()->point_utils_instance->get_default_point();
+
+		// get fee
+		$fees = $order->get_fees();
+
+		foreach ( $fees as $fee ) {
+			$fee_name = $fee->get_name();
+			if ( str_starts_with( $fee_name, self::FEE_NAME_PREFIX ) ) {
+				// 執行扣點
+				$default_point->deduct_points_to_user(
+					user_id: (int) $order->get_customer_id(),
+					args: array(
+						'title' => '訂單折抵購物金' . $default_point->name . ' ' . $fee->get_amount() . ' 點',
+						'type'  => 'system',
+					),
+					points: (float) $fee->get_amount()
+				);
+			}
+		}
 	}
 }
 
