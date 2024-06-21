@@ -8,10 +8,8 @@ declare(strict_types=1);
 namespace J7\PowerMembership\Resources\Order;
 
 use J7\PowerMembership\Plugin;
-use J7\WpUtils\Classes\WPUPoint;
 use J7\WpUtils\Classes\WPUPointUtils;
-use J7\PowerMembership\Resources\Point\Metabox;
-use J7\PowerMembership\Resources\MemberLv\Utils;
+use J7\PowerMembership\Admin\Menu\Setting;
 
 
 /**
@@ -29,10 +27,20 @@ final class Order {
 
 	/**
 	 * Bonus on certain day
+	 * 消費每  $2000 ＝ 20 購物金
+	 * 🟧 UN-TESTED
+	 *
+	 * @param int $order_id - order id
 	 *
 	 * @return void
 	 */
-	public function bonus_on_certain_day( $order_id ): void {
+	public function bonus_on_certain_day( int $order_id ): void {
+		global $power_plugins_settings;
+		$enable_bonus_on_certain_day = $power_plugins_settings[ Setting::ENABLE_BONUS_ON_CERTAIN_DAY_FIELD_NAME ];
+
+		if ( ! $enable_bonus_on_certain_day ) {
+			return;
+		}
 		// 只有每週四、週日才執行
 		if ( ! in_array(
 			gmdate( 'l', time() + 8 * 3600 ),
@@ -54,7 +62,7 @@ final class Order {
 		$default_point_slug = WPUPointUtils::DEFAULT_POINT_SLUG;
 		$point              = Plugin::instance()->point_utils_instance->get_point_by_slug( $default_point_slug );
 
-		// TODO
+		// PENDING 做成設定項
 		// 消費每  $2000 ＝ 20 購物金
 		$award_points = floor( $subtotal / 2000 ) * 20;
 

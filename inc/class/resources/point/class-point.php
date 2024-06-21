@@ -7,16 +7,18 @@ declare(strict_types=1);
 
 namespace J7\PowerMembership\Resources\Point;
 
+use Exception;
+use J7\PowerMembership\Admin\Menu\Setting;
 use J7\PowerMembership\Plugin;
-use J7\WpUtils\Classes\WPUPoint;
-use J7\PowerMembership\Resources\Point\Metabox;
 use J7\PowerMembership\Resources\MemberLv\Utils;
-
+use J7\WpUtils\Classes\WPUPoint;
+use WC_Cart;
 
 /**
  * Class Init
  */
 final class Point {
+
 	use \J7\WpUtils\Traits\SingletonTrait;
 
 	/**
@@ -26,6 +28,66 @@ final class Point {
 		\add_action( 'wpu_point_update_user_points', array( $this, 'create_user_log' ), 100, 4 );
 
 		\add_action( 'user_register', array( $this, 'award_after_user_register' ), 10, 2 );
+		\add_action( 'woocommerce_cart_calculate_fees', array( $this, 'apply_points_for_deduction' ) );
+	}
+
+	/**
+	 * 對指定會員發放生日禮金https://elextensions.com/how-to-add-discount-programmatically-on-woocommerce/
+	 *
+	 * @param int $user_id - user id
+	 * @return void
+	 */
+	public static function award_bday_by_user_id( int $user_id ): void {
+		$user           = \get_userdata( $user_id );
+		$user_member_lv = Utils::get_member_lv_by( 'user_id', $user_id );
+		$all_points     = Plugin::instance()->point_utils_instance->get_all_points();
+
+		foreach ( $all_points as $point ) {
+			$award_points = $user_member_lv?->get_bday_award_points( $point->slug );
+			if ( ! $award_points ) {
+				continue;
+			}
+
+			$allow_bday_reward = self::allow_bday_reward( $user_id, $point );
+
+			if ( $allow_bday_reward ) {
+				// Award the points to the user
+				$point->award_points_to_user(
+					(int) $user_id,
+					array(
+						'title' => "生日禮金發放 {$point->name} {$award_points} 點 - {$user->display_name} ({$user_member_lv->name})",
+						'type'  => 'system',
+					),
+					$award_points
+				);
+
+				\update_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
+			}
+			// else 不發放生日禮金
+		}
+	}
+
+	/**
+	 * Allow birthday reward
+	 *
+	 * @param int      $user_id - user id
+	 * @param WPUPoint $point - point
+	 * @return bool
+	 */
+	public static function allow_bday_reward( int $user_id, WPUPoint $point ): bool {
+		$last_awarded_on = \get_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', true );
+		if ( ! $last_awarded_on ) {
+			return true;
+		}
+
+		$last_awarded_on = strtotime( $last_awarded_on );
+		$today           = strtotime( gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
+
+		$diff = $today - $last_awarded_on;
+
+		$days = $diff / ( 60 * 60 * 24 );
+
+		return $days >= 330; // 365天後才能再次發放，太嚴格，這邊只抓330天，避免有人調整天數盜領點數
 	}
 
 	/**
@@ -49,7 +111,9 @@ final class Point {
 	 * @param array   $args - args
 	 * @param float   $points - points
 	 * @param string  $point_slug - point slug
+	 *
 	 * @return void
+	 * @throws Exception
 	 */
 	public function create_user_log( int $user_id = 0, array $args = array(), float $points = 0, string $point_slug = 'wpu_default_point' ): void {
 		Plugin::instance()->log_utils_instance->insert_user_log( $user_id, $args, $points, $point_slug );
@@ -80,71 +144,64 @@ final class Point {
 				),
 				$award_points
 			);
-
 		}
 	}
 
 	/**
-	 * 對指定會員發放生日禮金
+	 * Apply points for deduction
 	 *
-	 * @param int $user_id - user id
+	 * @param WC_Cart $cart - cart
 	 * @return void
 	 */
-	public static function award_bday_by_user_id( int $user_id ): void {
-		$user           = \get_userdata( $user_id );
-		$user_member_lv = Utils::get_member_lv_by( 'user_id', $user_id );
-		$all_points     = Plugin::instance()->point_utils_instance->get_all_points();
+	public function apply_points_for_deduction( WC_Cart $cart ): void {
 
-		foreach ( $all_points as $point ) {
-			$award_points = $user_member_lv?->get_bday_award_points( $point->slug );
-			if ( ! $award_points ) {
-				continue;
-			}
+		global $woocommerce;
 
-			$allow_bday_reward = self::allow_bday_reward( $user_id, $point );
+		// 扣物金扣抵上限百分比
+		$deduct_limit_percentage = $this->get_deduct_limit_percentage();
 
-			if ( $allow_bday_reward ) {
-				// Award the points to the user
-				$point->award_points_to_user(
-					(int) $user_id,
-					array(
-						'title' => "生日禮金發放 {$point->name} {$award_points} 點 - {$user->display_name} ({$user_member_lv->name})",
-						'type'  => 'system',
-					),
-					$award_points
-				);
+		$discount_price = $this->get_discount( $cart );
 
-				\update_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
-
-			}
-			// else 不發放生日禮金
-
-		}
+		$woocommerce->cart->add_fee( '購物金折抵', $discount_price, true, 'standard' );
 	}
 
 	/**
-	 * Allow birthday reward
+	 * Get deduct limit percentage
+	 * 購物金扣抵上限百分比，使用上限為訂單金額幾%
 	 *
-	 * @param int      $user_id - user id
-	 * @param WPUPoint $point - point
-	 * @return bool
+	 * @return float
 	 */
-	public static function allow_bday_reward( int $user_id, WPUPoint $point ): bool {
-		$last_awarded_on = \get_user_meta( $user_id, 'last_' . $point->slug . '_birthday_awarded_on', true );
-		if ( ! $last_awarded_on ) {
-			return true;
-		}
+	public function get_deduct_limit_percentage(): float {
+		global $power_plugins_settings;
+		// 扣物金扣抵上限百分比
+		$deduct_limit_percentage = (float) $power_plugins_settings[ Setting::DEDUCT_LIMIT_PERCENTAGE_FIELD_NAME ];
+		return $deduct_limit_percentage / 100;
+	}
 
-		$last_awarded_on = strtotime( $last_awarded_on );
-		$today           = strtotime( gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
+	/**
+	 * Get discount
+	 *
+	 * @param WC_Cart $cart - cart
+	 * @return float
+	 */
+	public function get_discount( WC_Cart $cart ): float {
+		// 扣物金扣抵上限百分比
+		$deduct_limit_percentage = self::get_deduct_limit_percentage();
 
-		$diff = $today - $last_awarded_on;
+		// get cart subtotal
+		$cart_subtotal = (float) $cart->get_subtotal();
 
-		$days = $diff / ( 60 * 60 * 24 );
+		$default_point = Plugin::instance()->point_utils_instance->get_default_point();
 
-		$allow = $days >= 330; // 365天後才能再次發放，太嚴格，這邊只抓330天，避免有人調整天數盜領點數
+		$current_user_id = \get_current_user_id();
 
-		return $allow;
+		$user_points = (float) \get_user_meta( $current_user_id, $default_point->slug, true );
+
+		$max_deduct_amount = $cart_subtotal * $deduct_limit_percentage;
+
+		$deduct_amount = \min( $max_deduct_amount, $user_points );
+
+		return -1 * $deduct_amount;
 	}
 }
 

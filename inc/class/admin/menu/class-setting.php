@@ -21,6 +21,8 @@ final class Setting {
 	const SHOW_FURTHER_COUPONS_QTY_FIELD_NAME      = 'pm_show_further_coupons_qty';
 	const ENABLE_SHOW_COUPON_FORM_FIELD_NAME       = 'pm_show_coupon_form';
 	const ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME = 'pm_show_available_coupons';
+	const ENABLE_BONUS_ON_CERTAIN_DAY_FIELD_NAME   = 'pm_bonus_on_certain_day';
+	const DEDUCT_LIMIT_PERCENTAGE_FIELD_NAME       = 'pm_deduct_limit_percentage'; // 購物金使用上限
 
 
 
@@ -96,6 +98,26 @@ final class Setting {
 					'attributes' => array(
 						'min' => 0,
 						'max' => 30,
+					),
+				),
+				array(
+					'id'       => self::ENABLE_BONUS_ON_CERTAIN_DAY_FIELD_NAME,
+					'type'     => 'switch',
+					'title'    => \esc_html__( '啟用特定日期優惠', 'power-membership' ),
+					'subtitle' => \esc_html__( '啟用後，每週四週日消費每  $2000 ＝ 20 購物金', 'power-membership' ),
+					'on'       => \esc_html__( '啟用', 'power-membership' ),
+					'off'      => \esc_html__( '關閉', 'power-membership' ),
+					'default'  => 1,
+				),
+				array(
+					'id'         => self::DEDUCT_LIMIT_PERCENTAGE_FIELD_NAME,
+					'type'       => 'number',
+					'title'      => \esc_html__( '使用上限為訂單金額幾%', 'power-membership' ),
+					'subtitle'   => \esc_html__( '不包含稅金、運費', 'power-membership' ),
+					'default'    => 2,
+					'attributes' => array(
+						'min' => 0,
+						'max' => 100,
 					),
 				),
 
