@@ -1,13 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
 module.exports = {
+  important: true,
+
   corePlugins: {
     preflight: false,
   },
-
-  // prefix: 'tw-',
-
-  content: ['./js/src/**/*.{js,ts,jsx,tsx}', './inc/**/*.php'],
+  content: ['./js/src/**/*.{js,ts,jsx,tsx}', './inc/**/*.{js,ts,jsx,tsx,php}'],
   theme: {
     extend: {
       colors: {
@@ -15,8 +14,8 @@ module.exports = {
       },
       screens: {
         sm: '576px', // iphone SE
-        md: '810px', // ipad 直向
-        lg: '1080px', // ipad 橫向
+        md: '810px', // ipad Portrait
+        lg: '1080px', // ipad Landscape
         xl: '1280px', // mac air
         xxl: '1440px',
       },

@@ -15,10 +15,11 @@
  * Tags: woocommerce, membership, membership plugin, membership site
  */
 
-declare (strict_types = 1);
+declare ( strict_types=1 );
 
 namespace J7\PowerMembership;
 
+use Exception;
 use J7\WpUtils\Classes\WPULogUtils;
 use J7\WpUtils\Classes\WPUPointUtils;
 
@@ -32,15 +33,15 @@ if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 
 
 	/**
-		* Class Plugin
-		*/
+	 * Class Plugin
+	 */
 	final class Plugin {
 		use \J7\WpUtils\Traits\PluginTrait;
 		use \J7\WpUtils\Traits\SingletonTrait;
 		use \J7\WpUtils\Traits\LogTableCreationTrait;
 
-		const LOG_TABLE_NAME = 'power_logs';
-		const POINT_SLUG     = 'pm_points';
+		public const LOG_TABLE_NAME = 'power_logs';
+		public const POINT_SLUG     = 'pm_points';
 
 
 		/**
@@ -66,27 +67,27 @@ if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 			$this->point_utils_instance->init( $this->log_utils_instance );
 			require_once __DIR__ . '/inc/class/class-bootstrap.php';
 
-			$this->required_plugins = array(
-				array(
+			$this->required_plugins = [
+				[
 					'name'     => 'WooCommerce',
 					'slug'     => 'woocommerce',
 					'required' => true,
 					'version'  => '7.6.0',
-				),
-				array(
+				],
+				[
 					'name'     => 'WP Toolkit',
 					'slug'     => 'wp-toolkit',
 					'source'   => 'https://github.com/j7-dev/wp-toolkit/releases/latest/download/wp-toolkit.zip',
 					'required' => true,
-				),
-			);
+				],
+			];
 
 			$this->init(
-				array(
+				[
 					'app_name'    => 'Power Membership',
 					'github_repo' => 'https://github.com/j7-dev/wp-power-membership',
-					'callback'    => array( Bootstrap::class, 'instance' ),
-				)
+					'callback'    => [ Bootstrap::class, 'instance' ],
+				]
 			);
 		}
 
@@ -94,6 +95,7 @@ if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 		 * Activate
 		 *
 		 * @return void
+		 * @throws Exception - Exception.
 		 */
 		public function activate(): void {
 			$this->create_log_table( table_name: self::LOG_TABLE_NAME );
