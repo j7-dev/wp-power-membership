@@ -42,7 +42,7 @@ final class Point {
 	}
 
 	/**
-	 * 對指定會員發放生日禮金https://elextensions.com/how-to-add-discount-programmatically-on-woocommerce/
+	 * 對指定會員發放生日禮金 https://elextensions.com/how-to-add-discount-programmatically-on-woocommerce/
 	 *
 	 * @param int $user_id - user id
 	 *
@@ -53,8 +53,9 @@ final class Point {
 		$user_member_lv = Utils::get_member_lv_by( 'user_id', $user_id );
 		$all_points     = Plugin::instance()->point_utils_instance->get_all_points();
 
+		global $power_plugins_settings;
 		foreach ( $all_points as $point ) {
-			$award_points = $user_member_lv?->get_bday_award_points( (int) $point->id );
+			$award_points = (float) $power_plugins_settings[ Setting::AWARD_POINTS_AFTER_USER_BIRTHDAY_FIELD_NAME . '__' . $point->id . '__amount' ];
 			if ( ! $award_points ) {
 				continue;
 			}
@@ -97,7 +98,7 @@ final class Point {
 		}
 
 		$last_awarded_on = strtotime( $last_awarded_on );
-		$today           = strtotime( gmdate( 'Y-m-d H:i:s', strtotime( '+8 hours' ) ) );
+		$today           = strtotime( date( 'Y-m-d H:i:s' ) );
 
 		$diff = $today - $last_awarded_on;
 

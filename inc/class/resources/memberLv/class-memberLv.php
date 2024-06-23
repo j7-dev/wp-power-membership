@@ -55,6 +55,7 @@ final class MemberLv {
 
 	/**
 	 * Get birthday award points by point id.
+	 * @deprecated 已棄用
 	 *
 	 * @param int $point_id Point id.
 	 *

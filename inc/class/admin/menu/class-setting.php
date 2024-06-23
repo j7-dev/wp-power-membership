@@ -284,8 +284,7 @@ final class Setting {
 				esc_html__( '生日禮金送多少 ⟪%s⟫', 'power-membership' ), // phpcs:ignore
 				$point->name
 			),
-			'subtitle'   => esc_html__( '預設為 30 天', 'power-membership' ),
-			'default'    => 30,
+			'default'    => 0,
 			'required'   => [
 				$bday_enable,
 				'equals',
