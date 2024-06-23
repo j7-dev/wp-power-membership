@@ -3,12 +3,9 @@
  * MemberLv
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace J7\PowerMembership\Resources\MemberLv;
-
-use J7\PowerMembership\Resources\MemberLv\Metabox;
-use J7\PowerMembership\Plugin;
 
 /**
  * Class MemberLv
@@ -57,17 +54,17 @@ final class MemberLv {
 	}
 
 	/**
-	 * Get birthday award points by point slug.
+	 * Get birthday award points by point id.
 	 *
-	 * @param string|null $point_slug Point slug.
+	 * @param int $point_id Point id.
+	 *
 	 * @return float
 	 */
-	public function get_bday_award_points( ?string $point_slug ): float {
-		if ( ! $point_slug ) {
+	public function get_bday_award_points( ?int $point_id ): float {
+		if ( ! $point_id ) {
 			$point_slug = \J7\WpUtils\Classes\WPUPointUtils::DEFAULT_POINT_SLUG;
 		}
 
-		$bday_award_points = (float) \get_post_meta( $this->id, Metabox::AWARD_POINTS_USER_BDAY_FIELD_NAME . '_' . $point_slug, true );
-		return $bday_award_points;
+		return (float) \get_post_meta( $this->id, Metabox::AWARD_POINTS_USER_BDAY_FIELD_NAME . '_' . $point_id, true );
 	}
 }

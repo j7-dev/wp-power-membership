@@ -1,9 +1,10 @@
 <?php
 /**
  * Metabox
+ * DELETE
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace J7\PowerMembership\Resources\Point;
 
@@ -50,10 +51,10 @@ final class Metabox {
 	 * Render metabox
 	 *
 	 * @param \WP_Post $post Post.
+	 *
 	 * @return void
 	 */
 	public function render_metabox( $post ): void {
-
 		$basic_fields = array(
 			array(
 				'label' => '會員註冊完成就送',
@@ -64,14 +65,19 @@ final class Metabox {
 		// phpcs:disable
 		?>
 
-		<div class="grid grid-cols-2 gap-4">
-			<?php foreach($basic_fields as $field):
+        <div class="grid grid-cols-2 gap-4">
+			<?php
+			foreach ( $basic_fields as $field ):
 				$value = \get_post_meta( $post->ID, $field['name'], true );
 				?>
-				<label for="<?php echo $field['name']; ?>" class="w-[14rem] block"><?= $field['label'] ?></label>
-				<input type="number" value="<?php echo $value; ?>" name="<?php echo $field['name']; ?>" min="0" class="" />
-			<?php endforeach; ?>
-		</div>
+                <label for="<?php
+				echo $field['name']; ?>" class="w-[14rem] block"><?= $field['label'] ?></label>
+                <input type="number" value="<?php
+				echo $value; ?>" name="<?php
+				echo $field['name']; ?>" min="0" class=""/>
+			<?php
+			endforeach; ?>
+        </div>
 
 		<?php
 		// phpcs:enable
@@ -82,6 +88,7 @@ final class Metabox {
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post Post.
+	 *
 	 * @return void
 	 */
 	public function save_metabox( $post_id, $post ): void {
@@ -95,9 +102,9 @@ final class Metabox {
 
 		foreach ( $fields as $field ) {
 			// phpcs:disable
-			if(isset( $_POST[ $field ] )){
+			if ( isset( $_POST[ $field ] ) ) {
 				\update_post_meta( $post_id, $field, \sanitize_text_field( $_POST[ $field ] ) );
-					}
+			}
 			// phpcs:enable
 		}
 	}

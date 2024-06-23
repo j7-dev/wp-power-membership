@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace J7\PowerMembership\WooCommerce\Coupons;
 
 use J7\PowerMembership\Plugin;
-use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
 use J7\PowerMembership\Resources\MemberLv\Utils as MemberLvUtils;
 
 /**
@@ -104,7 +103,7 @@ final class Metabox {
 
 		if ( $member_lvs ) {
 			foreach ( $member_lvs as $member_lv ) {
-				echo '<option value="' . \esc_attr( $member_lv['id'] ) . '"' . \wc_selected( $member_lv['id'], $member_lv_ids ) . '>' . \esc_html( $member_lv['name'] ) . '</option>';
+				echo '<option value="' . \esc_attr( $member_lv->id ) . '"' . \wc_selected( $member_lv->id, $member_lv_ids ) . '>' . \esc_html( $member_lv->name ) . '</option>';
 			}
 		}
 		?>
@@ -177,9 +176,6 @@ final class Metabox {
 	 * @return void
 	 */
 	public function update_fields( int $coupon_id, \WC_Coupon $coupon ): void {
-		if ( empty( $coupon ) ) {
-			return;
-		}
 		$this->handle_update_hide_this_coupon_field( $coupon_id, $coupon );
 		$this->handle_update_allowed_membership_field( $coupon_id, $coupon );
 		$this->handle_update_first_purchase_field( $coupon_id, $coupon );

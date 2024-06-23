@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace J7\PowerMembership\Resources\MemberLv;
 
-use J7\PowerMembership\Utils\Base;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
+use J7\PowerMembership\Utils\Base;
 
 
 /**
@@ -69,8 +69,8 @@ final class Upgrade {
 		if ( ! $next_member_lv ) {
 			return;
 		}
-		$next_member_lv_id        = $next_member_lv['id'];
-		$next_member_lv_threshold = (int) $next_member_lv['threshold'];
+		$next_member_lv_id        = $next_member_lv?->id;
+		$next_member_lv_threshold = (int) $next_member_lv->threshold;
 
 		if ( $acc_amount >= $next_member_lv_threshold ) {
 			\update_user_meta( $customer_id, MemberLvInit::POST_TYPE, $next_member_lv_id );
@@ -93,7 +93,7 @@ final class Upgrade {
 		if ( ! $prev_member_lv ) {
 			return;
 		}
-		$prev_member_lv_id = $prev_member_lv['id'];
+		$prev_member_lv_id = $prev_member_lv?->id;
 
 		// phpcs:disable
 		global $wpdb;

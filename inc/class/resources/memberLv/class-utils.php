@@ -15,6 +15,34 @@ use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
 abstract class Utils {
 
 	/**
+	 * 取得會員等級 by
+	 *
+	 * @param string     $field 欄位 'user_id' or 'member_lv_id'
+	 * @param int|string $value 欄位值
+	 * @return MemberLv|null
+	 */
+	public static function get_member_lv_by( string $field, int|string $value ): ?MemberLv {
+		$member_lvs        = self::get_member_lvs();
+		$current_member_lv = null;
+
+		switch ( $field ) {
+			case 'user_id':
+				$member_lv_id      = \get_user_meta( $value, MemberLvInit::POST_TYPE, true );
+				$current_member_lv = self::get_member_lv( (int) $member_lv_id, $member_lvs );
+				break;
+			case 'member_lv_id':
+				$current_member_lv = self::get_member_lv( (int) $value, $member_lvs );
+				break;
+
+			default:
+				// code...
+				break;
+		}
+
+		return $current_member_lv;
+	}
+
+	/**
 	 * 取得所有的會員物件，按照 menu_order 排序
 	 *
 	 * @param string|null $status 文章狀態
@@ -44,34 +72,6 @@ abstract class Utils {
 		$member_lv_array = array_map( fn( $post ) => new MemberLv( $post ), $member_lv_posts );
 
 		return $member_lv_array;
-	}
-
-	/**
-	 * 取得會員等級 by
-	 *
-	 * @param string     $field 欄位 'user_id' or 'member_lv_id'
-	 * @param int|string $value 欄位值
-	 * @return MemberLv|null
-	 */
-	public static function get_member_lv_by( string $field, int|string $value ): ?MemberLv {
-		$member_lvs        = self::get_member_lvs();
-		$current_member_lv = null;
-
-		switch ( $field ) {
-			case 'user_id':
-				$member_lv_id      = \get_user_meta( $value, MemberLvInit::POST_TYPE, true );
-				$current_member_lv = self::get_member_lv( (int) $member_lv_id, $member_lvs );
-				break;
-			case 'member_lv_id':
-				$current_member_lv = self::get_member_lv( (int) $value, $member_lvs );
-				break;
-
-			default:
-				// code...
-				break;
-		}
-
-		return $current_member_lv;
 	}
 
 	/**
@@ -113,7 +113,7 @@ abstract class Utils {
 				break;
 
 			default:
-				// code...
+				$next_member_lv = null;
 				break;
 		}
 

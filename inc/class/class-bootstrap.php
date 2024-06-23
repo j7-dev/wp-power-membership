@@ -3,12 +3,13 @@
  * Bootstrap
  */
 
-declare (strict_types = 1);
+declare ( strict_types=1 );
 
 namespace J7\PowerMembership;
 
-use J7\WpToolkit\PowerPlugins;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
+use J7\WpToolkit\PowerPlugins;
+use J7\PowerMembership\Admin\Menu\Setting;
 
 
 /**
@@ -46,17 +47,6 @@ final class Bootstrap {
 		$this->enqueue_script();
 	}
 
-
-	/**
-	 * Front-end Enqueue script
-	 * You can load the script on demand
-	 *
-	 * @return void
-	 */
-	public function frontend_enqueue_script(): void {
-		$this->enqueue_script();
-	}
-
 	/**
 	 * Enqueue script
 	 * You can load the script on demand
@@ -64,7 +54,6 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public function enqueue_script(): void {
-
 		\wp_enqueue_script(
 			Plugin::$kebab,
 			Plugin::$url . '/js/dist/index.js',
@@ -85,44 +74,61 @@ final class Bootstrap {
 	}
 
 	/**
+	 * Front-end Enqueue script
+	 * You can load the script on demand
+	 *
+	 * @return void
+	 */
+	public function frontend_enqueue_script(): void {
+		$this->enqueue_script();
+	}
+
+	/**
 	 * Add static assets
 	 *
 	 * @param string $hook current page hook
 	 *
 	 * @return void
 	 */
-	public function add_static_assets( $hook ): void {
+	public function add_static_assets( string $hook ): void {
 		if ( ! \is_admin() ) {
 			return;
+		}
+		$screen = \get_current_screen();
+
+		if ( 'toplevel_page_power_plugins_settings' === $hook || in_array(
+			$screen->id,
+			array( MemberLvInit::POST_TYPE, 'user-edit', 'users' ),
+			true
+		) ) {
+			\wp_enqueue_script(
+				Plugin::$kebab . '-settings',
+				Plugin::$url . '/inc/assets/dist/index.js',
+				[ 'jquery' ],
+				Plugin::$version,
+				[
+					'strategy'  => 'async',
+					'in_footer' => true,
+				]
+			);
+
+			\wp_localize_script(
+				Plugin::$kebab . '-settings',
+				Plugin::$snake . '_data',
+				Setting::get_params()
+			);
+
+			\wp_enqueue_style(
+				Plugin::$kebab . '-settings',
+				Plugin::$url . '/inc/assets/dist/css/index.css',
+				[],
+				Plugin::$version
+			);
 		}
 
 		global $power_plugins_settings;
 		$is_simple_admin = $power_plugins_settings[ PowerPlugins::ENABLE_SIMPLE_ADMIN_FIELD_NAME ];
 
-		$screen = \get_current_screen();
-
-		if ( in_array( $screen->id, array( MemberLvInit::POST_TYPE, 'user-edit', 'users' ), true ) ) {
-			// TODO 有空再打包成靜態檔案
-			\wp_enqueue_script(
-				'tailwindcss',
-				'https://cdn.tailwindcss.com',
-				array(),
-				'3.4.0',
-				array(
-					'strategy'  => 'async',
-					'in_footer' => true,
-				)
-			);
-			\wp_add_inline_script(
-				'tailwindcss',
-				'tailwind.config = {
-					corePlugins: {
-						columns: false,
-						container: false,
-					}
-				}'
-			);
-		}
 		if ( 'users.php' === $hook ) {
 			if ( $is_simple_admin ) {
 				\wp_enqueue_script(
