@@ -83,7 +83,7 @@ final class Bootstrap
 ?>
 			<script>
 				tailwind.config = {
-					important: '.tailwindcss',
+                    prefix: 'tw-'
 				}
 			</script>
 <?php

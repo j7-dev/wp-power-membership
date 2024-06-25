@@ -114,7 +114,7 @@ final class UserColumns
 				$order_data = Utils::get_order_data_by_user_date($user_id, $i);
 
 				if (!$order_data['user_is_registered']) {
-					return '<span class="bg-gray-200 px-2 py-1 rounded-md text-xs">當時尚未註冊</span>';
+					return '<span class="tw-bg-gray-200 tw-px-2 tw-py-1 tw-rounded-md tw-text-xs">當時尚未註冊</span>';
 				}
 				$text = '';
 				if (isset($order_data['goal'])) {
@@ -123,10 +123,10 @@ final class UserColumns
 							$text = '';
 							break;
 						case 'yes':
-							$text = '<span class="bg-teal-200 px-2 py-1 rounded-md text-xs">達標<span>';
+							$text = '<span class="tw-bg-teal-200 tw-px-2 tw-py-1 tw-rounded-md tw-text-xs">達標<span>';
 							break;
 						case 'no':
-							$text = '<span class="bg-red-200 px-2 py-1 rounded-md text-xs">不達標<span>';
+							$text = '<span class="tw-bg-red-200 tw-px-2 tw-py-1 tw-rounded-md tw-text-xs">不達標<span>';
 							break;
 						default:
 							$text = '';
@@ -187,7 +187,6 @@ final class UserColumns
 			</select>
 
 			<input type="submit" class="button" value="篩選">
-
 		</form>
 
 <?php
