@@ -31,6 +31,6 @@
     "lint": "phpcs"
   },
   "require": {
-    "j7-dev/wp-utils": "0.0.25"
+    "j7-dev/wp-utils": "0.1.0"
   }
 }
