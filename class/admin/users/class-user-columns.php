@@ -41,7 +41,7 @@ final class UserColumns
 		}, 10, 1);
 
 		// 在 users page 篩選不同等級的用戶
-		\add_action('manage_users_extra_tablenav', [$this, 'render_member_filter_options']);
+        \add_action('manage_users_extra_tablenav', [$this, 'render_member_filter_options']);
 		\add_action('pre_get_users', [$this, 'filter_users_by_member_lv']);
 	}
 
@@ -163,8 +163,9 @@ final class UserColumns
 		return $default_value;
 	}
 
-	function render_member_filter_options(): void
+	function render_member_filter_options($which): void
 	{
+
 		$member_lvs = get_posts([
 			'post_type'      => Utils::MEMBER_LV_POST_TYPE,
 			'posts_per_page' => -1,
@@ -177,19 +178,14 @@ final class UserColumns
 		$user_amount_by_member_lv = $this->get_user_amount_by_member_lv();
 
 ?>
-
-		<form method="GET">
-			<select name="member_lv">
+			<select name="<?= Utils::MEMBER_LV_POST_TYPE . '_' . $which ?>" id="<?= Utils::MEMBER_LV_POST_TYPE . '_' . $which ?>">
 				<option value="0">篩選會員等級</option>
 				<?php foreach ($member_lvs as $member_lv) : ?>
 					<option value="<?php echo esc_attr($member_lv->ID); ?>" <?php selected($get_member_lv, $member_lv->ID); ?>><?php echo esc_html($member_lv->post_title) . ' (' . $user_amount_by_member_lv[$member_lv->ID] . ')'; ?></option>
 				<?php endforeach; ?>
 			</select>
-
-			<input type="submit" class="button" value="篩選">
-		</form>
-
 <?php
+        \submit_button(\__( '篩選' ), null,$which, false);
 	}
 
 	public function filter_users_by_member_lv($query): void
@@ -198,19 +194,22 @@ final class UserColumns
 			return;
 		}
 		global $pagenow;
-		if ('users.php' === $pagenow) {
-			if (!empty($_GET[Utils::MEMBER_LV_POST_TYPE])) {
-				$value      = $_GET[Utils::MEMBER_LV_POST_TYPE];
+
+        $member_lv = $_GET[Utils::MEMBER_LV_POST_TYPE . '_top'] ?? $_GET[Utils::MEMBER_LV_POST_TYPE . '_bottom'] ?? 0;
+
+        \J7\WpToolkit\Utils::debug_log($member_lv);
+
+		if ('users.php' === $pagenow && !!$member_lv) {
 				$meta_query = array(
 					array(
 						'key'     => Utils::CURRENT_MEMBER_LV_META_KEY,
-						'value'   => $value,
+						'value'   => $member_lv,
 						'compare' => '=',
 					),
 				);
 
 				$query->set('meta_query', $meta_query);
-			}
+
 		}
 	}
 }
