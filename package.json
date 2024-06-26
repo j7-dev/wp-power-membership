@@ -1,6 +1,6 @@
 {
   "name": "create-j7power-membership",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "type": "module",
   "scripts": {
     "bootstrap": "npm install && composer install --no-interaction",
