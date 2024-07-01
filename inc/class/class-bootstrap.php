@@ -7,9 +7,9 @@ declare ( strict_types=1 );
 
 namespace J7\PowerMembership;
 
+use J7\PowerMembership\Admin\Menu\Setting;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
 use J7\WpToolkit\PowerPlugins;
-use J7\PowerMembership\Admin\Menu\Setting;
 
 
 /**
@@ -30,9 +30,9 @@ final class Bootstrap {
 
 		// require_once __DIR__ . '/front-end/index.php';
 
-		\add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_script' ), 99 );
-		\add_action( 'admin_enqueue_scripts', array( $this, 'add_static_assets' ), 100 );
-		\add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_script' ), 99 );
+		// \add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_script' ), 99 );
+		// \add_action( 'admin_enqueue_scripts', array( $this, 'add_static_assets' ), 100 );
+		// \add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_script' ), 99 );
 	}
 
 	/**
@@ -57,18 +57,18 @@ final class Bootstrap {
 		\wp_enqueue_script(
 			Plugin::$kebab,
 			Plugin::$url . '/js/dist/index.js',
-			array( 'jquery' ),
+			[ 'jquery' ],
 			Plugin::$version,
-			array(
+			[
 				'in_footer' => true,
 				'strategy'  => 'async',
-			)
+			]
 		);
 
 		\wp_enqueue_style(
 			Plugin::$kebab,
 			Plugin::$url . '/js/dist/assets/css/index.css',
-			array(),
+			[],
 			Plugin::$version
 		);
 	}
@@ -98,7 +98,7 @@ final class Bootstrap {
 
 		if ( 'toplevel_page_power_plugins_settings' === $hook || in_array(
 			$screen->id,
-			array( MemberLvInit::POST_TYPE, 'user-edit', 'users' ),
+			[ MemberLvInit::POST_TYPE, 'user-edit', 'users' ],
 			true
 		) ) {
 			\wp_enqueue_script(
@@ -134,11 +134,11 @@ final class Bootstrap {
 				\wp_enqueue_script(
 					'users',
 					Plugin::$url . '/inc/assets/js/admin-users.js',
-					array(),
+					[],
 					Plugin::$version,
-					array(
+					[
 						'strategy' => 'async',
-					)
+					]
 				);
 			}
 		}
@@ -147,11 +147,11 @@ final class Bootstrap {
 				\wp_enqueue_script(
 					'user-edit',
 					Plugin::$url . '/inc/assets/js/admin-user-edit.js',
-					array(),
+					[],
 					Plugin::$version,
-					array(
+					[
 						'strategy' => 'async',
-					)
+					]
 				);
 			}
 		}
@@ -159,19 +159,19 @@ final class Bootstrap {
 			\wp_enqueue_script(
 				MemberLvInit::POST_TYPE,
 				Plugin::$url . '/inc/assets/js/member_lv.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				Plugin::$version,
-				array(
+				[
 					'strategy' => 'async',
-				)
+				]
 			);
 		}
 		\wp_localize_script(
 			MemberLvInit::POST_TYPE,
 			MemberLvInit::POST_TYPE . '_data',
-			array(
+			[
 				'default_member_lv_id' => MemberLvInit::instance()->default_member_lv_id,
-			)
+			]
 		);
 	}
 }

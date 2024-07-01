@@ -114,11 +114,11 @@ final class Point {
 	 * @return array
 	 */
 	public function get_log_types(): array {
-		return array(
+		return [
 			'system' => '系統',
 			'admin'  => '管理員',
 			'user'   => '使用者',
-		);
+		];
 	}
 
 	/**
@@ -206,8 +206,10 @@ final class Point {
 			return;
 		}
 
+		$deduct_limit = $deduct_limit_percentage * 100;
+
 		$woocommerce->cart->add_fee(
-			name: self::FEE_NAME_PREFIX . " {$deduct_limit_percentage}%",
+			name: self::FEE_NAME_PREFIX . " {$deduct_limit}%",
 			amount: $discount_price,
 		);
 	}
