@@ -34,7 +34,7 @@ final class Metabox {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ], 10, 2 );
+		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ], 10, 1 );
 		add_action( 'save_post', [ $this, 'save_metabox' ], 10, 2 );
 	}
 
@@ -46,7 +46,7 @@ final class Metabox {
 	 *
 	 * @return void
 	 */
-	public function add_metabox( string $post_type, WP_Post $post ): void {
+	public function add_metabox( string $post_type ): void {
 		add_meta_box(
 			Plugin::$snake . '_metabox',
 			'設定',
@@ -109,16 +109,16 @@ final class Metabox {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		$all_point_fields = array();
+		$all_point_fields = [];
 		$all_points       = Plugin::instance()->point_utils_instance->get_all_points();
 
 		foreach ( $all_points as $point ) {
 			$all_point_fields[] = self::AWARD_POINTS_USER_BDAY_FIELD_NAME . '_' . $point->slug;
 		}
 
-		$basic_fields = array(
+		$basic_fields = [
 			self::THRESHOLD_META_KEY,
-		);
+		];
 
 		$fields = array_merge( $basic_fields, $all_point_fields );
 
