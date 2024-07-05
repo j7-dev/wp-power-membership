@@ -186,6 +186,20 @@ final class UserColumns
 			</select>
 <?php
         \submit_button(\__( '篩選' ), null,$which, false);
+
+
+
+        // 批次調整會員等級
+
+        ?>
+        <select name="<?= 'set_' . Utils::MEMBER_LV_POST_TYPE . '_' . $which ?>" id="<?= 'set_' . Utils::MEMBER_LV_POST_TYPE . '_' . $which ?>">
+            <option value="0">批次調整會員等級</option>
+            <?php foreach ($member_lvs as $member_lv) : ?>
+                <option value="<?php echo esc_attr($member_lv->ID); ?>" <?php selected($get_member_lv, $member_lv->ID); ?>><?php echo esc_html($member_lv->post_title) . ' (' . $user_amount_by_member_lv[$member_lv->ID] . ')'; ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php
+        \submit_button(\__( '批次調整會員等級' ), null,$which, false);
 	}
 
 	public function filter_users_by_member_lv($query): void
@@ -195,9 +209,9 @@ final class UserColumns
 		}
 		global $pagenow;
 
-        $member_lv = $_GET[Utils::MEMBER_LV_POST_TYPE . '_top'] ?? $_GET[Utils::MEMBER_LV_POST_TYPE . '_bottom'] ?? 0;
+        // 篩選會員等級
 
-        \J7\WpToolkit\Utils::debug_log($member_lv);
+        $member_lv = $_GET[Utils::MEMBER_LV_POST_TYPE . '_top'] ?? $_GET[Utils::MEMBER_LV_POST_TYPE . '_bottom'] ?? 0;
 
 		if ('users.php' === $pagenow && !!$member_lv) {
 				$meta_query = array(
@@ -211,5 +225,19 @@ final class UserColumns
 				$query->set('meta_query', $meta_query);
 
 		}
+
+        // 批次調整會員等級
+
+        $set_member_lv = $_GET['set_' . Utils::MEMBER_LV_POST_TYPE . '_top'] ?? $_GET['set_' . Utils::MEMBER_LV_POST_TYPE . '_bottom'] ?? 0;
+        $user_ids = $_GET['users'] ?? [];
+
+
+        if ('users.php' === $pagenow && !!$set_member_lv && !!$user_ids) {
+            foreach ($user_ids as $user_id) {
+                update_user_meta($user_id, Utils::CURRENT_MEMBER_LV_META_KEY, $set_member_lv);
+            }
+        }
+
+
 	}
 }
