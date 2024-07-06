@@ -6,33 +6,30 @@ namespace J7\PowerMembership\Admin\Menu;
 
 use J7\PowerMembership\Utils;
 
-final class Settings
-{
-	const OPT_NAME = Utils::SNAKE . '_settings';
-	const ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME = 'power_enable_simple_admin_ui';
-	const ENABLE_BIGGEST_COUPON_FIELD_NAME = Utils::SNAKE . '_biggest_coupon';
+final class Settings {
+
+	const OPT_NAME                               = Utils::SNAKE . '_settings';
+	const ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME      = 'power_enable_simple_admin_ui';
+	const ENABLE_BIGGEST_COUPON_FIELD_NAME       = Utils::SNAKE . '_biggest_coupon';
 	const ENABLE_SHOW_FURTHER_COUPONS_FIELD_NAME = Utils::SNAKE . '_show_further_coupons';
 
 	private $args;
 	private $sections = [];
 
-	public function __construct()
-	{
+	public function __construct() {
 		$this->set_args();
 		$this->set_sections();
 		$this->instance();
 	}
 
-	public function instance(): void
-	{
+	public function instance(): void {
 		\Redux::set_args(self::OPT_NAME, $this->args);
 		\Redux::set_sections(self::OPT_NAME, $this->sections);
 		\Redux::init(self::OPT_NAME);
 	}
 
-	private function set_args(): void
-	{
-		$args = array(
+	private function set_args(): void {
+		$args = [
 			// This is where your data is stored in the database and also becomes your global variable name.
 			'opt_name'                  => self::OPT_NAME,
 
@@ -142,57 +139,55 @@ final class Settings
 			'font_display'              => 'swap',
 
 			// HINTS.
-			'hints'                     => array(
+			'hints'                     => [
 				'icon'          => 'el el-question-sign',
 				'icon_position' => 'right',
 				'icon_color'    => 'lightgray',
 				'icon_size'     => 'normal',
-				'tip_style'     => array(
+				'tip_style'     => [
 					'color'   => 'red',
 					'shadow'  => true,
 					'rounded' => false,
 					'style'   => '',
-				),
-				'tip_position'  => array(
+				],
+				'tip_position'  => [
 					'my' => 'top left',
 					'at' => 'bottom right',
-				),
-				'tip_effect'    => array(
-					'show' => array(
+				],
+				'tip_effect'    => [
+					'show' => [
 						'effect'   => 'slide',
 						'duration' => '500',
 						'event'    => 'mouseover',
-					),
-					'hide' => array(
+					],
+					'hide' => [
 						'effect'   => 'slide',
 						'duration' => '500',
 						'event'    => 'click mouseleave',
-					),
-				),
-			),
+					],
+				],
+			],
 
 			// FUTURE -> Not in use yet, but reserved or partially implemented. Use at your own risk.
 			// Possible: options, theme_mods, theme_mods_expanded, transient. Not fully functional, warning!
 			'database'                  => '',
 			'network_admin'             => true,
 			'search'                    => true,
-		);
-
+		];
 
 		// SOCIAL ICONS -> Setup custom links in the footer for quick links in your panel footer icons.
 		// PLEASE CHANGE THESE SETTINGS IN YOUR THEME BEFORE RELEASING YOUR PRODUCT!!
 		// If these are left unchanged, they will not display in your panel!
-		$args['share_icons'][] = array(
+		$args['share_icons'][] = [
 			'url'   => Utils::GITHUB_REPO,
 			'title' => '你的五星好評是給開發者的最大的鼓勵',
 			'icon'  => 'el el-github',
-		);
-		$args['share_icons'][] = array(
+		];
+		$args['share_icons'][] = [
 			'url'   => 'https://cloud.luke.cafe/',
 			'title' => '網站速度不夠快？ 我們的主機代管服務 ⚡ 提供 30 天免費試用',
 			'icon'  => 'el el-globe',
-		);
-
+		];
 
 		// Panel Intro text -> before the form.
 		if (!isset($args['global_variable']) || false !== $args['global_variable']) {
@@ -203,24 +198,21 @@ final class Settings
 			}
 		}
 
-
-
 		// Add content after the form.
-		$args['footer_text'] = '<p class="tw-mt-10 tw-text-center tw-text-sm tw-text-gray-400">
+		$args['footer_text'] = '<p class="mt-10 text-center text-sm text-gray-400">
 		網站速度不夠快？
 		<a target="_blank" href="https://cloud.luke.cafe/"
-			class="tw-font-semibold tw-leading-6 tw-text-primary tw-hover:text-primary-400">我們的主機代管服務</a> ⚡ 提供30天免費試用
+			class="font-semibold leading-6 text-primary hover:text-primary-400">我們的主機代管服務</a> ⚡ 提供30天免費試用
 	</p>';
 
 		$this->args = $args;
 	}
 
-	private function set_sections(): void
-	{
+	private function set_sections(): void {
 		$this->sections[] = [
-			'title'            => esc_html__('一般設定', Utils::TEXT_DOMAIN),
-			'id'               => 'general',
-			'icon'             => 'el el-home',
+			'title'  => esc_html__('一般設定', Utils::TEXT_DOMAIN),
+			'id'     => 'general',
+			'icon'   => 'el el-home',
 			'fields' => [
 				[
 					'id'       => self::ENABLE_SIMPLE_ADMIN_UI_FIELD_NAME,
@@ -235,10 +227,10 @@ final class Settings
 		];
 
 		$this->sections[] = [
-			'title'            => Utils::APP_NAME,
-			'id'               => Utils::KEBAB,
-			'desc'             => '<p><span class="dashicons dashicons-info" style="color: #52accc;"></span>' . sprintf(esc_html__('可以到 %1$s 查看主要功能與使用方式', Utils::TEXT_DOMAIN), '<a href="' . Utils::GITHUB_REPO . '" target="_blank">Github 頁面</a>') . '<p>',
-			'icon'             => 'el el-tag',
+			'title'  => Utils::APP_NAME,
+			'id'     => Utils::KEBAB,
+			'desc'   => '<p><span class="dashicons dashicons-info" style="color: #52accc;"></span>' . sprintf(esc_html__('可以到 %1$s 查看主要功能與使用方式', Utils::TEXT_DOMAIN), '<a href="' . Utils::GITHUB_REPO . '" target="_blank">Github 頁面</a>') . '<p>',
+			'icon'   => 'el el-tag',
 			'fields' => [
 				[
 					'id'       => self::ENABLE_BIGGEST_COUPON_FIELD_NAME,

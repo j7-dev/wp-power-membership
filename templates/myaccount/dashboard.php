@@ -33,10 +33,33 @@ $allowed_html = [
 /**
  * 顯示會員等級
  */
-$current_user_id        = \get_current_user_id();
-$current_member_lv_id   = \get_user_meta($current_user_id, Utils::CURRENT_MEMBER_LV_META_KEY, true);
-$current_member_lv      = \get_post($current_member_lv_id);
-$current_member_lv_name = empty($current_member_lv) ? '預設會員' : $current_member_lv->post_title;
+$current_user_id           = \get_current_user_id();
+$current_member_lv_id      = \get_user_meta($current_user_id, Utils::CURRENT_MEMBER_LV_META_KEY, true);
+$current_member_lv         = \get_post($current_member_lv_id);
+$current_member_lv_img_url = empty($current_member_lv) ? '' : \get_the_post_thumbnail_url($current_member_lv, 'thumbnail');
+$current_member_lv_name    = empty($current_member_lv) ? '預設會員' : $current_member_lv->post_title;
+$next_rank_id              = \gamipress_get_next_user_rank_id($current_user_id, 'member_lv');
+
+$next_rank_html = '您已是最高等級';
+if ($next_rank_id) {
+
+	$next_rank_threshold = \get_post_meta($next_rank_id, 'power_membership_threshold', true);
+	$next_rank_threshold = \wc_price($next_rank_threshold);
+
+	$next_rank_html = sprintf(
+	/*html*/'
+	下個等級為 <span class="text-white bg-[#6e6d76] rounded-xl text-xs px-3 py-1">%1$s</span>
+	%2$s
+	',
+	\get_the_title($next_rank_id),
+	$next_rank_threshold ? "需要消費 {$next_rank_threshold} 元" : ''
+	);
+}
+
+
+echo '<pre>';
+var_dump($next_rank_id);
+echo '</pre>';
 
 printf(
 	/*html*/'
@@ -45,10 +68,17 @@ printf(
 			<span class="">會員等級</span>
 		</div>
 		<div>
-			<span class="text-white bg-[#fb7258] rounded-xl text-xs px-3 py-1">%s</span>
+			<span class="text-white bg-[#fb7258] rounded-xl text-xs px-3 py-1">%1$s</span>
+		</div>
+		<div>
+			<span class="">下個等級</span>
+		</div>
+		<div>
+			%2$s
 		</div>
 	</div>',
-	$current_member_lv_name
+	$current_member_lv_name,
+	$next_rank_html
 );
 
 
