@@ -71,7 +71,7 @@ final class Metabox {
 		);
 		$limit_type_html = \ob_get_clean();
 
-		$lt_fixed_html  = '<div data-type="fixed" class="flex gap-4">';
+		$lt_fixed_html  = '<div data-type="fixed" class="flex gap-4 items-center">從最近';
 		$lt_fixed_html .= sprintf(
 		/*html*/'<input type="number" name="%1$s" value="%2$s"  min="0" step="1" class="w-20" />',
 		self::LIMIT_VALUE_META_KEY,
@@ -90,7 +90,7 @@ final class Metabox {
 			]
 		);
 		$lt_fixed_html .= \ob_get_clean();
-		$lt_fixed_html .= '</div>';
+		$lt_fixed_html .= '累積計算</div>';
 
 		$lt_assigned_html = sprintf(
 			/*html*/'
@@ -98,7 +98,7 @@ final class Metabox {
 				從
 				<input type="date" name="%1$s" value="%2$s" max="%3$s" />
 				<input type="hidden" name="%4$s" value="date" />
-				統計至今
+				累積至今計算
 			</div>
 			',
 			self::LIMIT_VALUE_META_KEY,

@@ -52,8 +52,83 @@ abstract class Utils {
 		return $order_data;
 	}
 
+	/**
+	 * 根據用戶ID和指定的時間戳獲取訂單數據。
+	 *
+	 * 此函數首先嘗試從暫存中獲取訂單數據。如果暫存中沒有數據，
+	 * 則會調用 `query_order_data_by_timestamp` 函數從數據庫中查詢數據。
+	 *
+	 * @param int         $user_id 用戶ID。
+	 * @param int         $timestamp 指定的時間戳，用於查詢訂單數據。
+	 * @param string|null $begin 指定查詢的起始時間範圍，可為'day'或'month'，或為null。
+	 * @return array 返回包含訂單數據的數組。
+	 */
+	public static function get_order_data_by_timestamp( int $user_id, int $timestamp = 0, ?string $begin = null ): array {
+		// get transient
+		$key        = self::get_transient_key($user_id, $timestamp, "_timestamp__begin_{$begin}");
+		$order_data = \get_transient($key);
+		if (empty($order_data)) {
+			$order_data = self::query_order_data_by_timestamp($user_id, $timestamp, $begin);
+		}
+
+		return $order_data;
+	}
+
+	/**
+	 * 根據用戶ID和時間戳獲取訂單數據。
+	 *
+	 * @param int         $user_id 用戶ID。
+	 * @param int         $timestamp 指定的時間戳，用於查詢訂單數據。
+	 * @param string|null $begin 指定查詢的起始時間範圍，可為'day'或'month'，或為null。
+	 * @param array|null  $args 額外的查詢參數。
+	 * @return array 返回包含訂單數據的數組。
+	 */
+	public static function query_order_data_by_timestamp( int $user_id, int $timestamp, ?string $begin = null, ?array $args = [] ): array {
+		global $wpdb;
+		$user = \get_userdata($user_id);
+
+		if ('day' === $begin) {
+			$timestamp = strtotime('today', $timestamp);
+		} elseif ('month' === $begin) {
+			$timestamp = strtotime('first day of this month', $timestamp);
+		}
+
+		$user_registed_time = strtotime($user->data->user_registered);
+		$is_registered      = ( $user_registed_time >= $timestamp ) ? false : true;
+
+		$prepare = $wpdb->prepare(
+			"SELECT
+					SUM(pm.meta_value) as total_amount,
+					COUNT(DISTINCT p.ID) as order_count
+			FROM %1\$s as p
+			JOIN %2\$s as pm ON p.ID = pm.post_id
+			JOIN %2\$s as pm2 ON p.ID = pm2.post_id
+			WHERE p.post_type = 'shop_order'
+			AND p.post_status IN ('wc-completed', 'wc-processing')
+			%3\$s
+			AND pm.meta_key = '_order_total'
+			AND pm2.meta_key = '_customer_user'
+			AND pm2.meta_value = %4\$d",
+			"{$wpdb->prefix}posts",
+		"{$wpdb->prefix}postmeta",
+			$timestamp ? "AND UNIX_TIMESTAMP(p.post_date) >= {$timestamp}" : '',
+			$user_id
+		);
+
+		$result = $wpdb->get_row($prepare);
+
+		$order_data['total']              = $result->total_amount; // 金額
+		$order_data['order_num']          = $result->order_count; // N 筆訂單
+		$order_data['user_is_registered'] = $is_registered; // 是否已註冊
+
+		$key = self::get_transient_key($user_id, $timestamp, "_timestamp__begin_{$begin}");
+		\set_transient($key, $order_data, self::CACHE_TIME);
+
+		return $order_data;
+	}
+
 	public static function query_order_data_by_user_date( int $user_id, int $months_ago = 0, array $args = [] ): array {
-		$user      = get_userdata($user_id);
+		$user      = \get_userdata($user_id);
 		$that_date = strtotime('first day of -' . $months_ago . ' month', time());
 		$that_date = strtotime('first day of +1 month', $that_date);
 
@@ -92,8 +167,8 @@ abstract class Utils {
 		return $order_data;
 	}
 
-	public static function get_transient_key( int $user_id, int $months_ago ): string {
-		return "order_data_user_#{$user_id}__{$months_ago}_months_ago";
+	public static function get_transient_key( int $user_id, int $timestamp, ?string $key = 'months_ago' ): string {
+		return "order_data_user_#{$user_id}__{$timestamp}_{$key}";
 	}
 
 	/*
@@ -143,5 +218,33 @@ abstract class Utils {
 		$plugin_data = \get_plugin_data(self::get_plugin_dir() . '/plugin.php');
 		$plugin_ver  = $plugin_data['Version'];
 		return $plugin_ver;
+	}
+
+
+	/**
+	 * 計算基於指定的排名限制類型和值來獲取時間戳。
+	 *
+	 * 此函數根據排名限制類型（固定或指定）來計算時間戳。
+	 * - 如果類型為 'fixed'，則基於當前時間往回計算指定的時間單位和值。
+	 * - 如果類型為 'assigned'，則將指定的日期（格式為 'Y-m-d'）轉換為時間戳。
+	 *
+	 * @param string $next_rank_limit_type 排名限制類型，可為 'fixed' 或 'assigned'。
+	 * @param mixed  $next_rank_limit_value 排名限制的值，如果類型為 'fixed'，則為數字；如果類型為 'assigned'，則為日期字符串。
+	 * @param string $next_rank_limit_unit 排名限制的時間單位，僅當類型為 'fixed' 時使用。
+	 * @return int 返回計算後的時間戳。 如果是 unlimited 就會是 0
+	 */
+	public static function calc_timestamp( $next_rank_limit_type, $next_rank_limit_value, $next_rank_limit_unit ): int {
+		$calc_timestamp = 0;
+		if ('fixed' === $next_rank_limit_type) {
+			/**
+			 * $next_rank_limit_value = 10
+			 * $next_rank_limit_unit = 'month'
+			 */
+			$calc_timestamp = strtotime("-{$next_rank_limit_value} {$next_rank_limit_unit}");
+		} elseif ('assigned' === $next_rank_limit_type) {
+			// convert 'Y-m-d' to 'timestamp'
+			$calc_timestamp = strtotime($next_rank_limit_value);
+		}
+		return $calc_timestamp;
 	}
 }

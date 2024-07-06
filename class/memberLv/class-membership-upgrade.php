@@ -29,18 +29,18 @@ final class MembershipUpgrade {
 		}
 
 		// 取得下個等級的門檻
-		$next_rank_id        = \gamipress_get_next_user_rank_id($customer_id, Utils::MEMBER_LV_POST_TYPE);
-		$next_rank_threshold = (int) \get_post_meta($next_rank_id, Metabox::THRESHOLD_META_KEY, true);
+		$next_rank_id = \gamipress_get_next_user_rank_id($customer_id, Utils::MEMBER_LV_POST_TYPE);
+		if (!$next_rank_id) {
+			return;
+		}
 
-		// 取得歷史累積金額
-		$args       = [
-			'numberposts' => -1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $customer_id,
-			'post_type'   => [ 'shop_order' ],
-			'post_status' => [ 'wc-completed', 'wc-processing' ], // TODO 可以做成選單
-		];
-		$order_data = Utils::get_order_data_by_user_date($customer_id, 0, $args);
+		$next_rank_threshold   = (int) \get_post_meta($next_rank_id, Metabox::THRESHOLD_META_KEY, true);
+		$next_rank_limit_type  = \get_post_meta($next_rank_id, Metabox::LIMIT_TYPE_META_KEY, true);
+		$next_rank_limit_value = \get_post_meta($next_rank_id, Metabox::LIMIT_VALUE_META_KEY, true);
+		$next_rank_limit_unit  = \get_post_meta($next_rank_id, Metabox::LIMIT_UNIT_META_KEY, true);
+		$timestamp             = Utils::calc_timestamp($next_rank_limit_type, $next_rank_limit_value, $next_rank_limit_unit);
+
+		$order_data = Utils::get_order_data_by_timestamp($customer_id, $timestamp);
 		$acc_amount = (int) $order_data['total'];
 
 		if ($acc_amount >= $next_rank_threshold) {
