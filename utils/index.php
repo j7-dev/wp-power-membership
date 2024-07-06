@@ -41,18 +41,18 @@ abstract class Utils {
 	 *
 	 * @ref https://wisdmlabs.com/blog/query-posts-or-comments-by-date-time/
 	 */
-	public static function get_order_data_by_user_date( int $user_id, int $months_ago = 0, array $args = [], string $transient_key = '' ): array {
+	public static function get_order_data_by_user_date( int $user_id, int $months_ago = 0, array $args = [] ): array {
 		// get transient
-		$key        = self::get_transient_key($user_id, $months_ago, $transient_key);
+		$key        = self::get_transient_key($user_id, $months_ago);
 		$order_data = \get_transient($key);
 		if (empty($order_data)) {
-			$order_data = self::query_order_data_by_user_date($user_id, $months_ago, $args, $transient_key);
+			$order_data = self::query_order_data_by_user_date($user_id, $months_ago, $args);
 		}
 
 		return $order_data;
 	}
 
-	public static function query_order_data_by_user_date( int $user_id, int $months_ago = 0, array $args = [], string $transient_key = '' ): array {
+	public static function query_order_data_by_user_date( int $user_id, int $months_ago = 0, array $args = [] ): array {
 		$user      = get_userdata($user_id);
 		$that_date = strtotime('first day of -' . $months_ago . ' month', time());
 		$that_date = strtotime('first day of +1 month', $that_date);
@@ -86,14 +86,14 @@ abstract class Utils {
 		$order_data['order_num']          = count($customer_orders); // N 筆訂單
 		$order_data['user_is_registered'] = $is_registered; // 是否已註冊
 
-		$key = self::get_transient_key($user_id, $months_ago, $transient_key);
+		$key = self::get_transient_key($user_id, $months_ago);
 		\set_transient($key, $order_data, self::CACHE_TIME);
 
 		return $order_data;
 	}
 
-	public static function get_transient_key( int $user_id, int $months_ago, string $transient_key ): string {
-		return "order_data_user_id_{$user_id}_months_ago_{ $months_ago}_transient_key_{$transient_key}";
+	public static function get_transient_key( int $user_id, int $months_ago ): string {
+		return "order_data_user_#{$user_id}__{$months_ago}_months_ago";
 	}
 
 	/*
