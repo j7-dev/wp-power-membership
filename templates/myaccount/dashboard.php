@@ -87,7 +87,7 @@ if ($next_rank_id) {
 	<div>
 		<span class="text-white bg-[#6e6d76] rounded-xl text-xs px-3 py-1">%1$s</span>
 	</div>' .
-	( !$next_rank_threshold ?: /*html*/'
+	( $next_rank_threshold ? /*html*/'
 	<div>
 		<span class="">升級條件</span>
 	</div>
@@ -100,7 +100,7 @@ if ($next_rank_id) {
 	<div>
 		%3$s
 	</div>
-	' ),
+	' : '' ),
 	\get_the_title($next_rank_id),
 	$condition_html,
 	$current_condition_html
