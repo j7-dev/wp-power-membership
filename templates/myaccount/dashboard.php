@@ -74,7 +74,7 @@ if ($next_rank_id) {
 
 	$current_condition_html = $next_rank_id ? sprintf(
 		/*html*/'目前已累積 %1$s 元%2$s',
-		$acc_amount,
+		\wc_price($acc_amount),
 		$diff > 0 ? "，還差 {$diff_html} 元" : '',
 		) : '';
 
