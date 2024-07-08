@@ -6,5 +6,6 @@ module.exports = {
 		extend: {},
 	},
 	plugins: [],
+	blocklist: ['fixed', 'col-1', 'col-2'], // 排除 class
 }
 

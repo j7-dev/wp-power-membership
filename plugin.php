@@ -4,7 +4,7 @@
  * Plugin Name:       Power Membership | 讓每個人都可以輕鬆建立會員制網站
  * Plugin URI:        https://cloud.luke.cafe/plugins/power-membership/
  * Description:       Power Membership 可以設定會員升級需要的累積消費門檻，並針對特定會員等級發放優惠，也改善介面，可輕鬆查看會員的消費總覽。
- * Version:           0.1.2
+ * Version:           0.2.1
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            J7
@@ -25,41 +25,38 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 if (!\class_exists('J7\PowerMembership\Plugin')) {
 
-	class Plugin
-	{
+	final class Plugin {
+
 		private static $instance;
 		public static $is_all_plugins_activated = false;
 		const GAMIPRESS_CLASS                   = 'GamiPress';
 		const WOOCOMMERCE_CLASS                 = 'WooCommerce';
 		const WP_TOOLKIT_CLASS                  = 'J7\WpToolkit\Plugin';
 
-		public function __construct()
-		{
+		public function __construct() {
 			require_once __DIR__ . '/required_plugins/index.php';
 			require_once __DIR__ . '/vendor/autoload.php';
 			require_once __DIR__ . '/utils/index.php';
 			require_once __DIR__ . '/class/index.php';
 
-			\register_activation_hook(__FILE__, [$this, 'activate']);
-			\register_deactivation_hook(__FILE__, [$this, 'deactivate']);
-			\add_action('tgmpa_register', [$this, 'register_required_plugins']);
-			\add_action('plugins_loaded', [$this, 'check_required_plugins']);
+			\register_activation_hook(__FILE__, [ $this, 'activate' ]);
+			\register_deactivation_hook(__FILE__, [ $this, 'deactivate' ]);
+			\add_action('tgmpa_register', [ $this, 'register_required_plugins' ]);
+			\add_action('plugins_loaded', [ $this, 'check_required_plugins' ]);
 
 			$this->plugin_update_checker();
 		}
 
-		public function check_required_plugins()
-		{
+		public function check_required_plugins() {
 			self::$is_all_plugins_activated = \class_exists(self::GAMIPRESS_CLASS) && \class_exists(self::WOOCOMMERCE_CLASS) && \class_exists(self::WP_TOOLKIT_CLASS);
 
 			if (self::$is_all_plugins_activated) {
 				new Bootstrap();
-				\add_action('init', array($this, 'remove_notices'), 20);
+				\add_action('init', [ $this, 'remove_notices' ], 20);
 			}
 		}
 
-		public static function instance()
-		{
+		public static function instance() {
 			if (empty(self::$instance)) {
 				self::$instance = new self();
 			}
@@ -69,8 +66,7 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 		/**
 		 * wp plugin 更新檢查 update checker
 		 */
-		public function plugin_update_checker(): void
-		{
+		public function plugin_update_checker(): void {
 			$updateChecker = PucFactory::buildUpdateChecker(
 				Utils::GITHUB_REPO,
 				__FILE__,
@@ -81,8 +77,7 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 			$updateChecker->getVcsApi()->enableReleaseAssets();
 		}
 
-		public function register_required_plugins(): void
-		{
+		public function register_required_plugins(): void {
 			$plugins = [
 				[
 					'name'     => 'GamiPress',
@@ -104,7 +99,7 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 				],
 			];
 
-			$config = array(
+			$config = [
 				'id'           => Utils::KEBAB, // Unique ID for hashing notices for multiple instances of TGMPA.
 				'default_path' => '', // Default absolute path to bundled plugins.
 				'menu'         => 'tgmpa-install-plugins', // Menu slug.
@@ -115,14 +110,14 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 				'dismiss_msg'  => __('這個訊息將在依賴套件被安裝並啟用後消失。' . Utils::APP_NAME . ' 沒有這些依賴套件的情況下將無法運作！', Utils::TEXT_DOMAIN), // If 'dismissable' is false, this message will be output at top of nag.
 				'is_automatic' => true, // Automatically activate plugins after installation or not.
 				'message'      => '', // Message to output right before the plugins table.
-				'strings'      => array(
+				'strings'      => [
 					'page_title'                      => __('安裝依賴套件', Utils::TEXT_DOMAIN),
 					'menu_title'                      => __('安裝依賴套件', Utils::TEXT_DOMAIN),
 					'installing'                      => __('安裝套件: %s', Utils::TEXT_DOMAIN), // translators: %s: plugin name.
-					'updating'                        => __('更新套件: %s', Utils::TEXT_DOMAIN), //translators: %s: plugin name.
+					'updating'                        => __('更新套件: %s', Utils::TEXT_DOMAIN), // translators: %s: plugin name.
 					'oops'                            => __('OOPS! plugin API 出錯了', Utils::TEXT_DOMAIN),
 					'notice_can_install_required'     => _n_noop(
-						//translators: 1: plugin name(s).
+						// translators: 1: plugin name(s).
 						Utils::APP_NAME . ' 依賴套件: %1$s.',
 						Utils::APP_NAME . ' 依賴套件: %1$s.',
 						Utils::TEXT_DOMAIN
@@ -186,23 +181,20 @@ if (!\class_exists('J7\PowerMembership\Plugin')) {
 					'contact_admin'                   => __('請聯繫網站管理員', Utils::TEXT_DOMAIN),
 
 					'nag_type'                        => 'error', // Determines admin notice type - can only be one of the typical WP notice classes, such as 'updated', 'update-nag', 'notice-warning', 'notice-info' or 'error'. Some of which may not work as expected in older WP versions.
-				),
-			);
+				],
+			];
 
 			\tgmpa($plugins, $config);
 		}
 
-		public function remove_notices(): void
-		{
-			\remove_action('admin_notices', array(\TGM_Plugin_Activation::$instance, 'notices'));
+		public function remove_notices(): void {
+			\remove_action('admin_notices', [ \TGM_Plugin_Activation::$instance, 'notices' ]);
 		}
 
-		public function activate(): void
-		{
+		public function activate(): void {
 		}
 
-		public function deactivate(): void
-		{
+		public function deactivate(): void {
 			// 刪除會員等級 post type 或是 transient
 		}
 	}
