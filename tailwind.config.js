@@ -23,4 +23,5 @@ module.exports = {
   },
   plugins: [],
   safelist: [],
+  blocklist: ['fixed', 'columns-1', 'columns-2', 'hidden'],
 }
