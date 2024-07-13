@@ -13,6 +13,9 @@ use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
  * Class Base
  */
 abstract class Base {
+	const BASE_URL      = '/';
+	const APP1_SELECTOR = '#power_membership_logs';
+	const API_TIMEOUT   = '30000';
 	const DEFAULT_IMAGE = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
 	const CACHE_TIME    = 24 * HOUR_IN_SECONDS;
 

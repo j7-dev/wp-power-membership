@@ -10,6 +10,8 @@ namespace J7\PowerMembership;
 use J7\PowerMembership\Admin\Menu\Setting;
 use J7\PowerMembership\Resources\MemberLv\Init as MemberLvInit;
 use J7\WpToolkit\PowerPlugins;
+use J7\PowerMembership\Utils\Base;
+use Kucrut\Vite;
 
 
 /**
@@ -28,11 +30,12 @@ final class Bootstrap {
 		require_once __DIR__ . '/admin/index.php';
 		require_once __DIR__ . '/woocommerce/index.php';
 
-		// require_once __DIR__ . '/front-end/index.php';
+		require_once __DIR__ . '/front-end/index.php';
 
+		// PENDING
 		// \add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_script' ), 99 );
 		// \add_action( 'admin_enqueue_scripts', array( $this, 'add_static_assets' ), 100 );
-		// \add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_script' ), 99 );
+		\add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_script' ), 99 );
 	}
 
 	/**
@@ -54,22 +57,68 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public function enqueue_script(): void {
-		\wp_enqueue_script(
-			Plugin::$kebab,
-			Plugin::$url . '/js/dist/index.js',
-			[ 'jquery' ],
-			Plugin::$version,
-			[
-				'in_footer' => true,
-				'strategy'  => 'async',
-			]
+		// PENDING
+		// \wp_enqueue_script(
+		// Plugin::$kebab,
+		// Plugin::$url . '/js/dist/index.js',
+		// [ 'jquery' ],
+		// Plugin::$version,
+		// [
+		// 'in_footer' => true,
+		// 'strategy'  => 'async',
+		// ]
+		// );
+
+		// \wp_enqueue_style(
+		// Plugin::$kebab,
+		// Plugin::$url . '/js/dist/assets/css/index.css',
+		// [],
+		// Plugin::$version
+		// );
+
+		// React script
+
+		Vite\enqueue_asset(
+			Plugin::$dir . '/js/dist',
+			'js/src/main.tsx',
+			array(
+				'handle'    => Plugin::$kebab,
+				'in-footer' => true,
+			)
 		);
 
-		\wp_enqueue_style(
+		$post_id   = \get_the_ID();
+		$permalink = \get_permalink( $post_id );
+
+		\wp_localize_script(
 			Plugin::$kebab,
-			Plugin::$url . '/js/dist/assets/css/index.css',
-			[],
-			Plugin::$version
+			Plugin::$snake . '_data',
+			array(
+				'env' => array(
+					'siteUrl'       => \site_url(),
+					'ajaxUrl'       => \admin_url( 'admin-ajax.php' ),
+					'userId'        => \wp_get_current_user()?->data?->ID ?? null,
+					'postId'        => $post_id,
+					'permalink'     => $permalink,
+					'APP_NAME'      => Plugin::$app_name,
+					'KEBAB'         => Plugin::$kebab,
+					'SNAKE'         => Plugin::$snake,
+					'BASE_URL'      => Base::BASE_URL,
+					'APP1_SELECTOR' => Base::APP1_SELECTOR,
+					'API_TIMEOUT'   => Base::API_TIMEOUT,
+					'nonce'         => \wp_create_nonce( Plugin::$kebab ),
+
+				),
+			)
+		);
+
+		\wp_localize_script(
+			Plugin::$kebab,
+			'wpApiSettings',
+			array(
+				'root'  => \untrailingslashit( \esc_url_raw( rest_url() ) ),
+				'nonce' => \wp_create_nonce( 'wp_rest' ),
+			)
 		);
 	}
 
@@ -85,6 +134,7 @@ final class Bootstrap {
 
 	/**
 	 * Add static assets
+	 * PENDING
 	 *
 	 * @param string $hook current page hook
 	 *

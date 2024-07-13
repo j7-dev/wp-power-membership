@@ -1,42 +1,23 @@
-import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import alias from '@rollup/plugin-alias'
 import path from 'path'
-import optimizer from 'vite-plugin-optimizer'
 
 // import liveReload from 'vite-plugin-live-reload'
 
-export default defineConfig({
-  build: {
-    emptyOutDir: true,
-    minify: true,
-    outDir: path.resolve(__dirname, 'js/dist'),
+import { v4wp } from '@kucrut/vite-for-wp'
 
-    // watch: {
-    //   include: ['js/src/**', 'inc/**'],
-    //   exclude: 'node_modules/**, .git/**, dist/**, .vscode/**',
-    // },
-
-    rollupOptions: {
-      input: 'js/src/main.ts', // Optional, defaults to 'src/main.js'.
-      output: {
-        assetFileNames: 'assets/[ext]/index.[ext]',
-        entryFileNames: 'index.js',
-      },
-    },
-  },
+export default {
   plugins: [
     alias(),
+    react(),
     tsconfigPaths(),
 
-    // liveReload([
-    //   __dirname + '/**/*.php',
-    //   __dirname + '/js/dist/**/*',
-    //   __dirname + '/js/src/**/*.tsx',
-    // ]), // Optional, if you want to reload page on php changed
+    // liveReload(__dirname + '/**/*.php'), // Optional, if you want to reload page on php changed
 
-    optimizer({
-      jquery: 'const $ = window.jQuery; export { $ as default }',
+    v4wp({
+      input: 'js/src/main.tsx', // Optional, defaults to 'src/main.js'.
+      outDir: 'js/dist', // Optional, defaults to 'dist'.
     }),
   ],
   resolve: {
@@ -44,4 +25,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'js/src'),
     },
   },
-})
+}

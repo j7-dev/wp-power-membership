@@ -23,10 +23,10 @@ final class MyAccount {
 	 */
 	public function __construct() {
 		\add_action( 'init', [ $this, 'custom_account_endpoint' ] );
-		\add_filter( 'woocommerce_account_menu_items', [ $this, 'courses_menu_items' ], 100, 1 );
+		\add_filter( 'woocommerce_account_menu_items', [ $this, 'custom_menu_items' ], 100, 1 );
 		\add_action(
 			'woocommerce_account_' . self::POINT_LOG_ENDPOINT . '_endpoint',
-			[ $this, 'render_courses' ]
+			[ $this, 'render_page' ]
 		);
 	}
 
@@ -44,7 +44,7 @@ final class MyAccount {
 	 *
 	 * @return array
 	 */
-	public function courses_menu_items( array $items ): array {
+	public function custom_menu_items( array $items ): array {
 		// 重新排序，排在控制台後
 		return array_slice( $items, 0, 1, true ) + [
 			self::POINT_LOG_ENDPOINT => '點數紀錄',
@@ -54,12 +54,12 @@ final class MyAccount {
 	/**
 	 * Render courses
 	 */
-	public function render_courses(): void {
+	public function render_page(): void {
 		echo '點數紀錄';
-		$id = \substr( Base::APP2_SELECTOR, 1 );
+		$id = \substr( Base::APP1_SELECTOR, 1 );
 		printf(
-		/*html*/            '<div id="%1$s"></div>',
-			$id
+		/*html*/            '<div id="%1$s" class="max-w-[900px]"></div>',
+			$id // phpcs:ignore
 		);
 	}
 }
