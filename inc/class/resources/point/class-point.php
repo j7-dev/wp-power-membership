@@ -273,12 +273,12 @@ final class Point {
 
 		foreach ( $fees as $fee ) {
 			$fee_name = $fee->get_name();
-			if ( str_starts_with( $fee_name, self::FEE_NAME_PREFIX ) ) {
+			if ( str_starts_with( $fee_name, self::FEE_NAME_PREFIX ) && $fee->get_amount() ) {
 				// 執行扣點
 				$default_point->deduct_points_to_user(
 					user_id: (int) $order->get_customer_id(),
 					args: [
-						'title' => '訂單折抵購物金' . $default_point->name . ' ' . $fee->get_amount() . ' 點',
+						'title' => '訂單折抵【' . $default_point->name . '】 ' . $fee->get_amount() . ' 點',
 						'type'  => 'system',
 					],
 					points: (float) $fee->get_amount()

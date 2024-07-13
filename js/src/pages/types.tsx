@@ -1,9 +1,11 @@
 import { TParamsBase } from '@/types'
 
+type TLogType = 'cron' | 'modify' | 'purchase' | 'system' | 'manual'
+
 export type DataType = {
   id: string
   title: string
-  type: 'cron' | 'modify' | 'purchase'
+  type: TLogType
   user_id: string
   modified_by: string
   date: string
@@ -15,11 +17,11 @@ export type DataType = {
 export type TLogExtraParams = {
   user_id?: string
   modified_by?: string
-  type?: 'cron' | 'modify' | 'purchase'
+  type?: TLogType
 }
 
 export type TLogParams = TParamsBase & {
   user_id?: string
   modified_by?: string
-  type?: 'cron' | 'modify' | 'purchase'
+  type?: TLogType
 }

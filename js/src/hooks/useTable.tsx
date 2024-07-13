@@ -19,12 +19,11 @@ export const useTable = <T, K>({
   queryOptions?: Omit<UseQueryOptions, 'queryKey'>
 }) => {
   type TData = {
-    data: {
-      data: {
-        list: K[]
-        pagination: TPagination
-      }
-    }
+    data: K[]
+		headers: {
+			'x-wp-total': string
+			'x-wp-totalpages': string
+		}
   }
 
   const [params, setParams] = useState<T & TParamsBase>({
@@ -50,9 +49,13 @@ export const useTable = <T, K>({
     })
   }
 
-  const pagination = result?.data?.data?.data?.pagination
+	const headers = result?.data?.headers
+
+  const pagination = headers
     ? {
-        ...result?.data?.data?.data?.pagination,
+        total: Number(headers?.['x-wp-total']),
+				totalPages: Number(headers?.['x-wp-totalpages']),
+				// current: result?.data?.data?.data?.pagination.current_page,
         showSizeChanger: true,
         showTotal: (total: number) => `共 ${total} 筆`,
         onChange: handlePaginationChange,
@@ -65,7 +68,7 @@ export const useTable = <T, K>({
       }
     : false
 
-  const dataSource = result?.data?.data?.data?.list || []
+  const dataSource = result?.data?.data || []
 
   const tableProps: TableProps<K> = {
     loading: result?.isFetching,

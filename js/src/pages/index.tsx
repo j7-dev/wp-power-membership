@@ -22,12 +22,15 @@ const LogTypeTag: React.FC<{ record: DataType }> = ({ record }) => {
 	switch (type) {
 		case 'cron':
 			return <Tag color="purple">每日扣點</Tag>
+		case 'manual':
 		case 'modify':
 			return <Tag color="magenta">管理員直接修改</Tag>
 		case 'purchase':
 			return <Tag color="cyan">儲值</Tag>
+		case 'system':
+			return <Tag color="blue">系統</Tag>
 		default:
-			return <></>
+			return <Tag>未分類</Tag>
 	}
 }
 
@@ -68,7 +71,7 @@ function DefaultPage() {
 			render: (_, record) => <LogTypeTag record={record} />,
 		},
 		{
-			title: 'Power Money 變化',
+			title: '點數變化',
 			dataIndex: 'point_changed',
 			width: 144,
 			align: 'right',
