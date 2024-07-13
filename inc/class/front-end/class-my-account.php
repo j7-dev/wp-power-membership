@@ -55,10 +55,9 @@ final class MyAccount {
 	 * Render courses
 	 */
 	public function render_page(): void {
-		echo '點數紀錄';
 		$id = \substr( Base::APP1_SELECTOR, 1 );
 		printf(
-		/*html*/            '<div id="%1$s" class="max-w-[900px]"></div>',
+		/*html*/            '<div id="%1$s" class="w-full"></div>',
 			$id // phpcs:ignore
 		);
 	}

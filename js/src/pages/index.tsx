@@ -24,7 +24,7 @@ const LogTypeTag: React.FC<{ record: DataType }> = ({ record }) => {
 			return <Tag color="purple">每日扣點</Tag>
 		case 'manual':
 		case 'modify':
-			return <Tag color="magenta">管理員直接修改</Tag>
+			return <Tag color="magenta">管理員修改</Tag>
 		case 'purchase':
 			return <Tag color="cyan">儲值</Tag>
 		case 'system':
@@ -60,31 +60,20 @@ function DefaultPage() {
 
 	const columns: TableProps<DataType>['columns'] = [
 		{
-			title: '日期',
+			title: <p className='m-0 text-center'>日期</p>,
 			dataIndex: 'date',
 			width: 160,
 		},
 		{
-			title: '分類',
+			title: <p className='m-0 text-center'>分類</p>,
 			dataIndex: 'type',
-			width: 144,
+			width: 120,
 			render: (_, record) => <LogTypeTag record={record} />,
 		},
 		{
-			title: '點數變化',
-			dataIndex: 'point_changed',
-			width: 144,
-			align: 'right',
-		},
-		{
-			title: '餘額',
-			dataIndex: 'new_balance',
-			width: 208,
-			align: 'right',
-		},
-		{
-			title: '說明',
+			title: <p className='m-0 text-center'>購物金項目</p>,
 			dataIndex: 'title',
+			width: 200,
 			render: (value: string) => (
 				<Paragraph
 					copyable
@@ -99,9 +88,37 @@ function DefaultPage() {
 				</Paragraph>
 			),
 		},
+		{
+			title: <p className='m-0 text-center'>購物金款項</p>,
+			dataIndex: 'point_changed',
+			width: 120,
+			align: 'right',
+			render: (v: string) => Number(v) > 0 ? <span className='text-green-500'>+{v}</span> : <span className='text-red-500'>{v}</span>,
+		},
+		{
+			title: <p className='m-0 text-center'>到期日</p>,
+			dataIndex: 'expire_date',
+			width: 120,
+			align: 'right',
+		},
+		{
+			title: <p className='m-0 text-center'>購物金款項</p>,
+			dataIndex: 'point_changed',
+			width: 120,
+			align: 'right',
+		},
+		{
+			title: <p className='m-0 text-center'>餘額</p>,
+			dataIndex: 'new_balance',
+			width: 120,
+			align: 'right',
+		},
+
 	]
 
-	return <Table rowKey="id" {...tableProps} columns={columns} />
+	return <Table rowKey="id" {...tableProps} columns={columns} size="small" scroll={{
+		x: 960,
+	}} />
 }
 
 export default DefaultPage
