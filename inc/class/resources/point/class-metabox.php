@@ -9,7 +9,7 @@ declare( strict_types=1 );
 namespace J7\PowerMembership\Resources\Point;
 
 use J7\PowerMembership\Plugin;
-use J7\WpUtils\Classes\WPUPointUtils;
+use J7\WpUtils\Classes\PointService;
 
 /**
  * Class Metabox
@@ -41,7 +41,7 @@ final class Metabox {
 			Plugin::$snake . '_metabox',
 			'設定',
 			array( $this, 'render_metabox' ),
-			WPUPointUtils::POST_TYPE,
+			PointService::POST_TYPE,
 			'normal',
 			'high'
 		);

@@ -110,7 +110,7 @@ final class Metabox {
 			return;
 		}
 		$all_point_fields = [];
-		$all_points       = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points       = Plugin::instance()->point_service_instance->get_all_points();
 
 		foreach ( $all_points as $point ) {
 			$all_point_fields[] = self::AWARD_POINTS_USER_BDAY_FIELD_NAME . '_' . $point->slug;

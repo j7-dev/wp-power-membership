@@ -153,7 +153,7 @@ final class UserColumns {
 	 * @return array
 	 */
 	public function add_points_column_head( array $columns ): array {
-		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points = Plugin::instance()->point_service_instance->get_all_points();
 
 		foreach ( $all_points as $point ) {
 			$columns[ $point->slug ] = $point->name;
@@ -238,7 +238,7 @@ final class UserColumns {
 	 * @return string
 	 */
 	public function add_points_column_values( $default_value, $column_name, $user_id ) {
-		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points = Plugin::instance()->point_service_instance->get_all_points();
 
 		foreach ( $all_points as $point ) {
 			if ( $column_name === $point->slug ) {

@@ -20,17 +20,11 @@ declare ( strict_types=1 );
 namespace J7\PowerMembership;
 
 use Exception;
-use J7\WpUtils\Classes\WPULogUtils;
-use J7\WpUtils\Classes\WPUPointUtils;
+use J7\WpUtils\Classes\LogService;
+use J7\WpUtils\Classes\PointService;
 
 if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 	require_once __DIR__ . '/vendor/autoload.php';
-
-	// // DELETE
-	// require_once __DIR__ . '/test/LogTableCreationTrait.php';
-	// require_once __DIR__ . '/test/WPULogUtils.php';
-	// require_once __DIR__ . '/test/WPUPointUtils.php';
-
 
 	/**
 	 * Class Plugin
@@ -47,24 +41,24 @@ if ( ! \class_exists( 'J7\PowerMembership\Plugin' ) ) {
 		/**
 		 * Log Utils instance
 		 *
-		 * @var WPULogUtils
+		 * @var LogService
 		 */
-		public WPULogUtils $log_utils_instance;
+		public LogService $log_service_instance;
 
 		/**
 		 * Point Utils instance
 		 *
-		 * @var WPUPointUtils
+		 * @var PointService
 		 */
-		public WPUPointUtils $point_utils_instance;
+		public PointService $point_service_instance;
 
 		/**
 		 * Constructor
 		 */
 		public function __construct() {
-			$this->log_utils_instance   = new WPULogUtils( table_name: self::LOG_TABLE_NAME );
-			$this->point_utils_instance = new WPUPointUtils();
-			$this->point_utils_instance->init( $this->log_utils_instance );
+			$this->log_service_instance   = new LogService( table_name: self::LOG_TABLE_NAME );
+			$this->point_service_instance = new PointService();
+			$this->point_service_instance->init( $this->log_service_instance );
 			require_once __DIR__ . '/inc/class/class-bootstrap.php';
 
 			$this->required_plugins = [

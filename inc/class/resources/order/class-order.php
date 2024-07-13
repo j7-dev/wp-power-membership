@@ -58,7 +58,7 @@ final class Order {
 		$subtotal    = $order->get_subtotal();
 		$customer_id = $order->get_customer_id();
 
-		$point = Plugin::instance()->point_utils_instance->default_point;
+		$point = Plugin::instance()->point_service_instance->default_point;
 
 		// PENDING 做成設定項
 		// 消費每  $2000 ＝ 20 購物金

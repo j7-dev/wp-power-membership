@@ -15,7 +15,7 @@ use Exception;
 use J7\PowerMembership\Admin\Menu\Setting;
 use J7\PowerMembership\Plugin;
 use J7\PowerMembership\Resources\MemberLv\Utils;
-use J7\WpUtils\Classes\WPUPoint;
+use J7\WpUtils\Classes\Point as PointObject;
 use WC_Cart;
 
 /**
@@ -51,7 +51,7 @@ final class Point {
 	public static function award_bday_by_user_id( int $user_id ): void {
 		$user           = \get_userdata( $user_id );
 		$user_member_lv = Utils::get_member_lv_by( 'user_id', $user_id );
-		$all_points     = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points     = Plugin::instance()->point_service_instance->get_all_points();
 
 		global $power_plugins_settings;
 		foreach ( $all_points as $point ) {
@@ -86,12 +86,12 @@ final class Point {
 	/**
 	 * Allow birthday reward
 	 *
-	 * @param int      $user_id - user id
-	 * @param WPUPoint $point - point
+	 * @param int         $user_id - user id
+	 * @param PointObject $point - point
 	 *
 	 * @return bool
 	 */
-	public static function allow_bday_reward( int $user_id, WPUPoint $point ): bool {
+	public static function allow_bday_reward( int $user_id, PointObject $point ): bool {
 		$last_awarded_on = \get_user_meta( $user_id, 'last_' . $point->id . '_birthday_awarded_on', true );
 		if ( ! $last_awarded_on ) {
 			return true;
@@ -138,7 +138,7 @@ final class Point {
 		float $points = 0,
 		string $point_slug = 'wpu_default_point'
 	): void {
-		Plugin::instance()->log_utils_instance->insert_user_log( $user_id, $args, $points, $point_slug );
+		Plugin::instance()->log_service_instance->insert_user_log( $user_id, $args, $points, $point_slug );
 	}
 
 	/**
@@ -152,7 +152,7 @@ final class Point {
 	public function award_after_user_register( int $user_id, array $userdata ): void { // phpcs:ignore
 		global $power_plugins_settings;
 
-		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points = Plugin::instance()->point_service_instance->get_all_points();
 
 		foreach ( $all_points as $point ) {
 			// 判斷是否啟用
@@ -243,7 +243,7 @@ final class Point {
 		// get cart subtotal
 		$cart_subtotal = (float) $cart->get_subtotal();
 
-		$default_point = Plugin::instance()->point_utils_instance->get_default_point();
+		$default_point = Plugin::instance()->point_service_instance->get_default_point();
 
 		$current_user_id = \get_current_user_id();
 
@@ -266,7 +266,7 @@ final class Point {
 	public function deduct_user_point( int $order_id ): void {
 		$order = \wc_get_order( $order_id );
 
-		$default_point = Plugin::instance()->point_utils_instance->get_default_point();
+		$default_point = Plugin::instance()->point_service_instance->get_default_point();
 
 		// get fee
 		$fees = $order->get_fees();

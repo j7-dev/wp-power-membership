@@ -71,7 +71,7 @@ final class UserEdit {
 		$member_lvs     = Utils::get_member_lvs();
 		$user_member_lv = Utils::get_member_lv_by( 'user_id', $user_id );
 
-		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points = Plugin::instance()->point_service_instance->get_all_points();
 
 //phpcs:disable
 		?>
@@ -222,7 +222,7 @@ final class UserEdit {
 			\update_user_meta( $user_id, self::BDAY_FIELD_NAME, \sanitize_text_field($_POST[ self::BDAY_FIELD_NAME ]) );
 		}
 
-		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points = Plugin::instance()->point_service_instance->get_all_points();
 
 		foreach ( $all_points as $point ) {
 			if ( isset( $_POST[ $point->slug ] ) ) {

@@ -10,7 +10,7 @@ namespace J7\PowerMembership\Admin\Menu;
 use J7\PowerMembership\Plugin;
 use J7\PowerMembership\Resources\MemberLv\Utils;
 use J7\WpToolkit\PowerPlugins;
-use J7\WpUtils\Classes\WPUPoint;
+use J7\WpUtils\Classes\Point;
 use J7\WpUtils\Traits\SingletonTrait;
 
 use function add_action;
@@ -159,7 +159,7 @@ final class Setting {
 	 * @return array
 	 */
 	private function get_points_fields_array(): array {
-		$all_points = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points = Plugin::instance()->point_service_instance->get_all_points();
 		// 每個點數的欄位
 		$points_fields_array = [];
 		foreach ( $all_points as $point ) {
@@ -193,11 +193,11 @@ final class Setting {
 	/**
 	 * 取得用戶註冊送購物金點數欄位陣列
 	 *
-	 * @param WPUPoint $point 點數
+	 * @param Point $point 點數
 	 *
 	 * @return array
 	 */
-	private function get_points_fields_array_user_register( WPUPoint $point ): array {
+	private function get_points_fields_array_user_register( Point $point ): array {
 		$points_fields_array  = [];
 		$register_enable      = self::AWARD_POINTS_AFTER_USER_REGISTER_FIELD_NAME . '__' . $point->id . '__enable';
 		$register_amount      = self::AWARD_POINTS_AFTER_USER_REGISTER_FIELD_NAME . '__' . $point->id . '__amount';
@@ -256,11 +256,11 @@ final class Setting {
 	/**
 	 * 取得用戶生日送購物金點數欄位陣列
 	 *
-	 * @param $point WPUPoint
+	 * @param $point Point
 	 *
 	 * @return array
 	 */
-	private function get_points_fields_array_user_bday( WPUPoint $point ): array {
+	private function get_points_fields_array_user_bday( Point $point ): array {
 		$points_fields_array = [];
 		$bday_enable         = self::AWARD_POINTS_AFTER_USER_BIRTHDAY_FIELD_NAME . '__' . $point->id . '__enable';
 		$bday_amount         = self::AWARD_POINTS_AFTER_USER_BIRTHDAY_FIELD_NAME . '__' . $point->id . '__amount';
@@ -326,7 +326,7 @@ final class Setting {
 		];
 
 		// 選擇點數種類
-		$all_points    = Plugin::instance()->point_utils_instance->get_all_points();
+		$all_points    = Plugin::instance()->point_service_instance->get_all_points();
 		$point_options = [];
 		foreach ( $all_points as $point ) {
 			$point_options[ $point->id ] = $point->name;

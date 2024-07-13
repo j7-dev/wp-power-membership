@@ -29,7 +29,7 @@ final class Log {
 		[
 			'endpoint'            => 'logs',
 			'method'              => 'get',
-			'permission_callback' => null,
+			'permission_callback' => 'is_user_logged_in',
 		],
 
 	];
@@ -54,6 +54,15 @@ final class Log {
 		);
 	}
 
+	// $defaults = [
+	// 'numberposts' => 10, // 每页显示的日志数量
+	// 'offset'      => 0, // 跳过的日志数量
+	// 'orderby'     => 'date', // 排序字段
+	// 'order'       => 'DESC', // 排序方向
+	// 'user_id'     => '', // 用户ID查询
+	// 'modified_by' => '', // 修改者ID查询
+	// 'type'        => '', // 日志类型查询
+	// ];
 
 	public function get_logs_callback( \WP_REST_Request $request ): \WP_REST_Response {
 
@@ -61,39 +70,19 @@ final class Log {
 
 		$params = array_map( [ WP::class, 'sanitize_text_field_deep' ], $params );
 
-		$default_args = [
-			'search_columns' => [ 'ID', 'user_login', 'user_email', 'user_nicename', 'display_name' ],
-			'posts_per_page' => 10,
-			'orderby'        => 'ID',
-			'order'          => 'DESC',
-			'offset'         => 0,
-			'paged'          => 1,
-			'count_total'    => true,
-		];
+		[
+			'list'       => $logs,
+			'pagination' => $pagination,
+		] = Plugin::instance()->log_service_instance->get_logs( $params );
 
-		$args = \wp_parse_args(
-			$params,
-			$default_args,
-		);
+		[
+			'total'      => $total,
+			'totalPages' => $total_pages,
+			// 'current'    => $current,
+			// 'pageSize'   => $page_size
+		] = $pagination;
 
-		if ( ! empty( $args['search'] ) ) {
-			$args['search'] = '*' . $args['search'] . '*'; // 模糊搜尋
-		}
-
-		// Create the WP_User_Query object
-		$wp_user_query = new \WP_User_Query( $args );
-
-		/**
-		 * @var \WP_User[] $users
-		 */
-		$users = $wp_user_query->get_results();
-
-		$total       = $wp_user_query->get_total();
-		$total_pages = \floor( $total / $args['posts_per_page'] ) + 1;
-
-		$formatted_users = array_map( [ $this, 'format_user_details' ], $users );
-
-		$response = new \WP_REST_Response( $formatted_users );
+		$response = new \WP_REST_Response( $logs );
 
 		// // set pagination in header
 		$response->header( 'X-WP-Total', (string) $total );

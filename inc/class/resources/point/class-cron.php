@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace J7\PowerMembership\Resources\Point;
 
 use J7\PowerMembership\Plugin;
-use J7\WpUtils\Classes\WPUPointUtils;
+use J7\WpUtils\Classes\PointService;
 use J7\PowerMembership\Utils\Base;
 use J7\PowerMembership\Resources\MemberLv\Utils;
 
