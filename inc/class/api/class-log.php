@@ -63,7 +63,13 @@ final class Log {
 	// 'modified_by' => '', // 修改者ID查询
 	// 'type'        => '', // 日志类型查询
 	// ];
-
+	/**
+	 * 獲取日誌的回調函數
+	 *
+	 * @param \WP_REST_Request $request REST 請求對象
+	 *
+	 * @return \WP_REST_Response 包含日誌的 REST 回應
+	 */
 	public function get_logs_callback( \WP_REST_Request $request ): \WP_REST_Response {
 
 		$params = $request->get_query_params();

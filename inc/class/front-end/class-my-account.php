@@ -47,7 +47,7 @@ final class MyAccount {
 	public function custom_menu_items( array $items ): array {
 		// 重新排序，排在控制台後
 		return array_slice( $items, 0, 1, true ) + [
-			self::POINT_LOG_ENDPOINT => '點數紀錄',
+			self::POINT_LOG_ENDPOINT => '購物金紀錄',
 		] + array_slice( $items, 1, null, true );
 	}
 
