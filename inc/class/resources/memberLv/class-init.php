@@ -31,8 +31,8 @@ final class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		\add_action( 'init', array( $this, 'init' ), 30 );
-		\add_action( 'admin_menu', array( $this, 'menu_page' ), 10 );
+		\add_action( 'init', [ $this, 'init' ], 30 );
+		\add_action( 'admin_menu', [ $this, 'menu_page' ], 10 );
 	}
 
 	/**
@@ -62,15 +62,15 @@ final class Init {
 		} else {
 			// create default member_lv
 			$post_id                    = \wp_insert_post(
-				array(
+				[
 					'post_title'  => '預設會員',
 					'post_type'   => $post_type,
 					'post_status' => 'publish',
 					'post_name'   => $slug,
-					'meta_input'  => array(
+					'meta_input'  => [
 						Metabox::THRESHOLD_META_KEY => '0',
-					),
-				)
+					],
+				]
 			);
 			$this->default_member_lv_id = $post_id;
 			$this->set_all_users_default_member_lv( $post_id );

@@ -22,7 +22,7 @@ final class Upgrade {
 	 *
 	 * @var array
 	 */
-	public static $order_statuses = array( 'wc-completed', 'wc-processing' );
+	public static $order_statuses = [ 'wc-completed', 'wc-processing' ];
 
 	/**
 	 * Constructor
@@ -30,10 +30,10 @@ final class Upgrade {
 	public function __construct() {
 
 		foreach ( self::$order_statuses as $status ) {
-			\add_action( 'woocommerce_order_status_' . $status, array( $this, 'membership_check' ), 10, 1 );
+			\add_action( 'woocommerce_order_status_' . $status, [ $this, 'membership_check' ], 10, 1 );
 		}
 
-		\add_action( 'trash_' . MemberLvInit::POST_TYPE, array( $this, 'remove_user_member_lv' ), 10, 3 );
+		\add_action( 'trash_' . MemberLvInit::POST_TYPE, [ $this, 'remove_user_member_lv' ], 10, 3 );
 	}
 
 	/**
@@ -53,24 +53,19 @@ final class Upgrade {
 			return;
 		}
 
-		$args = array(
-			'numberposts' => -1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $customer_id,
-			'post_type'   => array( 'shop_order' ),
-			'post_status' => self::$order_statuses, // TODO 可以做成選單
-		);
-		// 取得歷史累積金額
-		$order_data = Base::get_order_data_by_user_date( $customer_id, 0, $args );
-		$acc_amount = (int) $order_data['total'];
-
 		// 取得下個等級的門檻
 		$next_member_lv = Utils::get_next_member_lv_by( 'user_id', $customer_id );
 		if ( ! $next_member_lv ) {
 			return;
 		}
-		$next_member_lv_id        = $next_member_lv?->id;
+
+		$timestamp                = Base::calc_timestamp($next_member_lv->limit_type, $next_member_lv->limit_value, $next_member_lv->limit_unit);
+		$next_member_lv_id        = $next_member_lv->id;
 		$next_member_lv_threshold = (int) $next_member_lv->threshold;
+
+		// 取得歷史累積金額
+		$order_data = Base::get_order_data_by_timestamp($customer_id, $timestamp);
+		$acc_amount = (int) $order_data['total'];
 
 		if ( $acc_amount >= $next_member_lv_threshold ) {
 			\update_user_meta( $customer_id, MemberLvInit::POST_TYPE, $next_member_lv_id );

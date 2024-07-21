@@ -5,3 +5,8 @@ require_once __DIR__ . '/class-utils.php';
 require_once __DIR__ . '/class-metabox.php';
 require_once __DIR__ . '/class-upgrade.php';
 require_once __DIR__ . '/class-memberLv.php';
+
+/**
+ * TODO
+ * 1. 專享商品，可見，不可見
+ */

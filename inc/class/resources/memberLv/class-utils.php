@@ -35,7 +35,7 @@ abstract class Utils {
 				break;
 
 			default:
-				// code...
+				$current_member_lv = null;
 				break;
 		}
 
@@ -56,17 +56,17 @@ abstract class Utils {
 	public static function get_member_lvs( ?string $status = 'publish' ): array {
 
 		$member_lv_posts = \get_posts(
-			array(
+			[
 				'post_type'      => MemberLvInit::POST_TYPE,
 				'posts_per_page' => -1,
 				'post_status'    => $status,
 				'orderby'        => 'menu_order',
 				'order'          => 'ASC',
-			)
+			]
 		);
 
 		if ( ! $member_lv_posts ) {
-			return array();
+			return [];
 		}
 
 		$member_lv_array = array_map( fn( $post ) => new MemberLv( $post ), $member_lv_posts );
@@ -210,5 +210,33 @@ abstract class Utils {
 		$prev_member_lv = $member_lvs[ $current_index - 1 ];
 
 		return $prev_member_lv;
+	}
+
+
+	/**
+	 * 取得某個會員等級的會員數量
+	 *
+	 * @param string     $field 欄位 'user_id' or 'member_lv_id'
+	 * @param int|string $value 欄位值
+	 * @return int
+	 */
+	public static function get_member_count_by( string $field = 'member_lv_id', int|string $value ): int {
+		global $wpdb;
+		$prefix = $wpdb->prefix;
+
+		$member_lv_id = match ( $field ) {
+			'member_lv_id' => $value,
+		};
+
+		$member_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %1$s WHERE meta_key = "%2$s" AND meta_value = "%3$d"', //phpcs:ignore
+				"{$prefix}usermeta",
+				MemberLvInit::POST_TYPE,
+				$member_lv_id
+			)
+		);
+
+		return $member_count;
 	}
 }

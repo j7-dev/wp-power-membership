@@ -1,15 +1,13 @@
 <?php
 /**
  * Custom Post Type: member_lv
- * DELETE 自訂PHP模板
- * DELETE 自訂rewrite
  */
 
 declare(strict_types=1);
 
 namespace J7\PowerMembership\Resources\MemberLv;
 
-use J7\PowerMembership\Plugin;
+use J7\PowerMembership\Resources\MemberLv\Utils as MemberLvUtils;
 
 /**
  * Class RegisterCPT
@@ -17,29 +15,19 @@ use J7\PowerMembership\Plugin;
 final class RegisterCPT {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
-	/**
-	 * Rewrite
-	 * DELETE
-	 *
-	 * @var array
-	 */
-	public $rewrite = array(
-		'template_path' => 'test.php',
-		'slug'          => 'test',
-		'var'           => 'pm_test',
-	);
+
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
 
-		\add_action( 'init', array( $this, 'init' ) );
+		\add_action( 'init', [ $this, 'init' ] );
 
-		if ( ! empty( $args['rewrite'] ) ) {
-			\add_filter( 'query_vars', array( $this, 'add_query_var' ) );
-			\add_filter( 'template_include', array( $this, 'load_custom_template' ), 99 );
-		}
+		\add_filter( 'manage_' . Init::POST_TYPE . '_posts_columns', [ $this, 'set_custom_columns' ] );
+		\add_action( 'manage_' . Init::POST_TYPE . '_posts_custom_column', [ $this, 'set_custom_column_value' ], 10, 2 );
+
+		\add_action( 'pre_get_posts', [ $this, 'order_by_menu_order' ] );
 	}
 
 	/**
@@ -47,12 +35,6 @@ final class RegisterCPT {
 	 */
 	public function init(): void {
 		$this->register_cpt();
-
-		// add {$this->post_type}/{slug}/test rewrite rule
-		if ( ! empty( $this->rewrite ) ) {
-			\add_rewrite_rule( '^power-membership/([^/]+)/' . $this->rewrite['slug'] . '/?$', 'index.php?post_type=power-membership&name=$matches[1]&' . $this->rewrite['var'] . '=1', 'top' );
-			\flush_rewrite_rules();
-		}
 	}
 
 	/**
@@ -60,7 +42,7 @@ final class RegisterCPT {
 	 */
 	public static function register_cpt(): void {
 
-		$labels = array(
+		$labels = [
 			'name'                     => \esc_html__( '會員等級', 'power-membership' ),
 			'singular_name'            => \esc_html__( 'member_lv', 'power-membership' ),
 			'add_new'                  => \esc_html__( 'Add new', 'power-membership' ),
@@ -92,13 +74,13 @@ final class RegisterCPT {
 			'item_reverted_to_draft'   => \esc_html__( 'member_lv reverted to draft', 'power-membership' ),
 			'item_scheduled'           => \esc_html__( 'member_lv scheduled', 'power-membership' ),
 			'item_updated'             => \esc_html__( 'member_lv updated', 'power-membership' ),
-		);
-		$args   = array(
+		];
+		$args   = [
 			'label'                 => \esc_html__( '會員等級', 'power-membership' ),
 			'labels'                => $labels,
 			'description'           => '',
 			'public'                => true,
-			'hierarchical'          => true,
+			'hierarchical'          => false,
 			'exclude_from_search'   => true,
 			'publicly_queryable'    => true,
 			'show_ui'               => true,
@@ -114,57 +96,71 @@ final class RegisterCPT {
 			'menu_position'         => 6,
 			'menu_icon'             => 'dashicons-store',
 			'capability_type'       => 'post',
-			'supports'              => array( 'title', 'editor', 'thumbnail', 'custom-fields', 'author', 'page-attributes' ),
-			'taxonomies'            => array(),
+			'supports'              => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'author', 'page-attributes' ],
+			'taxonomies'            => [],
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
-			'rewrite'               => array(
+			'rewrite'               => [
 				'with_front' => true,
-			),
-		);
+			],
+		];
 
 		\register_post_type( Init::POST_TYPE, $args );
 	}
 
-
 	/**
-	 * Add query var
+	 * 設定自訂欄位
 	 *
-	 * @param array $vars Vars.
+	 * @param array $columns 欄位
+	 *
 	 * @return array
 	 */
-	public function add_query_var( $vars ) {
-		$vars[] = $this->rewrite['var'];
-		return $vars;
+	public function set_custom_columns( array $columns ): array {
+
+		$new_columns = array_slice( $columns, 1, 1 ) + [
+			'menu_order'   => '等級順序',
+			'member_count' => '會員人數',
+		] + array_slice( $columns, 1 );
+
+		return $new_columns;
 	}
 
 	/**
-	 * Custom post type rewrite rules
+	 * 設定自訂欄位的值
 	 *
-	 * @param array $rules Rules.
-	 * @return array
-	 */
-	public function custom_post_type_rewrite_rules( $rules ) {
-		global $wp_rewrite;
-		$wp_rewrite->flush_rules();
-		return $rules;
-	}
-
-
-	/**
-	 * Load custom template
-	 * Set {Plugin::$kebab}/{slug}/report  php template
+	 * @param string $column 欄位名稱
+	 * @param int    $post_id 文章 ID
 	 *
-	 * @param string $template Template.
+	 * @return void
 	 */
-	public function load_custom_template( $template ) {
-		$repor_template_path = Plugin::$dir . '/inc/templates/' . $this->rewrite['template_path'];
-
-		if ( \get_query_var( $this->rewrite['var'] ) ) {
-			if ( file_exists( $repor_template_path ) ) {
-				return $repor_template_path;
-			}
+	public function set_custom_column_value( string $column, $post_id ): void {
+		switch ( $column ) {
+			case 'menu_order':
+				echo get_post_field( 'menu_order', $post_id );
+				break;
+			case 'member_count':
+				echo MemberLvUtils::get_member_count_by( 'member_lv_id', $post_id );
+				break;
 		}
-		return $template;
+	}
+
+	/**
+	 * 讓後台的會員等級根據 menu order 順序排序查詢
+	 *
+	 * @param \WP_Query $query 查詢對象
+	 *
+	 * @return void
+	 */
+	public function order_by_menu_order( \WP_Query $query ): void {
+		if (!is_admin()) {
+			return;
+		}
+
+		if (Init::POST_TYPE !== $query->get('post_type')) {
+			return;
+		}
+
+		$query->set( 'orderby', 'menu_order' );
+		$query->set( 'order', 'ASC');
 	}
 }
 

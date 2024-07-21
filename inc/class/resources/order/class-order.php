@@ -61,8 +61,9 @@ final class Order {
 		$point = Plugin::instance()->point_service_instance->default_point;
 
 		// PENDING 做成設定項
-		// 消費每  $2000 ＝ 20 購物金
-		$award_points = floor( $subtotal / 2000 ) * 20;
+		// 消費每  $1000 ＝ 20 購物金
+		$rate         = 20 / 1000;
+		$award_points = $subtotal * $rate;
 
 		$point?->award_points_to_user(
 			user_id: (int) $customer_id,

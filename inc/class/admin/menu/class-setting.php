@@ -125,7 +125,7 @@ final class Setting {
 					'id'       => self::ENABLE_BONUS_ON_CERTAIN_DAY_FIELD_NAME,
 					'type'     => 'switch',
 					'title'    => esc_html__( '啟用特定日期優惠', 'power-membership' ),
-					'subtitle' => esc_html__( '啟用後，每週四週日消費每  $2000 ＝ 20 購物金', 'power-membership' ),
+					'subtitle' => esc_html__( '啟用後，每週四週日消費每  $1000 ＝ 20 購物金', 'power-membership' ),
 					'on'       => esc_html__( '啟用', 'power-membership' ),
 					'off'      => esc_html__( '關閉', 'power-membership' ),
 					'default'  => 1,

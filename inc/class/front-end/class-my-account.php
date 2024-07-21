@@ -9,6 +9,7 @@ declare( strict_types=1 );
 namespace J7\PowerMembership\FrontEnd;
 
 use J7\PowerMembership\Utils\Base;
+use J7\PowerMembership\Plugin;
 
 /**
  * Class FrontEnd
@@ -17,6 +18,7 @@ final class MyAccount {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
 	public const POINT_LOG_ENDPOINT = 'pm_point_log';
+
 
 	/**
 	 * Constructor
@@ -38,23 +40,25 @@ final class MyAccount {
 	}
 
 	/**
-	 * Add menu item 我的學習
+	 * Add menu item 購物金紀錄
 	 *
 	 * @param array $items Menu items.
 	 *
 	 * @return array
 	 */
 	public function custom_menu_items( array $items ): array {
-		// 重新排序，排在控制台後
-		return array_slice( $items, 0, 1, true ) + [
-			self::POINT_LOG_ENDPOINT => '購物金紀錄',
-		] + array_slice( $items, 1, null, true );
+		$items[ self::POINT_LOG_ENDPOINT ] = '購物金紀錄';
+		return $items;
 	}
 
 	/**
 	 * Render courses
 	 */
 	public function render_page(): void {
+
+		Plugin::get( 'member/details' );
+
+		// render the log records
 		$id = \substr( Base::APP1_SELECTOR, 1 );
 		printf(
 		/*html*/            '<div id="%1$s" class="w-full"></div>',
