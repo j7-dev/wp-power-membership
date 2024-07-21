@@ -32,11 +32,12 @@ final class Bootstrap {
 		require_once __DIR__ . '/admin/index.php';
 		require_once __DIR__ . '/woocommerce/index.php';
 		require_once __DIR__ . '/front-end/index.php';
+		require_once __DIR__ . '/integration/index.php';
 
 		// PENDING
 		// \add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_script' ), 99 );
 		// \add_action( 'admin_enqueue_scripts', array( $this, 'add_static_assets' ), 100 );
-		\add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_script' ), 99 );
+		\add_action( 'wp_enqueue_scripts', [ $this, 'frontend_enqueue_script' ], 99 );
 	}
 
 	/**
@@ -53,39 +54,20 @@ final class Bootstrap {
 
 	/**
 	 * Enqueue script
-	 * You can load the script on demand
+	 * TODO 案需載入
 	 *
 	 * @return void
 	 */
 	public function enqueue_script(): void {
-		// PENDING
-		// \wp_enqueue_script(
-		// Plugin::$kebab,
-		// Plugin::$url . '/js/dist/index.js',
-		// [ 'jquery' ],
-		// Plugin::$version,
-		// [
-		// 'in_footer' => true,
-		// 'strategy'  => 'async',
-		// ]
-		// );
-
-		// \wp_enqueue_style(
-		// Plugin::$kebab,
-		// Plugin::$url . '/js/dist/assets/css/index.css',
-		// [],
-		// Plugin::$version
-		// );
-
 		// React script
 
 		Vite\enqueue_asset(
 			Plugin::$dir . '/js/dist',
 			'js/src/main.tsx',
-			array(
+			[
 				'handle'    => Plugin::$kebab,
 				'in-footer' => true,
-			)
+			]
 		);
 
 		$post_id   = \get_the_ID();
@@ -94,8 +76,8 @@ final class Bootstrap {
 		\wp_localize_script(
 			Plugin::$kebab,
 			Plugin::$snake . '_data',
-			array(
-				'env' => array(
+			[
+				'env' => [
 					'siteUrl'       => \site_url(),
 					'ajaxUrl'       => \admin_url( 'admin-ajax.php' ),
 					'userId'        => \wp_get_current_user()?->data?->ID ?? null,
@@ -109,17 +91,17 @@ final class Bootstrap {
 					'API_TIMEOUT'   => Base::API_TIMEOUT,
 					'nonce'         => \wp_create_nonce( Plugin::$kebab ),
 
-				),
-			)
+				],
+			]
 		);
 
 		\wp_localize_script(
 			Plugin::$kebab,
 			'wpApiSettings',
-			array(
+			[
 				'root'  => \untrailingslashit( \esc_url_raw( rest_url() ) ),
 				'nonce' => \wp_create_nonce( 'wp_rest' ),
-			)
+			]
 		);
 	}
 
@@ -131,6 +113,13 @@ final class Bootstrap {
 	 */
 	public function frontend_enqueue_script(): void {
 		$this->enqueue_script();
+
+		\wp_enqueue_style(
+			Plugin::$kebab . '-settings',
+			Plugin::$url . '/inc/assets/dist/css/index.css',
+			[],
+			Plugin::$version
+		);
 	}
 
 	/**

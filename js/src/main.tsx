@@ -18,6 +18,7 @@ const queryClient = new QueryClient({
 
 const app1Nodes = document.querySelectorAll(app1Selector)
 
+
 const mapping = [
   {
     els: app1Nodes,

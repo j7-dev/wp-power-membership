@@ -9,7 +9,7 @@ export const appName =
 	window?.[APP_DOMAIN]?.env?.APP_NAME || 'Power Membership'
 export const kebab = window?.[APP_DOMAIN]?.env?.KEBAB || 'power-membership'
 export const app1Selector =
-	window?.[APP_DOMAIN]?.env?.APP1_SELECTOR || 'power_membership'
+	window?.[APP_DOMAIN]?.env?.APP1_SELECTOR || '#power_membership'
 export const apiUrl =
 	removeTrailingSlash(window?.wpApiSettings?.root) || '/wp-json'
 export const ajaxUrl =
