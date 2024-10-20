@@ -220,7 +220,7 @@ abstract class Utils {
 	 * @param int|string $value 欄位值
 	 * @return int
 	 */
-	public static function get_member_count_by( string $field = 'member_lv_id', int|string $value ): int {
+	public static function get_member_count_by( string $field = 'member_lv_id', int|string $value = '' ): int {
 		global $wpdb;
 		$prefix = $wpdb->prefix;
 
