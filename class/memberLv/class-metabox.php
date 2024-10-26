@@ -17,7 +17,7 @@ final class Metabox
 	{
 		\add_action('add_meta_boxes', [$this, 'add_metabox'], 10);
 		\add_action('save_post', [$this, 'save_metabox'], 10, 2);
-		\add_action('init', array($this, 'create_default_member_lv'), 30);
+		// \add_action('init', array($this, 'create_default_member_lv'), 30);
 	}
 
 	public function add_metabox(): void

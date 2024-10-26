@@ -37,8 +37,8 @@ final class MembershipUpgrade
 			'post_type'   => array('shop_order'),
 			'post_status' => array('wc-completed', 'wc-processing'), // TODO 可以做成選單
 		);
-		// 取得歷史累積金額
-		$order_data = Utils::get_order_data_by_user_date($customer_id, 0, $args);
+		// 取得最近12個月累積金額
+		$order_data = Utils::get_order_data_by_user_date($customer_id, 12, $args);
 		$acc_amount = (int) $order_data['total'];
 
 		// 取得下個等級的門檻
