@@ -27,11 +27,9 @@ final class UserEdit
 		$rank_earned_time = date('Y-m-d H:i:s', \gamipress_get_rank_earned_time($user_id, Utils::MEMBER_LV_POST_TYPE));
 
 		$args = array(
-			'numberposts' => -1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $user_id,
-			'post_type'   => array('shop_order'),
-			'post_status' => array('wc-completed', 'wc-processing'),
+			'limit' => -1,
+			'customer_id'  => $user_id,
+			'status' => array('wc-completed', 'wc-processing'),
 		);
 		$order_data = Utils::get_order_data_by_user_date($user_id, 0, $args);
 

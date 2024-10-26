@@ -44,11 +44,12 @@ abstract class Utils
 	public static function get_order_data_by_user_date(int $user_id, int $months_ago = 0, array $args = array(), string $transient_key = ''): array
 	{
 		// get transient
-		$key = self::get_transient_key($user_id, $months_ago, $transient_key);
-		$order_data = \get_transient($key);
-		if (empty($order_data)) {
+		// $key = self::get_transient_key($user_id, $months_ago, $transient_key);
+		// $order_data = \get_transient($key);
+		// if (empty($order_data)) {
 			$order_data = self::query_order_data_by_user_date($user_id, $months_ago, $args, $transient_key);
-		}
+		// }
+
 
 		return $order_data;
 	}
@@ -57,28 +58,24 @@ abstract class Utils
 	{
 		$user      = get_userdata($user_id);
 		$that_date = strtotime("first day of -" . $months_ago . " month", time());
-		$that_date = strtotime("first day of +1 month", $that_date);
+		$start_date = date('Y-m-d', $that_date);
+		$end_date = date('Y-m-d');
 
 		$user_registed_time = strtotime($user->data->user_registered);
 		$is_registered      = ($user_registed_time >= $that_date) ? false : true;
 
-		$month = date('m', strtotime("-{$months_ago} months", time()));
-		$year  = date('Y', strtotime("-{$months_ago} months", time()));
 
 		if (empty($args)) {
 			$args = array(
-				'numberposts' => -1,
-				'meta_key'    => '_customer_user',
-				'meta_value'  => $user_id,
-				'post_type'   => array('shop_order'),
-				'post_status' => array('wc-completed', 'wc-processing'),
-				'date_query'  => array(
-					'year'  => $year,
-					'month' => $month,
-				),
+				'limit' => -1,
+				'customer_id'  => $user_id,
+				'status' => array('wc-completed', 'wc-processing'),
+				'date_paid'  => "{$start_date}...{$end_date}", // YYYY-MM-DD...YYYY-MM-DD
 			);
 		}
-		$customer_orders = get_posts($args);
+
+		$customer_orders = \wc_get_orders($args);
+
 		$total           = 0;
 		foreach ($customer_orders as $customer_order) {
 			$order = wc_get_order($customer_order);

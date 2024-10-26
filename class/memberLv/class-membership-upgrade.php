@@ -14,12 +14,12 @@ final class MembershipUpgrade
 {
 	public function __construct()
 	{
-		\add_action('woocommerce_order_status_completed', [$this, 'membership_check'], 10, 1);
-		\add_action('woocommerce_order_status_processing', [$this, 'membership_check'], 10, 1);
-		\add_action('trash_' . Utils::MEMBER_LV_POST_TYPE, [$this, 'remove_user_member_lv'], 10, 3);
+		\add_action('woocommerce_order_status_completed', [__CLASS__, 'membership_check'], 10, 1);
+		\add_action('woocommerce_order_status_processing', [__CLASS__, 'membership_check'], 10, 1);
+		\add_action('trash_' . Utils::MEMBER_LV_POST_TYPE, [__CLASS__, 'remove_user_member_lv'], 10, 3);
 	}
 
-	public function membership_check($order_id): void
+	public static function membership_check($order_id): void
 	{
 		$order       = new \WC_Order($order_id);
 		if (empty($order)) {
@@ -31,26 +31,53 @@ final class MembershipUpgrade
 		}
 
 		$args = array(
-			'numberposts' => -1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $customer_id,
-			'post_type'   => array('shop_order'),
-			'post_status' => array('wc-completed', 'wc-processing'), // TODO 可以做成選單
+			'limit' => -1,
+			'customer_id'  => $customer_id,
+			'status' => array('wc-completed', 'wc-processing'), // TODO 可以做成選單
 		);
 		// 取得最近12個月累積金額
 		$order_data = Utils::get_order_data_by_user_date($customer_id, 12, $args);
 		$acc_amount = (int) $order_data['total'];
 
-		// 取得下個等級的門檻
-		$next_rank_id        = \gamipress_get_next_user_rank_id($customer_id, Utils::MEMBER_LV_POST_TYPE);
-		$next_rank_threshold = (int) \get_post_meta($next_rank_id, Metabox::THRESHOLD_META_KEY, true);
+		self::handle_upgrade($customer_id, $acc_amount);
+	}
 
-		if ($acc_amount >= $next_rank_threshold) {
-			\update_user_meta($customer_id, Utils::CURRENT_MEMBER_LV_META_KEY, $next_rank_id);
+	/**
+	 * 處理升級
+	 *
+	 * @param int $customer_id
+	 * @param int $acc_amount
+	 * @return void
+	 */
+	public static function handle_upgrade(int $customer_id, $acc_amount):void{
+		$all_ranks = self::get_all_rank_threshold();
+
+		foreach ($all_ranks as $rank_id => $threshold) {
+			if ($acc_amount >= $threshold) {
+				\gamipress_award_rank_to_user($rank_id, $customer_id);
+				break;
+			}
 		}
 	}
 
-	public function remove_user_member_lv(int $post_id, \WP_Post $post, string $old_status): void
+	/**
+	 * 取得所有等級的門檻
+	 *
+	 * return array<int, int> ID => threshold
+	 */
+	public static function get_all_rank_threshold():array{
+		$ranks = \gamipress_get_ranks([
+			'post_status' => 'publish',
+		]);
+
+		$formatted_ranks = [];
+		foreach ($ranks as $rank) {
+			$formatted_ranks[$rank->ID] = (int) \get_post_meta($rank->ID, Metabox::THRESHOLD_META_KEY, true);
+		}
+		return $formatted_ranks;
+	}
+
+	public static function remove_user_member_lv(int $post_id, \WP_Post $post, string $old_status): void
 	{
 		$meta_key = Utils::CURRENT_MEMBER_LV_META_KEY;
 		$meta_value = $post_id;
