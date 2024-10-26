@@ -22,7 +22,7 @@ class Settings extends PowerPlugins
 		parent::__construct();
 	}
 
-	public function set_sections(): void
+	public function set_sections($section = []): void
 	{
 		$this->sections[] = [
 			'title'            => Utils::APP_NAME,

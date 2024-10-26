@@ -22,14 +22,14 @@ final class View
 	{
 		global $power_plugins_settings;
 
-		if ($power_plugins_settings[Settings::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME]) {
+		if ($power_plugins_settings[Settings::ENABLE_SHOW_AVAILABLE_COUPONS_FIELD_NAME] ?? false) {
 			\add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 			\add_action('woocommerce_before_checkout_form', [$this, 'show_available_coupons'], 10, 1);
 			\add_filter('woocommerce_coupon_validate_minimum_amount', [$this, 'modify_minimum_amount_condition'], 200, 3);
 			\add_filter('woocommerce_coupon_is_valid', [$this, 'custom_condition'], 200, 3);
 		}
 
-		if (!$power_plugins_settings[Settings::ENABLE_SHOW_COUPON_FORM_FIELD_NAME]) {
+		if (!($power_plugins_settings[Settings::ENABLE_SHOW_COUPON_FORM_FIELD_NAME] ?? false)) {
 			\add_action('init', [$this, 'remove_wc_coupon_form'], 20);
 		}
 	}
@@ -183,7 +183,7 @@ final class View
 		});
 
 		// 只保留前 N 個 further_coupons
-		$show_further_coupons_qty = $power_plugins_settings[Settings::SHOW_FURTHER_COUPONS_QTY_FIELD_NAME] ?? 3;
+		$show_further_coupons_qty = (int) $power_plugins_settings[Settings::SHOW_FURTHER_COUPONS_QTY_FIELD_NAME] ?? 3;
 		$sliced_further_coupons = array_slice($further_coupons, 0, $show_further_coupons_qty);
 
 		// 如果啟用只顯示最大折扣券
