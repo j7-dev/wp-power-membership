@@ -6,6 +6,7 @@ namespace J7\PowerMembership\Admin;
 
 use J7\PowerMembership\Utils;
 use J7\PowerMembership\Admin\Menu\Settings;
+use J7\WpToolkit\PowerPlugins;
 
 /**
  * 後台 UI 相關
@@ -23,7 +24,7 @@ final class UI
 	{
 		global $power_plugins_settings;
 
-		if ($power_plugins_settings[Settings::ENABLE_SIMPLE_ADMIN_FIELD_NAME]) {
+		if ($power_plugins_settings[PowerPlugins::ENABLE_SIMPLE_ADMIN_FIELD_NAME] ?? false) {
 			\add_action('admin_init', [$this, 'remove_gamipress_admin_notices'], 10);
 			\add_action('admin_menu', [$this, 'menu_page'], 10);
 			\add_action('admin_head', [$this, 'remove_metabox'], 200);
