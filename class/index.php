@@ -18,6 +18,7 @@ final class Bootstrap
 		require_once __DIR__ . '/admin/index.php';
 		require_once __DIR__ . '/memberLv/index.php';
 		require_once __DIR__ . '/woocommerce/index.php';
+		require_once __DIR__ . '/gamipress/index.php';
 
 		\add_action('admin_enqueue_scripts', [$this, 'add_static_assets']);
 		\add_action('admin_head', [$this, 'add_tailwind_config'], 1000);
