@@ -446,20 +446,24 @@ final class View {
 	}
 
 	public function exec_deduct_point( $order ): void {
-		$user_id = $order->get_customer_id();
-		$value   = WC()->session->get('custom_fee');
+		$user_id      = $order->get_customer_id();
+		$value        = WC()->session->get('custom_fee');
+		$point_amount = $value['amount'] ?? 0;
+		if (!$point_amount) {
+			return;
+		}
 
-		$order->update_meta_data('award_deduct_point', $value['amount']);
+		$order->update_meta_data('award_deduct_point', $point_amount);
 		$order->save();
 
 		$updated_user_point = \gamipress_deduct_points_to_user(
 			$user_id,
-			(int) $value['amount'],
+			(int) $point_amount,
 			'ee_point',
 			[
 				'admin_id'       => 0,
 				'achievement_id' => null,
-				'reason'         => "使用購物金折抵 {$value} 元",
+				'reason'         => "使用購物金折抵 {$point_amount} 元",
 				'log_type'       => 'points_deduct',
 			]
 			);

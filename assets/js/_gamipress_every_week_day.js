@@ -1,5 +1,4 @@
 (function ($) {
-	console.log('gamipress_every_week_day');
 
 	const $trigerTypes = $("select[id^='select-trigger-type']")
 	$trigerTypes.each(function () {
@@ -13,16 +12,24 @@
 
 
 	$('.requirements-list').on('update_requirement_data', '.requirement-row', function (e, requirement_details, requirement) {
-
-		console.log(requirement);
-		console.log(requirement_details);
 		// Add expiration fields
 		requirement_details._gamipress_every_week_day = requirement.find('select[id^="_gamipress_every_week_day"]').val();
+		requirement_details._gamipress_every_week_day_time = requirement.find('input[name="hour"]').val() + ':' + requirement.find('input[name="minute"]').val();
 		requirement_details._gamipress_ratio = requirement.find('._gamipress_ratio input').val();
 		requirement_details.points = requirement.find('input[name="requirement-points"]').val();
 
 
 	});
+
+
+	$('.requirements-list').on('change', function () {
+		const $li = $(this).children('li').last();
+		const $trigerType = $li.find("select[id^='select-trigger-type']");
+		showRepeatRow($trigerType.val(), $li);
+		$trigerType.on('change', function () {
+			showRepeatRow($trigerType.val(), $li);
+		});
+	})
 
 	function showRepeatRow(type, $li) {
 		const $rows = $li.find('._gamipress_every_week_day-row, ._gamipress_ratio-row');

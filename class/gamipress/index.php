@@ -16,8 +16,10 @@ use J7\PowerMembership\Utils;
  */
 final class GamiPress {
 
-	const WEEK_DAY_KEY = '_gamipress_every_week_day';
-	const RATIO_KEY    = '_gamipress_ratio'; // 每 OOO 元 送 X 購物金
+	const WEEK_DAY_KEY      = '_gamipress_every_week_day';
+	const WEEK_DAY_TIME_KEY = '_gamipress_every_week_day_time';
+
+	const RATIO_KEY = '_gamipress_ratio'; // 每 OOO 元 送 X 購物金
 
 	/**
 	 * Constructor
@@ -32,7 +34,8 @@ final class GamiPress {
 		\add_action( 'admin_init', [ __CLASS__, 'register_scripts' ] );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ], 100 );
 
-		\add_action( 'woocommerce_payment_complete', [ __CLASS__, 'listener' ] );
+		\add_action('woocommerce_order_status_changed', [ __CLASS__, 'listener' ], 10, 3);
+
 		// TEST \add_action( 'init', [ __CLASS__, 'listener' ] );
 	}
 
@@ -71,11 +74,15 @@ final class GamiPress {
 	}
 </style>
 		<?php
-		$key      = self::WEEK_DAY_KEY;
-		$selected = \get_post_meta( $requirement_id, $key, true );
+		$key           = self::WEEK_DAY_KEY;
+		$key_time      = self::WEEK_DAY_TIME_KEY;
+		$selected      = \get_post_meta( $requirement_id, $key, true );
+		$selected_time = \get_post_meta( $requirement_id, $key_time, true );
+
+		$time = $selected_time ? explode(':', $selected_time) : [ '', '' ];
 
 		$option_items = [ // date("D") = Mon, Tue, Wed, Thu, Fri, Sat, Sun
-			''    => '不限制',
+			''    => '每天',
 			'Mon' => '每週一',
 			'Tue' => '每週二',
 			'Wed' => '每週三',
@@ -107,6 +114,10 @@ final class GamiPress {
 							%3$s
 						</select>
 				</div>
+				<div class="inline">
+				<input type="number" style="width: 75px;" min="0" max="23" name="hour" value="%6$s" />
+				<input type="number" style="width: 75px;" min="0" max="59" name="minute" value="%7$s" />
+				</div>
 		</div>
 		<div class="%4$s-row">
 				<label for="%4$s-%2$d">每滿多少錢</label>
@@ -119,7 +130,9 @@ final class GamiPress {
 		$requirement_id,
 		$options,
 		$key2,
-		$ratio
+		$ratio,
+		$time[0],
+		$time[1]
 		);
 	}
 
@@ -178,6 +191,7 @@ final class GamiPress {
 
 		// Save expiration fields field
 		\gamipress_update_post_meta( $requirement_id, self::WEEK_DAY_KEY, $requirement[ self::WEEK_DAY_KEY ] );
+		\gamipress_update_post_meta( $requirement_id, self::WEEK_DAY_TIME_KEY, $requirement[ self::WEEK_DAY_TIME_KEY ] );
 		\gamipress_update_post_meta( $requirement_id, self::RATIO_KEY, absint( $requirement[ self::RATIO_KEY ] ) );
 	}
 
@@ -188,11 +202,20 @@ final class GamiPress {
 	 * @param int $order_id 訂單 ID
 	 * @return void
 	 */
-	public static function listener( $order_id ): void {
-		$order    = \wc_get_order($order_id);
+	public static function listener( $order_id, $from, $to ): void {
+		$order = \wc_get_order($order_id);
 		if (! ( $order instanceof \WC_Order )) {
 			return;
 		}
+
+		if (in_array($from, [ 'completed', 'processing', 'withdrawal-paid' ], true)) {
+			return;
+		}
+
+		if (!in_array($to, [ 'completed', 'processing', 'withdrawal-paid' ], true)) {
+			return;
+		}
+
 		$order_subtotal = $order->get_subtotal();
 
 		$trigger_ids = \get_posts(
@@ -205,21 +228,33 @@ final class GamiPress {
 			]
 			);
 
+		// $hk_time = "2025-10-27 20:23";
+		// $server_timestamp = strtotime($hk_time . " -8 hours");
+
 		// 把 Repeat 欄位為 不限制/或等同今天星期幾的 trigger_id 找出來
 		$trigger_ids = \array_filter(
 			$trigger_ids,
 			function ( $trigger_id ) {
-				$repeat = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_KEY, true);
-				return $repeat === '' || $repeat === \wp_date('D');
+				$repeat      = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_KEY, true);
+				$repeat_time = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_TIME_KEY, true);
+
+				if ($repeat_time) {
+					$begin = self::is_server_time_passed_hk($repeat_time);
+					return ( $repeat === '' && $begin ) || ( $repeat === \date('D', \time() + 8 * 3600) && $begin );
+				} else {
+					return $repeat === '' || $repeat === \date('D', \time() + 8 * 3600);
+				}
 			}
 			);
 
 		foreach ($trigger_ids as $trigger_id) {
 			$points = \gamipress_get_post_meta($trigger_id, '_gamipress_points', true);
-			if (!$points) {
+			$ratio  = \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
+
+			if (!$points || !$ratio) {
 				continue;
 			}
-			$ratio        = \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
+
 			$award_points = floor($order_subtotal / $ratio) * $points;
 
 			\gamipress_award_points_to_user(
@@ -234,6 +269,19 @@ final class GamiPress {
 				]
 				);
 		}
+	}
+
+	public static function is_server_time_passed_hk( $hk_time ) {
+		// 驗證時間格式
+		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $hk_time)) {
+			return false;
+		}
+
+		// 香港比伺服器快 8 小時，所以伺服器時間要減 8 小時才是對應的香港時間
+		$server_time   = \current_time('H:i');
+		$server_target = date('H:i', strtotime($hk_time . ' -8 hours'));
+
+		return $server_time >= $server_target;
 	}
 }
 
