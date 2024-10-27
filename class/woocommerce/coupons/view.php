@@ -56,8 +56,11 @@ final class View {
 
 	public function show_award_deduct( $checkout ): void {
 
+		$custom_fee  = \WC()->session->get('custom_fee');
+		$current_fee = $custom_fee ? (int) $custom_fee['amount'] : 0;
+
 		$user_point       = \gamipress_get_user_points(\get_current_user_id(), 'ee_point');
-		$user_point_price = \wc_price($user_point);
+		$user_point_price = \wc_price($user_point + $current_fee);
 		$sub_total        = (int) WC()->cart->subtotal;
 
 		$coupons = $this->get_valid_award_deduct_coupons(); // 取得購物車折抵優惠
@@ -71,7 +74,7 @@ final class View {
 			$max_deduct_amount = \floor($sub_total * $deduct_ratio);
 
 			printf(
-				/*html*/'<p class="mb-0">購物金折抵，最高可以折抵購物車金額 %1$s %% 即 %2$s 元，您目前有 <span id="user-point">%3$s</span> 元購物金</p>',
+				/*html*/'<p class="mb-0">購物金折抵，最高可以折抵購物車金額 %1$s %% 即 %2$s 元，您目前有 <span id="user-point" >%3$s</span> 元購物金</p>',
 				$coupon->get_amount(),
 				\wc_price($max_deduct_amount),
 				$user_point_price
@@ -81,10 +84,11 @@ final class View {
 			printf(
 				/*html*/'
 					<input type="number" class="input-text inline-block w-40" name="%1$s" id="%1$s" placeholder="" value="">
-					<button id="%1$s-apply" data-coupon_id="%2$s" type="button" class="button">折抵</button>
+					<button id="%1$s-apply" data-coupon_id="%2$s" data-user_point="%3$d" type="button" class="button">折抵</button>
 				',
 				$name,
-				$coupon->get_id()
+				$coupon->get_id(),
+				$user_point,
 			);
 
 		}
@@ -472,9 +476,9 @@ final class View {
 	}
 
 	public function restore_award_deduct_point( $order_id ): void {
-		$order = \wc_get_order($order_id);
+		$order        = \wc_get_order($order_id);
 		$deduct_point = (int) $order->get_meta('award_deduct_point');
-		$award_point = $deduct_point * -1;
+		$award_point  = $deduct_point * -1;
 		$user_id      = $order->get_customer_id();
 		\gamipress_award_points_to_user(
 			$user_id,

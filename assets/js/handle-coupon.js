@@ -112,8 +112,9 @@
 
 		// 折抵購物金
 		$("#award_deduct_point-apply").on("click", function () {
-			const value = $("#award_deduct_point").val();
-			if (value === "") {
+			const userPoint = Number($(this).data("user_point"));
+			const value = Number($("#award_deduct_point").val());
+			if (value === 0) {
 				return;
 			}
 			$.blockUI();
@@ -133,7 +134,7 @@
 						return;
 					}
 					const updated_user_point = Number(data?.updated_user_point);
-					$("#user-point bdi").html(`<span class="woocommerce-Price-currencySymbol">$</span>${updated_user_point.toLocaleString()}`);
+					$("#user-point bdi").html(`<span class="woocommerce-Price-currencySymbol">$</span>${(userPoint - value).toLocaleString()}`);
 					$('body').trigger('update_checkout');
 				}
 			);
