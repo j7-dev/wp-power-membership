@@ -50,6 +50,7 @@ final class View {
 			\wp_enqueue_style('dashicons');
 			\wp_enqueue_style('handle-coupon', Utils::get_plugin_url() . '/assets/css/front.min.css', [], Utils::get_plugin_ver());
 
+			\wp_enqueue_script( 'jquery-blockui' );
 			\wp_enqueue_script('handle-coupon', Utils::get_plugin_url() . '/assets/js/handle-coupon.js', [ 'wc-checkout' ], Utils::get_plugin_ver(), true);
 		}
 	}
