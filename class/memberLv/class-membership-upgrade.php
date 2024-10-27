@@ -10,18 +10,15 @@ use J7\PowerMembership\Utils;
  * 處理會員升級相關邏輯
  */
 
-final class MembershipUpgrade
-{
-	public function __construct()
-	{
-		\add_action('woocommerce_order_status_completed', [__CLASS__, 'membership_check'], 10, 1);
-		\add_action('woocommerce_order_status_processing', [__CLASS__, 'membership_check'], 10, 1);
-		\add_action('trash_' . Utils::MEMBER_LV_POST_TYPE, [__CLASS__, 'remove_user_member_lv'], 10, 3);
+final class MembershipUpgrade {
+
+	public function __construct() {
+		\add_action('woocommerce_order_status_changed', [ __CLASS__, 'membership_check' ], 10, 3);
+		\add_action('trash_' . Utils::MEMBER_LV_POST_TYPE, [ __CLASS__, 'remove_user_member_lv' ], 10, 3);
 	}
 
-	public static function membership_check($order_id): void
-	{
-		$order       = new \WC_Order($order_id);
+	public static function membership_check( $order_id, $from, $to ): void {
+		$order = new \WC_Order($order_id);
 		if (empty($order)) {
 			return;
 		}
@@ -30,11 +27,19 @@ final class MembershipUpgrade
 			return;
 		}
 
-		$args = array(
-			'limit' => -1,
-			'customer_id'  => $customer_id,
-			'status' => array('wc-completed', 'wc-processing'), // TODO 可以做成選單
-		);
+		if (in_array($from, [ 'completed', 'processing', 'withdrawal-paid' ], true)) {
+			return;
+		}
+
+		if (!in_array($to, [ 'completed', 'processing', 'withdrawal-paid' ], true)) {
+			return;
+		}
+
+		$args = [
+			'limit'       => -1,
+			'customer_id' => $customer_id,
+			'status'      => [ 'wc-completed', 'wc-processing', 'wc-withdrawal-paid' ], // TODO 可以做成選單
+		];
 		// 取得最近12個月累積金額
 		$order_data = Utils::get_order_data_by_user_date($customer_id, 12, $args);
 		$acc_amount = (int) $order_data['total'];
@@ -49,7 +54,7 @@ final class MembershipUpgrade
 	 * @param int $acc_amount
 	 * @return void
 	 */
-	public static function handle_upgrade(int $customer_id, $acc_amount):void{
+	public static function handle_upgrade( int $customer_id, $acc_amount ): void {
 		$all_ranks = self::get_all_rank_threshold();
 
 		foreach ($all_ranks as $rank_id => $threshold) {
@@ -65,29 +70,30 @@ final class MembershipUpgrade
 	 *
 	 * return array<int, int> ID => threshold
 	 */
-	public static function get_all_rank_threshold():array{
-		$ranks = \gamipress_get_ranks([
-			'post_status' => 'publish',
-		]);
+	public static function get_all_rank_threshold(): array {
+		$ranks = \gamipress_get_ranks(
+			[
+				'post_status' => 'publish',
+			]
+			);
 
 		$formatted_ranks = [];
 		foreach ($ranks as $rank) {
-			$formatted_ranks[$rank->ID] = (int) \get_post_meta($rank->ID, Metabox::THRESHOLD_META_KEY, true);
+			$formatted_ranks[ $rank->ID ] = (int) \get_post_meta($rank->ID, Metabox::THRESHOLD_META_KEY, true);
 		}
 		return $formatted_ranks;
 	}
 
-	public static function remove_user_member_lv(int $post_id, \WP_Post $post, string $old_status): void
-	{
-		$meta_key = Utils::CURRENT_MEMBER_LV_META_KEY;
-		$meta_value = $post_id;
+	public static function remove_user_member_lv( int $post_id, \WP_Post $post, string $old_status ): void {
+		$meta_key       = Utils::CURRENT_MEMBER_LV_META_KEY;
+		$meta_value     = $post_id;
 		$prev_member_id = \gamipress_get_prev_rank_id($post_id);
 		// 如果用戶的等級被刪除，則將其等級設為預設等級
 		$new_meta_value = empty($prev_member_id) ? Metabox::$default_member_lv_id : $prev_member_id;
 
 		global $wpdb;
 		$prefix = $wpdb->prefix;
-		$query = $wpdb->prepare(
+		$query  = $wpdb->prepare(
 			"UPDATE {$prefix}usermeta
     SET meta_value = %s
     WHERE meta_key = %s AND meta_value = %s",

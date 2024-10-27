@@ -115,7 +115,8 @@ final class GamiPress {
 						</select>
 				</div>
 				<div class="inline">
-				<input type="number" style="width: 75px;" min="0" max="23" name="hour" value="%6$s" />
+				開始時間
+				<input type="number" style="width: 75px;" min="0" max="23" name="hour" value="%6$s" />:
 				<input type="number" style="width: 75px;" min="0" max="59" name="minute" value="%7$s" />
 				</div>
 		</div>
