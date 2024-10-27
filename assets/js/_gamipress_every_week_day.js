@@ -14,7 +14,10 @@
 	$('.requirements-list').on('update_requirement_data', '.requirement-row', function (e, requirement_details, requirement) {
 		// Add expiration fields
 		requirement_details._gamipress_every_week_day = requirement.find('select[id^="_gamipress_every_week_day"]').val();
-		requirement_details._gamipress_every_week_day_time = requirement.find('input[name="hour"]').val() + ':' + requirement.find('input[name="minute"]').val();
+
+		const hour = requirement.find('input[name="hour"]').val();
+		const minute = requirement.find('input[name="minute"]').val();
+		requirement_details._gamipress_every_week_day_time = (hour ? hour.padStart(2, '0') : '00') + ':' + (minute ? minute.padStart(2, '0') : '00');
 		requirement_details._gamipress_ratio = requirement.find('._gamipress_ratio input').val();
 		requirement_details.points = requirement.find('input[name="requirement-points"]').val();
 

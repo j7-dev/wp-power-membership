@@ -277,10 +277,10 @@ final class GamiPress {
 		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $hk_time)) {
 			return false;
 		}
-
 		// 香港比伺服器快 8 小時，所以伺服器時間要減 8 小時才是對應的香港時間
 		$server_time   = \current_time('H:i');
 		$server_target = date('H:i', strtotime($hk_time . ' -8 hours'));
+		// $server_target = date('H:i', strtotime($hk_time)); // LOCAL 測試
 
 		return $server_time >= $server_target;
 	}
