@@ -177,7 +177,7 @@ final class Metabox {
 	public static function add_script( string $hook ): void {
 		$key = 'pm_coupon_admin';
 		global $post;
-		if ($hook === 'post.php' && $post->post_type === 'shop_coupon') {
+		if (( $hook === 'post.php' && $post->post_type === 'shop_coupon' ) || ( $hook === 'post-new.php' && $post->post_type === 'shop_coupon' )) {
 			\wp_enqueue_script(
 				"{$key}-js",
 				Utils::get_plugin_url() . "/assets/js/{$key}.js",
