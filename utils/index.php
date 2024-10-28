@@ -55,8 +55,8 @@ abstract class Utils {
 	public static function query_order_data_by_user_date( int $user_id, int $months_ago = 0, array $args = [], string $transient_key = '' ): array {
 		$user       = get_userdata($user_id);
 		$that_date  = strtotime('first day of -' . $months_ago . ' month', time());
-		$start_date = date('Y-m-d', $that_date);
-		$end_date   = date('Y-m-d');
+		$start_date = \wp_date('Y-m-d', $that_date);
+		$end_date   = \wp_date('Y-m-d');
 
 		$user_registed_time = strtotime($user->data->user_registered);
 		$is_registered      = ( $user_registed_time >= $that_date ) ? false : true;

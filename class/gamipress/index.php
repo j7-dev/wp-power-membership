@@ -296,8 +296,9 @@ final class GamiPress {
 		if (!$end_time || $start_time >= $end_time) {
 			// 如果結束時間比開始時間小，就只看開始了沒有
 			// 香港比伺服器快 8 小時，所以伺服器時間要減 8 小時才是對應的香港時間
+			// 目前伺服器是 UTC+8 所以不用減 8 小時
 			$server_current_time = \current_time('H:i');
-			$server_start_time   = date('H:i', strtotime($start_time . ' -8 hours'));
+			$server_start_time   = date('H:i', strtotime($start_time));
 			// $server_target = date('H:i', strtotime($hk_time)); // LOCAL 測試
 
 			return $server_current_time >= $server_start_time;
@@ -305,23 +306,11 @@ final class GamiPress {
 
 		// 如果結束時間比開始時間大，檢查當前時間是否在範圍內
 		$server_current_time = \current_time('H:i');
-		$server_start_time   = date('H:i', strtotime($start_time . ' -8 hours'));
-		$server_end_time     = date('H:i', strtotime($end_time . ' -8 hours'));
+		// 目前伺服器是 UTC+8 所以不用減 8 小時
+		$server_start_time = date('H:i', strtotime($start_time));
+		$server_end_time   = date('H:i', strtotime($end_time));
 
 		return $server_current_time >= $server_start_time && $server_current_time <= $server_end_time;
-	}
-
-	public static function is_server_time_passed_hk( $hk_time ) {
-		// 驗證時間格式
-		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $hk_time)) {
-			return false;
-		}
-		// 香港比伺服器快 8 小時，所以伺服器時間要減 8 小時才是對應的香港時間
-		$server_time   = \current_time('H:i');
-		$server_target = date('H:i', strtotime($hk_time . ' -8 hours'));
-		// $server_target = date('H:i', strtotime($hk_time)); // LOCAL 測試
-
-		return $server_time >= $server_target;
 	}
 }
 
