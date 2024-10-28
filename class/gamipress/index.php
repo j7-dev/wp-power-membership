@@ -16,8 +16,10 @@ use J7\PowerMembership\Utils;
  */
 final class GamiPress {
 
-	const WEEK_DAY_KEY      = '_gamipress_every_week_day';
-	const WEEK_DAY_TIME_KEY = '_gamipress_every_week_day_time';
+	const WEEK_DAY_KEY            = '_gamipress_every_week_day';
+	const WEEK_DAY_START_TIME_KEY = '_gamipress_every_week_day_start_time';
+	const WEEK_DAY_END_TIME_KEY   = '_gamipress_every_week_day_end_time';
+
 
 	const RATIO_KEY = '_gamipress_ratio'; // 每 OOO 元 送 X 購物金
 
@@ -74,12 +76,15 @@ final class GamiPress {
 	}
 </style>
 		<?php
-		$key           = self::WEEK_DAY_KEY;
-		$key_time      = self::WEEK_DAY_TIME_KEY;
-		$selected      = \get_post_meta( $requirement_id, $key, true );
-		$selected_time = \get_post_meta( $requirement_id, $key_time, true );
+		$key                 = self::WEEK_DAY_KEY;
+		$key_start_time      = self::WEEK_DAY_START_TIME_KEY;
+		$key_end_time        = self::WEEK_DAY_END_TIME_KEY;
+		$selected            = \get_post_meta( $requirement_id, $key, true );
+		$selected_start_time = \get_post_meta( $requirement_id, $key_start_time, true );
+		$selected_end_time   = \get_post_meta( $requirement_id, $key_end_time, true );
 
-		$time = $selected_time ? explode(':', $selected_time) : [ '', '' ];
+		$start_time = $selected_start_time ? explode(':', $selected_start_time) : [ '', '' ];
+		$end_time   = $selected_end_time ? explode(':', $selected_end_time) : [ '', '' ];
 
 		$option_items = [ // date("D") = Mon, Tue, Wed, Thu, Fri, Sat, Sun
 			''    => '每天',
@@ -114,10 +119,16 @@ final class GamiPress {
 							%3$s
 						</select>
 				</div>
-				<div class="inline">
-				開始時間
-				<input type="number" style="width: 75px;" min="0" max="23" name="hour" value="%6$s" />:
-				<input type="number" style="width: 75px;" min="0" max="59" name="minute" value="%7$s" />
+				<div class="inline start_time">
+					開始時間
+					<input type="number" style="width: 75px;" min="0" max="23" name="hour" value="%6$s" />:
+					<input type="number" style="width: 75px;" min="0" max="59" name="minute" value="%7$s" />
+				</div>
+
+				<div class="inline end_time">
+					結束時間
+					<input type="number" style="width: 75px;" min="0" max="23" name="hour" value="%8$s" />:
+					<input type="number" style="width: 75px;" min="0" max="59" name="minute" value="%9$s" />
 				</div>
 		</div>
 		<div class="%4$s-row">
@@ -132,8 +143,10 @@ final class GamiPress {
 		$options,
 		$key2,
 		$ratio,
-		$time[0],
-		$time[1]
+		$start_time[0],
+		$start_time[1],
+		$end_time[0],
+		$end_time[1]
 		);
 	}
 
@@ -192,7 +205,8 @@ final class GamiPress {
 
 		// Save expiration fields field
 		\gamipress_update_post_meta( $requirement_id, self::WEEK_DAY_KEY, $requirement[ self::WEEK_DAY_KEY ] );
-		\gamipress_update_post_meta( $requirement_id, self::WEEK_DAY_TIME_KEY, $requirement[ self::WEEK_DAY_TIME_KEY ] );
+		\gamipress_update_post_meta( $requirement_id, self::WEEK_DAY_START_TIME_KEY, $requirement[ self::WEEK_DAY_START_TIME_KEY ] );
+		\gamipress_update_post_meta( $requirement_id, self::WEEK_DAY_END_TIME_KEY, $requirement[ self::WEEK_DAY_END_TIME_KEY ] );
 		\gamipress_update_post_meta( $requirement_id, self::RATIO_KEY, absint( $requirement[ self::RATIO_KEY ] ) );
 	}
 
@@ -236,12 +250,13 @@ final class GamiPress {
 		$trigger_ids = \array_filter(
 			$trigger_ids,
 			function ( $trigger_id ) {
-				$repeat      = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_KEY, true);
-				$repeat_time = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_TIME_KEY, true);
+				$repeat     = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_KEY, true);
+				$start_time = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_START_TIME_KEY, true);
+				$end_time   = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_END_TIME_KEY, true);
 
-				if ($repeat_time) {
-					$begin = self::is_server_time_passed_hk($repeat_time);
-					return ( $repeat === '' && $begin ) || ( $repeat === \date('D', \time() + 8 * 3600) && $begin );
+				if ($start_time) {
+					$in_range = self::in_range($start_time, $end_time);
+					return ( $repeat === '' && $in_range ) || ( $repeat === \date('D', \time() + 8 * 3600) && $in_range );
 				} else {
 					return $repeat === '' || $repeat === \date('D', \time() + 8 * 3600);
 				}
@@ -270,6 +285,30 @@ final class GamiPress {
 				]
 				);
 		}
+	}
+
+
+	public static function in_range( $start_time, $end_time ) {
+		// 驗證時間格式
+		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $start_time)) {
+			return false;
+		}
+		if (!$end_time || $start_time >= $end_time) {
+			// 如果結束時間比開始時間小，就只看開始了沒有
+			// 香港比伺服器快 8 小時，所以伺服器時間要減 8 小時才是對應的香港時間
+			$server_current_time = \current_time('H:i');
+			$server_start_time   = date('H:i', strtotime($start_time . ' -8 hours'));
+			// $server_target = date('H:i', strtotime($hk_time)); // LOCAL 測試
+
+			return $server_current_time >= $server_start_time;
+		}
+
+		// 如果結束時間比開始時間大，檢查當前時間是否在範圍內
+		$server_current_time = \current_time('H:i');
+		$server_start_time   = date('H:i', strtotime($start_time . ' -8 hours'));
+		$server_end_time     = date('H:i', strtotime($end_time . ' -8 hours'));
+
+		return $server_current_time >= $server_start_time && $server_current_time <= $server_end_time;
 	}
 
 	public static function is_server_time_passed_hk( $hk_time ) {
