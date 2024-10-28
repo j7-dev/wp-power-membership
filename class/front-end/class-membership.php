@@ -90,7 +90,7 @@ final class Membership {
 			'購物金'            => \wc_price(\gamipress_get_user_points(0, 'ee_point')),
 			'下個會員等級'         => match ($next_member_lv instanceof \WP_Post) {
 				true => $next_member_lv->post_title,
-				false => '無法取得會員等級',
+				false => '已是最高會員等級',
 			},
 			'升級條件'           => $next_member_lv_threshold ? "最近一年累積消費達到 {$next_member_lv_threshold_price}元{$diff_text}" : '',
 			'最近一年累積消費'       => $acc_amount_price,

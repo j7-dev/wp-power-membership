@@ -422,9 +422,7 @@ final class View {
 
 	public function add_custom_fee(): void {
 		$value = WC()->session->get('custom_fee');
-		ob_start();
-		var_dump($value);
-		\J7\WpUtils\Classes\ErrorLog::info('add_custom_fee value ' . ob_get_clean());
+
 		$point_amount      = $value['amount'] ?? 0;
 		$coupon_id         = $value['coupon_id'] ?? 0;
 		$coupon            = new \WC_Coupon($coupon_id);

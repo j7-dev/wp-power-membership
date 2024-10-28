@@ -18,7 +18,7 @@ final class MembershipUpgrade {
 	}
 
 	public static function membership_check( $order_id, $from, $to ): void {
-		$order = new \WC_Order($order_id);
+		$order = \wc_get_order($order_id);
 		if (empty($order)) {
 			return;
 		}
@@ -35,13 +35,8 @@ final class MembershipUpgrade {
 			return;
 		}
 
-		$args = [
-			'limit'       => -1,
-			'customer_id' => $customer_id,
-			'status'      => [ 'wc-completed', 'wc-processing', 'wc-withdrawal-paid' ], // TODO 可以做成選單
-		];
 		// 取得最近12個月累積金額
-		$order_data = Utils::get_order_data_by_user_date($customer_id, 12, $args);
+		$order_data = Utils::query_order_data_by_user_date($customer_id, 12);
 		$acc_amount = (int) $order_data['total'];
 
 		self::handle_upgrade($customer_id, $acc_amount);
@@ -81,6 +76,9 @@ final class MembershipUpgrade {
 		foreach ($ranks as $rank) {
 			$formatted_ranks[ $rank->ID ] = (int) \get_post_meta($rank->ID, Metabox::THRESHOLD_META_KEY, true);
 		}
+
+		\arsort($formatted_ranks);
+
 		return $formatted_ranks;
 	}
 
