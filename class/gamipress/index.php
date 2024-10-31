@@ -1,6 +1,6 @@
 <?php
 /**
- * GamiPress 事件
+ * GamiPress 購物金發放
  */
 
 declare(strict_types=1);
@@ -20,6 +20,14 @@ final class GamiPress {
 	const WEEK_DAY_START_TIME_KEY = '_gamipress_every_week_day_start_time';
 	const WEEK_DAY_END_TIME_KEY   = '_gamipress_every_week_day_end_time';
 
+	/**
+	 * 已付款的訂單狀態
+	 *
+	 * @var array<string>
+	 */
+	public static $paid_statuses = [ 'completed', 'processing', 'withdrawal-paid' ];
+
+
 
 	const RATIO_KEY = '_gamipress_ratio'; // 每 OOO 元 送 X 購物金
 
@@ -37,6 +45,8 @@ final class GamiPress {
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ], 100 );
 
 		\add_action('woocommerce_order_status_changed', [ __CLASS__, 'listener' ], 10, 3);
+		\add_action('woocommerce_order_status_cancelled', [ __CLASS__, 'restore_point' ], 10, 1);
+		\add_action('woocommerce_order_status_refunded', [ __CLASS__, 'restore_point' ], 10, 1);
 
 		// TEST \add_action( 'init', [ __CLASS__, 'listener' ] );
 	}
@@ -223,15 +233,23 @@ final class GamiPress {
 			return;
 		}
 
-		if (in_array($from, [ 'completed', 'processing', 'withdrawal-paid' ], true)) {
+		if (in_array($from, self::$paid_statuses, true)) {
 			return;
 		}
 
-		if (!in_array($to, [ 'completed', 'processing', 'withdrawal-paid' ], true)) {
+		if (!in_array($to, self::$paid_statuses, true)) {
 			return;
 		}
 
-		$order_subtotal = $order->get_subtotal();
+		$total_award_points = (int) $order->get_meta('gained_award_points');
+
+		// 如果已經發放過購物金，就不再發放
+		if (!!$total_award_points) {
+			return;
+		}
+
+		$order_subtotal     = $order->get_subtotal();
+		$order_created_time = $order->get_date_created();
 
 		$trigger_ids = \get_posts(
 			[
@@ -249,13 +267,14 @@ final class GamiPress {
 		// 把 Repeat 欄位為 不限制/或等同今天星期幾的 trigger_id 找出來
 		$trigger_ids = \array_filter(
 			$trigger_ids,
-			function ( $trigger_id ) {
+			function ( $trigger_id ) use ( $order_created_time ) {
 				$repeat     = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_KEY, true);
 				$start_time = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_START_TIME_KEY, true);
 				$end_time   = \gamipress_get_post_meta($trigger_id, self::WEEK_DAY_END_TIME_KEY, true);
 
 				if ($start_time) {
-					$in_range = self::in_range($start_time, $end_time);
+					$order_created_timestamp = $order_created_time->date_i18n('H:i');
+					$in_range                = self::in_range($start_time, $end_time, $order_created_timestamp);
 					return ( $repeat === '' && $in_range ) || ( $repeat === \date('D', \time() + 8 * 3600) && $in_range );
 				} else {
 					return $repeat === '' || $repeat === \date('D', \time() + 8 * 3600);
@@ -263,6 +282,7 @@ final class GamiPress {
 			}
 			);
 
+		$total_award_points = 0;
 		foreach ($trigger_ids as $trigger_id) {
 			$points = \gamipress_get_post_meta($trigger_id, '_gamipress_points', true);
 			$ratio  = \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
@@ -271,8 +291,8 @@ final class GamiPress {
 				continue;
 			}
 
-			$award_points = floor($order_subtotal / $ratio) * $points;
-
+			$award_points        = floor($order_subtotal / $ratio) * $points;
+			$total_award_points += $award_points;
 			\gamipress_award_points_to_user(
 				$order->get_customer_id(),
 				$award_points,
@@ -280,37 +300,91 @@ final class GamiPress {
 				[
 					'admin_id'       => 0,
 					'achievement_id' => null,
-					'reason'         => "滿額贈購物金 {$award_points} 元，消費金額 {$order_subtotal} 元 #{$order->get_order_number()}",
+					'reason'         => "滿額贈購物金 {$award_points} 元，消費金額 {$order_subtotal} 元，訂單編號 #{$order->get_order_number()}",
 					'log_type'       => 'points_earn',
 				]
 				);
+
+			$order->add_order_note("滿額贈購物金 {$award_points} 元，消費金額 {$order_subtotal} 元，訂單編號 #{$order->get_order_number()}，使用 trigger_id #{$trigger_id}規則");
+		}
+
+
+		if ($total_award_points > 0) {
+			$order->add_order_note("總計發放購物金 {$total_award_points} 元");
+			$order->update_meta_data('gained_award_points', $total_award_points);
+			$order->save_meta_data();
 		}
 	}
 
+	/**
+	 * 訂單取消或退款時，歸還購物金
+	 *
+	 * @param int $order_id 訂單 ID
+	 *
+	 * @return void
+	 */
+	public static function restore_point( $order_id ): void {
+		$order = \wc_get_order($order_id);
+		if (! ( $order instanceof \WC_Order )) {
+			return;
+		}
 
-	public static function in_range( $start_time, $end_time ) {
+		$total_award_points = (int) $order->get_meta('gained_award_points');
+
+		if (!$total_award_points) {
+			return;
+		}
+
+		\gamipress_deduct_points_to_user(
+			$order->get_customer_id(),
+		$total_award_points,
+		'ee_point',
+		[
+			'admin_id'       => 0,
+			'achievement_id' => null,
+			'reason'         => "訂單狀態取消，收回已發放購物金 {$total_award_points} 元，消費金額，訂單編號 #{$order->get_order_number()}",
+			'log_type'       => 'points_earn',
+		]
+		);
+
+		$order->add_order_note("訂單狀態取消，收回已發放購物金 {$total_award_points} 元，消費金額，訂單編號 #{$order->get_order_number()}");
+		$order->delete_meta_data('gained_award_points');
+		$order->save();
+	}
+
+
+	/**
+	 * 檢查時間是否在範圍內
+	 *
+	 * @param string $start_time 開始時間 13:00
+	 * @param string $end_time 結束時間 20:00
+	 * @param string $compare_time 比較時間 14:00
+	 * @return bool
+	 */
+	public static function in_range( $start_time, $end_time, $compare_time = null ) {
 		// 驗證時間格式
 		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $start_time)) {
 			return false;
 		}
+
+		$compare_time = $compare_time ? $compare_time : \current_time('H:i');
+
 		if (!$end_time || $start_time >= $end_time) {
 			// 如果結束時間比開始時間小，就只看開始了沒有
 			// 香港比伺服器快 8 小時，所以伺服器時間要減 8 小時才是對應的香港時間
 			// 目前伺服器是 UTC+8 所以不用減 8 小時
-			$server_current_time = \current_time('H:i');
-			$server_start_time   = date('H:i', strtotime($start_time));
+			$server_start_time = date('H:i', strtotime($start_time));
 			// $server_target = date('H:i', strtotime($hk_time)); // LOCAL 測試
 
-			return $server_current_time >= $server_start_time;
+			return $compare_time >= $server_start_time;
 		}
 
 		// 如果結束時間比開始時間大，檢查當前時間是否在範圍內
-		$server_current_time = \current_time('H:i');
 		// 目前伺服器是 UTC+8 所以不用減 8 小時
 		$server_start_time = date('H:i', strtotime($start_time));
 		$server_end_time   = date('H:i', strtotime($end_time));
 
-		return $server_current_time >= $server_start_time && $server_current_time <= $server_end_time;
+		return $compare_time >= $server_start_time && $compare_time <= $server_end_time;
 	}
 }
 

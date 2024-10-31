@@ -37,8 +37,8 @@ final class View {
 		\add_action('woocommerce_checkout_order_created', [ $this, 'exec_deduct_point' ]);
 		\add_action('woocommerce_cart_emptied', [ $this, 'clear_cart_and_session' ]);
 		\add_action('init', [ $this, 'clear_fee' ]);
-		// 訂單取消時，歸還購物金
-		\add_action('woocommerce_order_status_cancelled', [ $this, 'restore_award_deduct_point' ]);
+		// 訂單取消時，歸還購物金；更新: 折抵的購物金不退
+		// \add_action('woocommerce_order_status_cancelled', [ $this, 'restore_award_deduct_point' ]);
 	}
 
 	public function remove_wc_coupon_form(): void {
@@ -375,15 +375,20 @@ final class View {
 		return $not_valid;
 	}
 
+	/**
+	 * Checkout 頁面操作折抵購物金
+	 *
+	 * @return void
+	 */
 	public function award_deduct_point(): void {
-		$value     = $_POST['value'];
-		$coupon_id = $_POST['coupon_id'];
+		$value     = (int) $_POST['value']; // phpcs:ignore
+		$coupon_id = (int) $_POST['coupon_id']; // phpcs:ignore
 		if (!\is_user_logged_in()) {
 			\wp_send_json_error('請先登入');
 		}
 
-		if (!\is_numeric($value) || !\is_numeric($coupon_id)) {
-			\wp_send_json_error('請輸入數字');
+		if (!$value || !$coupon_id) {
+			\wp_send_json_error('請輸入折抵的數值');
 		}
 
 		$user_id    = \get_current_user_id();

@@ -1,6 +1,6 @@
 <?php
 /**
- * GamiPress 事件
+ * GamiPress 邀請朋友註冊購物金發放
  */
 
 declare(strict_types=1);
