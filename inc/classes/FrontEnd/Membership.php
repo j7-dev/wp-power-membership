@@ -122,6 +122,11 @@ final class Membership {
 		/*html*/'<a href="%s" class="button">回報問題</a>',
 		\site_url('report-error'),
 		);
+
+		$id = Base::APP1_SELECTOR;
+		// 移除字串的第一個字
+		$id = \substr($id, 1);
+		echo "<div id=\"{$id}\"></div>";
 	}
 
 

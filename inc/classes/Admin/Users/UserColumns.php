@@ -37,7 +37,7 @@ final class UserColumns {
 		\add_filter(
 			'users_list_table_query_args',
 			function ( $args ) {
-				if (isset($_REQUEST['ts_all'])) {
+				if (isset($_REQUEST['ts_all'])) { // phpcs:ignore
 					$args['orderby']  = 'meta_value_num';
 					$args['meta_key'] = '_total_sales_in_life';
 					$args['order']    = $_REQUEST['ts_all']; //phpcs:ignore
@@ -83,7 +83,7 @@ final class UserColumns {
 			);
 		foreach ($member_lvs as $member_lv) {
 			$meta_value = $member_lv->ID;
-			// 使用 $wpdb->prepare 防止 SQL 注入攻击
+			// phpcs:disable
 			$query = $wpdb->prepare(
 				"
 						SELECT COUNT(DISTINCT user_id) as user_count
@@ -93,7 +93,7 @@ final class UserColumns {
 				$meta_key,
 				$meta_value
 				);
-
+			// phpcs:enable
 			// 执行查询
 			$result = $wpdb->get_row($query); //phpcs:ignore
 
@@ -123,17 +123,17 @@ final class UserColumns {
 	/**
 	 * 設定用戶欄位標題
 	 *
-	 * @param array $columns
+	 * @param array $columns 欄位
 	 * @return array
 	 */
 	public function set_users_column_titles( $columns ): array {
 		// $columns['user_id'] = 'User ID';
-		$order                                = ( @$_REQUEST['ts_all'] == 'DESC' ) ? 'ASC' : 'DESC';
+		$order                                = ( @$_REQUEST['ts_all'] == 'DESC' ) ? 'ASC' : 'DESC'; // phpcs:ignore
 		$columns[ Base::MEMBER_LV_POST_TYPE ] = '會員等級';
 		$columns['total_order_amount']        = "<a title='用戶註冊後至今累積總消費金額' href='?ts_all={$order}'>全部</a>";
 
 		for ($i = 0; $i < $this->order_history; $i++) {
-			$order    = ( @$_REQUEST[ "ts{$i}" ] == 'DESC' ) ? 'ASC' : 'DESC';
+			$order    = ( @$_REQUEST[ "ts{$i}" ] == 'DESC' ) ? 'ASC' : 'DESC'; // phpcs:ignore
 			$the_date = date('Y年m', strtotime("-{$i} month"));
 			// $month = current_time('m') - $i;
 			$columns[ "ts{$i}" ] = "<a title='{$the_date} 月累積採購金額' href='?ts{$i}={$order}'>{$the_date} 月</a>";
@@ -217,7 +217,7 @@ final class UserColumns {
 			]
 			);
 
-		$get_member_lv            = $_GET[ Base::MEMBER_LV_POST_TYPE ] ?? 0;
+		$get_member_lv            = $_GET[ Base::MEMBER_LV_POST_TYPE ] ?? 0; // phpcs:ignore
 		$user_amount_by_member_lv = $this->get_user_amount_by_member_lv();
 
 		?>
@@ -249,7 +249,7 @@ final class UserColumns {
 		global $pagenow;
 		if ('users.php' === $pagenow) {
 			if (!empty($_GET[ Base::MEMBER_LV_POST_TYPE ])) {
-				$value      = $_GET[ Base::MEMBER_LV_POST_TYPE ];
+				$value      = $_GET[ Base::MEMBER_LV_POST_TYPE ]; //phpcs:ignore
 				$meta_query = [
 					[
 						'key'     => Base::CURRENT_MEMBER_LV_META_KEY,

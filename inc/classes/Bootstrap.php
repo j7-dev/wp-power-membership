@@ -79,6 +79,8 @@ final class Bootstrap {
 
 		$post_id = \get_the_ID();
 
+		var_dump(Plugin::$snake);
+
 		\wp_localize_script(
 			Plugin::$kebab,
 			Plugin::$snake . '_data',
@@ -93,7 +95,6 @@ final class Bootstrap {
 					'SNAKE'         => Plugin::$snake,
 					'BASE_URL'      => Base::BASE_URL,
 					'APP1_SELECTOR' => Base::APP1_SELECTOR,
-					'APP2_SELECTOR' => Base::APP2_SELECTOR,
 					'API_TIMEOUT'   => Base::API_TIMEOUT,
 					'nonce'         => \wp_create_nonce(Plugin::$kebab),
 				],
