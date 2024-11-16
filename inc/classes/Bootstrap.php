@@ -11,6 +11,7 @@ use J7\PowerMembership\Utils\Base;
 use J7\WpToolkit\PowerPlugins;
 use Kucrut\Vite;
 use J7\PowerMembership\MemberLv\Metabox;
+use J7\WpUtils\Classes\General;
 
 
 if (class_exists('J7\PowerMembership\Bootstrap')) {
@@ -44,22 +45,11 @@ final class Bootstrap {
 
 		Frontend\Membership::instance();
 
-		\add_action('admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script' ], 99);
 		\add_action('admin_enqueue_scripts', [ __CLASS__, 'add_static_assets' ], 99);
 		\add_action('wp_enqueue_scripts', [ __CLASS__, 'frontend_enqueue_script' ], 99);
 	}
 
-	/**
-	 * Admin Enqueue script
-	 * You can load the script on demand
-	 *
-	 * @param string $hook current page hook
-	 *
-	 * @return void
-	 */
-	public static function admin_enqueue_script( $hook ): void {
-		self::enqueue_script();
-	}
+
 
 	/**
 	 * Enqueue script
@@ -117,6 +107,9 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function frontend_enqueue_script(): void {
+		if (!General::in_url([ 'my-account/pm_membership' ])) {
+			return;
+		}
 		self::enqueue_script();
 	}
 
