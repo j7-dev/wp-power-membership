@@ -23,10 +23,6 @@ final class UserEdit {
 		\add_action('edit_user_profile', [ $this, 'add_fields' ], 10);
 		\add_action('edit_user_profile_update', [ $this, 'update_fields' ], 10);
 		\add_action('personal_options_update', [ $this, 'update_fields' ], 10);
-
-		// 往 gamipress_log 添加時間跟上色
-		\add_action('gamipress_before_render_log', [ $this, 'add_date_to_gamipress_log' ], 10, 2);
-		\add_action('gamipress_after_render_log', [ $this, 'add_closetag_to_gamipress_log' ], 10, 2);
 	}
 
 	/**
@@ -143,34 +139,5 @@ final class UserEdit {
 		if (isset($_POST[ Base::MEMBER_LV_POST_TYPE ])) { //phpcs:ignore
 			\update_user_meta($user_id, Base::CURRENT_MEMBER_LV_META_KEY, $_POST[ Base::MEMBER_LV_POST_TYPE ]); //phpcs:ignore
 		}
-	}
-
-	/**
-	 * 添加日期到 gamipress 日誌
-	 *
-	 * @param int   $log_id 日誌 ID
-	 * @param array $a 數組
-	 */
-	public function add_date_to_gamipress_log( int $log_id, array $a ): void {
-
-		$results = $a['query']->results;
-
-		foreach ($results as $result) {
-			if ($result->log_id == $log_id) {
-				$color = ( $result->type == 'points_deduct' ) ? 'green' : 'red';
-				echo '<span style="color:' . $color . '">' . $result->date;
-				break;
-			}
-		}
-	}
-
-	/**
-	 * 添加閉合標籤到 gamipress 日誌
-	 *
-	 * @param int   $log_id 日誌 ID
-	 * @param array $a 數組
-	 */
-	public function add_closetag_to_gamipress_log( int $log_id, array $a ): void {
-		echo '<span>';
 	}
 }

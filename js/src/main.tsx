@@ -6,7 +6,6 @@ import { app1Selector, app2Selector } from '@/utils'
 import { StyleProvider } from '@ant-design/cssinjs'
 
 const App1 = React.lazy(() => import('./App1'))
-const App2 = React.lazy(() => import('./App2'))
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -18,16 +17,11 @@ const queryClient = new QueryClient({
 })
 
 const app1Nodes = document.querySelectorAll(app1Selector)
-const app2Nodes = document.querySelectorAll(app2Selector)
 
 const mapping = [
 	{
 		els: app1Nodes,
 		App: App1,
-	},
-	{
-		els: app2Nodes,
-		App: App2,
 	},
 ]
 

@@ -40,6 +40,7 @@ final class Bootstrap {
 
 		Gamipress\Gamipress::instance();
 		Gamipress\Invite::instance();
+		Gamipress\Api::instance();
 
 		Frontend\Membership::instance();
 
@@ -78,8 +79,6 @@ final class Bootstrap {
 		);
 
 		$post_id = \get_the_ID();
-
-		var_dump(Plugin::$snake);
 
 		\wp_localize_script(
 			Plugin::$kebab,

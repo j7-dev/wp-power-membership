@@ -1,59 +1,81 @@
-import { useState } from 'react'
-import reactLogo from '../assets/images/react.svg'
-import viteLogo from '../assets/images/vite.svg'
-import wpLogo from '../assets/images/wp.png'
-import GetRestPostsPage from './GetRestPosts'
+import React, { useState } from 'react'
+import { Table, TableProps, DatePicker, DatePickerProps } from 'antd'
+import { TLogRecord } from './types'
+import dayjs, { Dayjs } from 'dayjs'
+import { useQuery } from '@tanstack/react-query'
+import { customAxios as axios } from '@/api'
+import { AxiosResponse } from 'axios'
 
-function DefaultPage() {
-	const [
-		count,
-		setCount,
-	] = useState(0)
-	const [
-		showRestPosts,
-		setShowRestPosts,
-	] = useState(false)
+const columns: TableProps<TLogRecord>['columns'] = [
+	{
+		width: 200,
+		title: 'Log ID',
+		dataIndex: 'log_id',
+		render: (_, record) => (
+			<p className="m-0">
+				#{record?.log_id} {record?.title}
+			</p>
+		),
+	},
+	{
+		width: 100,
+		align: 'right',
+		title: '購物金變化',
+		dataIndex: 'points',
+	},
 
+	{
+		width: 160,
+		title: '分類',
+		dataIndex: 'type',
+	},
+	{
+		width: 160,
+		title: '獎勵原因',
+		dataIndex: 'trigger_type',
+	},
+	{
+		width: 160,
+		align: 'right',
+		title: '日期',
+		dataIndex: 'date',
+	},
+]
+
+const disabledDate: DatePickerProps['disabledDate'] = (current) => {
+	// Can not select days before today and today
+	return current && current > dayjs().endOf('day')
+}
+
+const index = () => {
+	// 預設日期為7天前
+	const [date, setDate] = useState<Dayjs>(dayjs().subtract(7, 'day'))
+
+	const { data, isLoading } = useQuery<AxiosResponse<TLogRecord[]>>({
+		queryKey: ['logs', date.unix()],
+		queryFn: () => axios.get(`/logs?since=${date.unix()}`),
+	} as any)
+
+	const logs = data?.data || []
 	return (
-		<div className="App py-20">
-			<div className="flex justify-center">
-				<a href="https://vitejs.dev" target="_blank" rel="noreferrer noopener">
-					<img src={viteLogo} className="logo" alt="Vite logo" />
-				</a>
-				<a href="https://reactjs.org" target="_blank" rel="noreferrer noopener">
-					<img src={reactLogo} className="logo" alt="React logo" />
-				</a>
-				<a
-					href="https://wordpress.org"
-					target="_blank"
-					rel="noreferrer noopener"
-				>
-					<img src={wpLogo} className="logo" alt="WordPress logo" />
-				</a>
+		<>
+			<div className="mt-8 mb-4">
+				<label className="mr-2 mb-2 text-sm">選擇 LOG 起始日期</label>
+				<DatePicker
+					defaultValue={date}
+					onChange={setDate}
+					disabledDate={disabledDate}
+				/>
 			</div>
-			<h1>Vite + React + WordPress</h1>
-			<div className="flex justify-center mb-8">
-				<button
-					type="button"
-					onClick={() => setCount((theCount) => theCount + 1)}
-				>
-					Count is {count}
-				</button>
-
-				<button type="button" onClick={() => setShowRestPosts(!showRestPosts)}>
-					Get Posts Example by REST API
-				</button>
-			</div>
-			<p>
-				Edit <code>src/App.tsx</code> and save to test HMR
-			</p>
-			<p className="read-the-docs">
-				Click on the Vite, React and WordPress logos to learn more
-			</p>
-
-			{showRestPosts && <GetRestPostsPage />}
-		</div>
+			<Table
+				rowKey="log_id"
+				loading={isLoading}
+				columns={columns}
+				dataSource={logs}
+				scroll={{ x: 600 }}
+			/>
+		</>
 	)
 }
 
-export default DefaultPage
+export default index
