@@ -43,7 +43,7 @@ final class Bootstrap {
 		require_once __DIR__ . '/Gamipress/Invite.php';
 		require_once __DIR__ . '/Gamipress/Api.php';
 
-		require_once __DIR__ . '/Frontend/Membership.php';
+		require_once __DIR__ . '/FrontEnd/Membership.php';
 
 		\add_action('admin_enqueue_scripts', [ __CLASS__, 'add_static_assets' ], 99);
 		\add_action('wp_enqueue_scripts', [ __CLASS__, 'frontend_enqueue_script' ], 99);
