@@ -70,3 +70,5 @@ final class Api {
 		return new \WP_REST_Response( $logs );
 	}
 }
+
+Api::instance();

@@ -158,3 +158,5 @@ final class Metabox {
 		}
 	}
 }
+
+Metabox::instance();

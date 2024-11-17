@@ -263,3 +263,5 @@ final class UserColumns {
 		}
 	}
 }
+
+UserColumns::instance();

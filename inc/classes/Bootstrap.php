@@ -28,22 +28,22 @@ final class Bootstrap {
 	 * Constructor
 	 */
 	public function __construct() {
-		new Admin\Menu\Settings();
-		Admin\Ui::instance();
-		Admin\Users\UserColumns::instance();
-		Admin\Users\UserEdit::instance();
+		require_once __DIR__ . '/Admin/Menu/Settings.php';
+		require_once __DIR__ . '/Admin/Ui.php';
+		require_once __DIR__ . '/Admin/Users/UserColumns.php';
+		require_once __DIR__ . '/Admin/Users/UserEdit.php';
 
-		MemberLv\Metabox::instance();
-		MemberLv\MembershipUpgrade::instance();
+		require_once __DIR__ . '/MemberLv/Metabox.php';
+		require_once __DIR__ . '/MemberLv/MembershipUpgrade.php';
 
 		require_once __DIR__ . '/Woocommerce/Coupons/Metabox.php';
-		WooCommerce\Coupons\View::instance();
+		require_once __DIR__ . '/Woocommerce/Coupons/View.php';
 
-		Gamipress\Gamipress::instance();
-		Gamipress\Invite::instance();
-		Gamipress\Api::instance();
+		require_once __DIR__ . '/Gamipress/Gamipress.php';
+		require_once __DIR__ . '/Gamipress/Invite.php';
+		require_once __DIR__ . '/Gamipress/Api.php';
 
-		Frontend\Membership::instance();
+		require_once __DIR__ . '/Frontend/Membership.php';
 
 		\add_action('admin_enqueue_scripts', [ __CLASS__, 'add_static_assets' ], 99);
 		\add_action('wp_enqueue_scripts', [ __CLASS__, 'frontend_enqueue_script' ], 99);

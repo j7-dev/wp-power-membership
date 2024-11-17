@@ -139,3 +139,5 @@ final class Invite {
 		\update_user_meta($customer_id, 'ref_user_ids', $ref_user_id);
 	}
 }
+
+Invite::instance();

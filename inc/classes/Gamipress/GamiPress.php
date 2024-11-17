@@ -443,3 +443,5 @@ final class GamiPress {
 		);
 	}
 }
+
+GamiPress::instance();

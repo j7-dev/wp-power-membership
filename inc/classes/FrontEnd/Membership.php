@@ -180,3 +180,5 @@ final class Membership {
 		}
 	}
 }
+
+Membership::instance();

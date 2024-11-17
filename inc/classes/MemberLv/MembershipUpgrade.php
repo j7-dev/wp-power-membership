@@ -125,3 +125,5 @@ final class MembershipUpgrade {
 		// phpcs:enable
 	}
 }
+
+MembershipUpgrade::instance();

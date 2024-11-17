@@ -141,3 +141,5 @@ final class UserEdit {
 		}
 	}
 }
+
+UserEdit::instance();

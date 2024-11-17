@@ -634,3 +634,5 @@ final class View {
 	// $cart->add_fee(__("首次消費折 {$discount} 元", 'power_membership'), -$discount);
 	// }
 }
+
+View::instance();

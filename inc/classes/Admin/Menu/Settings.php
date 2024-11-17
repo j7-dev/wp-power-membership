@@ -98,3 +98,4 @@ final class Settings extends PowerPlugins {
 		];
 	}
 }
+new Settings();
