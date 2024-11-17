@@ -36,7 +36,7 @@ final class Bootstrap {
 		MemberLv\Metabox::instance();
 		MemberLv\MembershipUpgrade::instance();
 
-		WooCommerce\Coupons\Metabox::instance();
+		require_once __DIR__ . '/Woocommerce/Coupons/Metabox.php';
 		WooCommerce\Coupons\View::instance();
 
 		Gamipress\Gamipress::instance();
