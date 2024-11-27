@@ -73,10 +73,19 @@ final class View {
 	public function enqueue_assets(): void {
 		if (\is_checkout()) {
 			\wp_enqueue_style('dashicons');
-			\wp_enqueue_style('handle-coupon', Plugin::$url . '/assets/css/front.min.css', [], Plugin::$version);
+			\wp_enqueue_style('handle-coupon', Plugin::$url . '/inc/assets/css/front.min.css', [], Plugin::$version);
 
 			\wp_enqueue_script( 'jquery-blockui' );
-			\wp_enqueue_script('handle-coupon', Plugin::$url . '/assets/js/handle-coupon.js', [ 'wc-checkout' ], Plugin::$version, true);
+			\wp_enqueue_script(
+				'handle-coupon',
+				Plugin::$url . '/inc/assets/js/handle-coupon.js',
+				[ 'jquery' ,'wc-checkout' ],
+				Plugin::$version,
+				[
+					'strategy'  => 'async',
+					'in_footer' => true,
+				]
+				);
 		}
 	}
 
