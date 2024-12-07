@@ -62,14 +62,14 @@ final class UserEdit {
 							<option value="">請選擇</option>
 		<?php
 		$member_lvs = get_posts(
-								[
-									'post_type'      => Base::MEMBER_LV_POST_TYPE,
-									'posts_per_page' => -1,
-									'post_status'    => 'publish',
-									'orderby'        => 'menu_order',
-									'order'          => 'ASC',
-								]
-								);
+													[
+														'post_type'      => Base::MEMBER_LV_POST_TYPE,
+														'posts_per_page' => -1,
+														'post_status'    => 'publish',
+														'orderby'        => 'menu_order',
+														'order'          => 'ASC',
+													]
+													);
 
 		foreach ($member_lvs as $member_lv) {
 			$selected = ( $user_member_lv_id == $member_lv->ID ) ? 'selected' : '';
@@ -80,14 +80,14 @@ final class UserEdit {
 						<span class="description">上次變更時間：<?php echo $rank_earned_time; ?></span>
 					</td>
 				</tr>
-				<tr>
+				<!-- <tr>
 					<th>
 						<label for="time_MemberLVexpire_date">會員到期日</label>
 					</th>
 					<td>
 						TODO
 					</td>
-				</tr>
+				</tr> -->
 				<tr>
 					<th>
 						<label for="sales_total">累積銷售額</label>
@@ -103,6 +103,16 @@ final class UserEdit {
 					</th>
 					<td>
 						<input type="text" value="<?php echo $user_registered; ?>" id="user_register_time" name="user_register_time" disabled="disabled" class="regular-text">
+					</td>
+				</tr>
+
+
+				<tr class="birthday">
+					<th>
+						<label for="birthday">生日</label>
+					</th>
+					<td>
+						<input type="date" value="<?php echo $birthday; ?>" id="birthday" name="birthday" class="regular-text">
 					</td>
 				</tr>
 
@@ -138,6 +148,10 @@ final class UserEdit {
 
 		if (isset($_POST[ Base::MEMBER_LV_POST_TYPE ])) { //phpcs:ignore
 			\update_user_meta($user_id, Base::CURRENT_MEMBER_LV_META_KEY, $_POST[ Base::MEMBER_LV_POST_TYPE ]); //phpcs:ignore
+		}
+
+		if (isset($_POST[ 'birthday' ])) { //phpcs:ignore
+			\update_user_meta($user_id, 'birthday', $_POST[ 'birthday' ]); //phpcs:ignore
 		}
 	}
 }
