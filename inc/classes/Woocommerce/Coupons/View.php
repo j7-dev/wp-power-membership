@@ -597,6 +597,8 @@ final class View {
 				'log_type'       => 'points_deduct',
 			]
 			);
+
+		\WC()->session->__unset('custom_fee');
 	}
 
 	/**
