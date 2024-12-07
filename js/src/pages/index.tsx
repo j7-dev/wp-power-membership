@@ -23,12 +23,11 @@ const columns: TableProps<TLogRecord>['columns'] = [
 		title: '購物金變化',
 		dataIndex: 'points',
 	},
-
-	{
-		width: 160,
-		title: '分類',
-		dataIndex: 'type',
-	},
+	// {
+	// 	width: 160,
+	// 	title: '分類',
+	// 	dataIndex: 'type',
+	// },
 	{
 		width: 160,
 		title: '獎勵原因',

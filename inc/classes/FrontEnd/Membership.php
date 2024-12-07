@@ -19,7 +19,7 @@ final class Membership {
 	 * @var array<string, string> $my_account_pages 我的帳號頁面
 	 */
 	public static $my_account_pages = [
-		'pm_membership' => '我的會籍',
+		'pm_membership' => '購物金及會藉',
 	];
 
 	/**
