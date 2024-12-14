@@ -134,7 +134,7 @@ final class Bootstrap {
 			if ($is_simple_admin) {
 				\wp_enqueue_script(
 					'users',
-					Plugin::$url . '/assets/js/admin-users.js',
+					Plugin::$url . '/inc/assets/js/admin-users.js',
 					[],
 					Plugin::$version,
 					[
@@ -147,7 +147,7 @@ final class Bootstrap {
 			if ($is_simple_admin) {
 				\wp_enqueue_script(
 					'user-edit',
-					Plugin::$url . '/assets/js/admin-user-edit.js',
+					Plugin::$url . '/inc/assets/js/admin-user-edit.js',
 					[],
 					Plugin::$version,
 					[
@@ -159,7 +159,7 @@ final class Bootstrap {
 		if (Base::MEMBER_LV_POST_TYPE === $screen->id) {
 			\wp_enqueue_script(
 				Base::MEMBER_LV_POST_TYPE,
-				Plugin::$url . '/assets/js/member_lv.js',
+				Plugin::$url . '/inc/assets/js/member_lv.js',
 				[ 'jquery' ],
 				Plugin::$version,
 				[

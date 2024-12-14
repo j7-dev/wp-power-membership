@@ -42,7 +42,6 @@ final class GamiPress {
 		\add_filter( 'gamipress_requirement_object', [ __CLASS__, 'requirement_object' ], 10, 2 );
 		\add_action( 'gamipress_ajax_update_requirement', [ __CLASS__, 'ajax_update_requirement' ], 10, 2 );
 
-		\add_action( 'admin_init', [ __CLASS__, 'register_scripts' ] );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ], 100 );
 
 		\add_action('woocommerce_order_status_changed', [ __CLASS__, 'listener' ], 10, 3);
@@ -163,17 +162,6 @@ final class GamiPress {
 		);
 	}
 
-	/**
-	 * Register admin scripts
-	 *
-	 * @since       1.0.0
-	 * @return      void
-	 */
-	public static function register_scripts(): void {
-		$key = self::WEEK_DAY_KEY;
-		// Scripts
-		\wp_register_script( "{$key}-js", Plugin::$url . "/assets/js/{$key}.js", [ 'jquery' ], Plugin::$version, true );
-	}
 
 	/**
 	 * Enqueue admin scripts
@@ -186,7 +174,17 @@ final class GamiPress {
 
 		if ( $post_type === 'points-type' ) {
 			$key = self::WEEK_DAY_KEY;
-			\wp_enqueue_script( "{$key}-js" );
+
+			\wp_enqueue_script(
+				"{$key}-js",
+				Plugin::$url . "/inc/assets/js/{$key}.js",
+				[ 'jquery' ],
+				Plugin::$version,
+				[
+					'in_footer' => true,
+					'strategy'  => 'defer',
+				]
+				);
 		}
 	}
 

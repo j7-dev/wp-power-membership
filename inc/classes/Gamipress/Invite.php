@@ -62,7 +62,7 @@ final class Invite {
 		// Scripts
 		\wp_enqueue_script(
 			"{$key}-js",
-			Plugin::$url . "/assets/js/{$key}.js",
+			Plugin::$url . "/inc/assets/js/{$key}.js",
 			[ 'jquery' ],
 			Plugin::$version,
 			[

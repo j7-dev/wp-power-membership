@@ -265,7 +265,7 @@ final class Metabox {
 		if (( $hook === 'post.php' && $post->post_type === 'shop_coupon' ) || ( $hook === 'post-new.php' && $post->post_type === 'shop_coupon' )) {
 			\wp_enqueue_script(
 				"{$key}-js",
-				Plugin::$url . "/assets/js/{$key}.js",
+				Plugin::$url . "/inc/assets/js/{$key}.js",
 				[ 'jquery' ],
 				Plugin::$version,
 				[
