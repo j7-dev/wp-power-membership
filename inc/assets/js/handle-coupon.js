@@ -114,9 +114,7 @@
 		$("#award_deduct_point-apply").on("click", function () {
 			const userPoint = Number($(this).data("user_point"));
 			const value = Number($("#award_deduct_point").val());
-			if (value === 0) {
-				return;
-			}
+
 			$.blockUI();
 
 			$.post(
@@ -133,7 +131,8 @@
 						alert(data);
 						return;
 					}
-					const updated_user_point = Number(data?.updated_user_point);
+
+					// const updated_user_point = Number(data?.data);
 					$("#user-point bdi").html(`<span class="woocommerce-Price-currencySymbol">$</span>${(userPoint - value).toLocaleString()}`);
 					$('body').trigger('update_checkout');
 				}

@@ -506,8 +506,8 @@ final class View {
 			\wp_send_json_error('請先登入');
 		}
 
-		if (!$value || !$coupon_id) {
-			\wp_send_json_error('請輸入折抵的數值');
+		if (!$coupon_id) {
+			\wp_send_json_error('找不到購物金折抵的設定');
 		}
 
 		$user_id    = \get_current_user_id();
@@ -522,6 +522,17 @@ final class View {
 
 		$deduct_ratio      = $coupon->get_amount() / 100;
 		$max_deduct_amount = \floor($sub_total * $deduct_ratio);
+
+		if (!$value) {
+			\WC()->session->set('custom_fee', null);
+			\wp_send_json_success(
+				[
+					'code'    => 'award_deduct_point_remove',
+					'message' => '已移除購物金折抵',
+					'data'    => $user_point,
+				]
+				);
+		}
 
 		if ($value > $max_deduct_amount) {
 			\wp_send_json_error('購物金折抵金額超過上限');
@@ -539,7 +550,9 @@ final class View {
 
 		\wp_send_json_success(
 			[
-				'updated_user_point' => $user_point - $value,
+				'code'    => 'award_deduct_point_success',
+				'message' => '已折抵購物金',
+				'data'    => $user_point - $value,
 			]
 			);
 	}
