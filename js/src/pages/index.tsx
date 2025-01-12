@@ -8,8 +8,13 @@ import { AxiosResponse } from 'axios'
 
 const columns: TableProps<TLogRecord>['columns'] = [
 	{
-		width: 200,
-		title: 'Log ID',
+		width: 160,
+		title: '日期',
+		dataIndex: 'date',
+	},
+	{
+		width: 100,
+		title: '獎勵原因',
 		dataIndex: 'log_id',
 		render: (_, record) => (
 			<p className="m-0">
@@ -23,21 +28,18 @@ const columns: TableProps<TLogRecord>['columns'] = [
 		title: '購物金變化',
 		dataIndex: 'points',
 	},
+
 	// {
 	// 	width: 160,
 	// 	title: '分類',
 	// 	dataIndex: 'type',
 	// },
-	{
-		width: 160,
-		title: '獎勵原因',
-		dataIndex: 'trigger_type',
-	},
+
 	{
 		width: 160,
 		align: 'right',
-		title: '日期',
-		dataIndex: 'date',
+		title: '到期日',
+		dataIndex: 'expiration_date',
 	},
 ]
 
@@ -59,7 +61,7 @@ const index = () => {
 	return (
 		<>
 			<div className="mt-8 mb-4">
-				<label className="mr-2 mb-2 text-sm">選擇 LOG 起始日期</label>
+				<label className="mr-2 mb-2 text-sm">起始日期</label>
 				<DatePicker
 					defaultValue={date}
 					onChange={setDate}

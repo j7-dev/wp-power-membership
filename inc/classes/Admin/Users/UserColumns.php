@@ -35,26 +35,26 @@ final class UserColumns {
 
 		// 排序
 		\add_filter(
-			'users_list_table_query_args',
-			function ( $args ) {
-				if (isset($_REQUEST['ts_all'])) { // phpcs:ignore
-					$args['orderby']  = 'meta_value_num';
-					$args['meta_key'] = '_total_sales_in_life';
-					$args['order']    = $_REQUEST['ts_all']; //phpcs:ignore
-					return $args;
-				}
-				for ($i = 0; $i < 3; $i++) {
-					if (isset($_REQUEST[ "ts{$i}" ])) {
-						$args['orderby']  = 'meta_value_num';
-						$args['meta_key'] = '_total_sales_in_' . $i . '_months_ago';
-						$args['order']    = $_REQUEST[ "ts{$i}" ]; //phpcs:ignore
-					}
-				}
+		'users_list_table_query_args',
+		function ( $args ) {
+		if (isset($_REQUEST['ts_all'])) { // phpcs:ignore
+				$args['orderby']  = 'meta_value_num';
+				$args['meta_key'] = '_total_sales_in_life';
+				$args['order']    = $_REQUEST['ts_all']; //phpcs:ignore
 				return $args;
-			},
-			10,
-			1
-			);
+			}
+			for ($i = 0; $i < 3; $i++) {
+				if (isset($_REQUEST[ "ts{$i}" ])) {
+					$args['orderby']  = 'meta_value_num';
+					$args['meta_key'] = '_total_sales_in_' . $i . '_months_ago';
+				$args['order']    = $_REQUEST[ "ts{$i}" ]; //phpcs:ignore
+				}
+			}
+			return $args;
+		},
+		10,
+		1
+		);
 
 		// 在 users page 篩選不同等級的用戶
 		\add_action('manage_users_extra_tablenav', [ $this, 'render_member_filter_options' ]);

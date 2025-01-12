@@ -67,6 +67,16 @@ final class Api {
 		$user_id = \get_current_user_id();
 		$logs    = \gamipress_get_user_logs( $user_id, [], $since );
 
+		$logs = array_values(
+			array_map(
+			function ( $log ) {
+				$log->expiration_date = \gamipress_get_log_meta($log->log_id, '_expiration_date', true);
+				return $log;
+			},
+			$logs
+			)
+			);
+
 		return new \WP_REST_Response( $logs );
 	}
 }

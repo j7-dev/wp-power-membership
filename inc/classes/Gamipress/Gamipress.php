@@ -50,7 +50,99 @@ final class GamiPress {
 
 		\add_action( 'woocommerce_checkout_order_review', [ __CLASS__, 'display_award_points_text' ], 15 );
 
+		\add_action('gamipress_insert_log', [ __CLASS__, 'sync_expiration_date_to_log_meta' ], 10, 4);
+
 		// TEST \add_action( 'init', [ __CLASS__, 'listener' ] );
+	}
+
+	/**
+	 * 同步購物金到期日到 log meta
+	 *
+	 * @param int                  $log_id 日誌 ID
+	 * @param array<string, mixed> $log_data 日誌資料
+	 * @param array<string, mixed> $log_meta 日誌 meta
+	 * @param int                  $user_id 使用者 ID
+	 * @return void
+	 */
+	public static function sync_expiration_date_to_log_meta( $log_id, $log_data, $log_meta, $user_id ) {
+
+		$title = $log_data['title'] ?? ''; // 滿額贈購物金 40 元，消費金額 2970.00 元，訂單編號 #202501134061，使用 trigger_id #836規則
+
+		// 從字串中取得 trigger_id
+		$matches    = [];
+		$trigger_id = 0;
+
+		// 檢查標題是否為空
+		if (empty($title)) {
+			return;
+		}
+
+		// 嘗試從標題中取得 trigger_id
+		if (preg_match('/trigger_id #(\d+)/', $title, $matches)) {
+			$trigger_id = (int) $matches[1];
+		} else {
+			return;
+		}
+
+		// 確認 trigger_id 是否有效
+		if (!$trigger_id) {
+			return;
+		}
+
+		$expiration_date = self::get_expiration_date($trigger_id);
+		\gamipress_update_log_meta($log_id, '_expiration_date', $expiration_date);
+	}
+
+
+	/**
+	 * 取得購物金到期日
+	 *
+	 * @param int $trigger_id 觸發 ID
+	 * @return string
+	 */
+	private static function get_expiration_date( $trigger_id ) {
+		$prefix = '_gamipress_expirations_';
+
+		// Bail if not post assigned
+		if ( $trigger_id === 0 ) {
+			return;
+		}
+
+		$post_type = \gamipress_get_post_type( $trigger_id );
+
+		$allowed_post_types   = array_merge( \gamipress_get_achievement_types_slugs(), \gamipress_get_rank_types_slugs() );
+		$allowed_post_types[] = 'points-award';
+		$allowed_post_types[] = 'points-deduct';
+		$allowed_post_types[] = 'step';
+		$allowed_post_types[] = 'rank-requirement';
+
+		// Bail if the user earning post type is not allowed
+		if ( ! in_array( $post_type, $allowed_post_types ) ) {
+			return;
+		}
+
+		$expiration = \gamipress_get_post_meta( $trigger_id, $prefix . 'expiration', true );
+
+		// Bail if item never expires
+		if ( $expiration === '' ) {
+			return;
+		}
+
+		if ( $expiration === 'date' ) {
+			$date = \gamipress_get_post_meta( $trigger_id, $prefix . 'date', true );
+
+			if ( ! \gamipress_expirations_is_a_valid_date( $date, 'Y-m-d' ) ) {
+				return;
+			}
+
+			$expiration_date = date( 'Y-m-d H:i:s', strtotime( $date ) );
+		} else {
+			$amount = \absint( \gamipress_get_post_meta( $trigger_id, $prefix . 'amount', true ) );
+
+			$expiration_date = date( 'Y-m-d H:i:s', strtotime( "+{$amount}{$expiration}", \current_time( 'timestamp' ) ) );
+		}
+
+		return $expiration_date;
 	}
 
 	/**
@@ -258,20 +350,41 @@ final class GamiPress {
 
 		$total_award_points = 0;
 		foreach ($trigger_ids as $trigger_id) {
-			$points = \gamipress_get_post_meta($trigger_id, '_gamipress_points', true);
-			$ratio  = \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
-
+			$points              = \gamipress_get_post_meta($trigger_id, '_gamipress_points', true);
+			$ratio               = \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
+			$post_type           = \get_post_type($trigger_id); // points-award | points-type
+			$points_type         = \get_post_meta($trigger_id, '_gamipress_points_type', true); // ee_point
 			$award_points        = floor($order_total / $ratio) * $points;
 			$total_award_points += $award_points;
+
+			$user_id = $order->get_customer_id();
+
+			$reason = "滿額贈購物金 {$award_points} 元，消費金額 {$order_total} 元，訂單編號 #{$order->get_order_number()}，使用 trigger_id #{$trigger_id}規則";
+
+			$expiration_date = self::get_expiration_date($trigger_id);
+
 			\gamipress_award_points_to_user(
-				$order->get_customer_id(),
+				$user_id,
 				$award_points,
-				'ee_point',
+				$points_type,
 				[
 					'admin_id'       => 0,
 					'achievement_id' => null,
-					'reason'         => "滿額贈購物金 {$award_points} 元，消費金額 {$order_total} 元，訂單編號 #{$order->get_order_number()}",
+					'reason'         => $reason,
 					'log_type'       => 'points_earn',
+				]
+				);
+
+			\gamipress_insert_user_earning(
+				$user_id,
+				[
+					'title'       => $reason,
+					'user_id'     => $user_id,
+					'post_id'     => $trigger_id,
+					'post_type'   => $post_type,
+					'points'      => $award_points,
+					'points_type' => $points_type,
+					'date'        => \wp_date( 'Y-m-d H:i:s' ),
 				]
 				);
 
@@ -418,9 +531,8 @@ final class GamiPress {
 		$trigger_ids        = self::get_trigger_ids(\wp_date('H:i'));
 
 		foreach ($trigger_ids as $trigger_id) {
-			$points = (float) \gamipress_get_post_meta($trigger_id, '_gamipress_points', true);
-			$ratio  = (float) \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
-
+			$points              = (float) \gamipress_get_post_meta($trigger_id, '_gamipress_points', true);
+			$ratio               = (float) \gamipress_get_post_meta($trigger_id, self::RATIO_KEY, true);
 			$award_points        = floor($cart_total / $ratio) * $points;
 			$total_award_points += $award_points;
 		}
@@ -432,12 +544,12 @@ final class GamiPress {
 				<tr>
 					<th>訂單完成後可獲得購物金</th>
 					<td style="text-align: right;">
-					%s 元
+					%s 購物金
 					</td>
 				</tr>
 			</tbody>
 		</table>',
-		\wc_price($total_award_points)
+		number_format($total_award_points)
 		);
 	}
 }
