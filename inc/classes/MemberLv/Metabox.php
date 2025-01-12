@@ -32,6 +32,9 @@ final class Metabox {
 		\add_action('add_meta_boxes', [ $this, 'add_metabox' ], 10);
 		\add_action('save_post', [ $this, 'save_metabox' ], 10, 2);
 		// \add_action('init', array($this, 'create_default_member_lv'), 30);
+
+		// 移除 unlock_with_points 欄位
+		\add_filter('manage_member_lv_posts_columns', [ $this, 'remove_unlock_points_column' ], 20);
 	}
 
 	/**
@@ -156,6 +159,19 @@ final class Metabox {
 				\update_user_meta($user_id, Base::CURRENT_MEMBER_LV_META_KEY, $default_member_lv_id);
 			}
 		}
+	}
+
+	/**
+	 * 移除 unlock_with_points 欄位
+	 *
+	 * @param array<string, string> $columns 欄位列表
+	 * @return array<string, string> 修改後的欄位列表
+	 */
+	public function remove_unlock_points_column( array $columns ): array {
+		if (isset($columns['unlock_with_points'])) {
+			unset($columns['unlock_with_points']);
+		}
+		return $columns;
 	}
 }
 
