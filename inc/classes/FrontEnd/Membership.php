@@ -73,7 +73,7 @@ final class Membership {
 		$member_lv      = \gamipress_get_user_rank(null, 'member_lv');
 		$next_member_lv = \gamipress_get_next_user_rank(null, 'member_lv');
 
-		$next_member_lv_threshold       = \get_post_meta($next_member_lv->ID, 'power_membership_threshold', true);
+		$next_member_lv_threshold       = $next_member_lv ? \get_post_meta($next_member_lv->ID, 'power_membership_threshold', true) : null;
 		$next_member_lv_threshold_price = $next_member_lv_threshold ? \wc_price( (float) $next_member_lv_threshold) : null;
 		// 取得最近12個月累積金額
 		$current_user_id = \get_current_user_id();
