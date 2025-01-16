@@ -57,7 +57,8 @@ final class UserColumns {
 		);
 
 		// 在 users page 篩選不同等級的用戶
-		\add_action('manage_users_extra_tablenav', [ $this, 'render_member_filter_options' ]);
+		// BUG 後台無法批量刪除用戶
+		// \add_action('manage_users_extra_tablenav', [ $this, 'render_member_filter_options' ]);
 		\add_action('pre_get_users', [ $this, 'filter_users_by_member_lv' ]);
 	}
 
