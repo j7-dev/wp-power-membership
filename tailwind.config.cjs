@@ -6,7 +6,7 @@ module.exports = {
 		preflight: false,
 		container: false, // conflicted with WordPress
 	},
-	content: ['./js/src/**/*.{js,ts,jsx,tsx}', './inc/**/*.php'],
+	content: ['./js/src/**/*.{js,ts,jsx,tsx}', './inc/**/*.php', './inc/**/*.js'],
 	theme: {
 		animation: {
 			// why need this? because elementor plugin might conflict with same animate keyframe name
