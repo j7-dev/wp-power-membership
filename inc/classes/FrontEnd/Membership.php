@@ -60,10 +60,19 @@ final class Membership {
 	 * @return array<string,string>
 	 */
 	public static function custom_menu_items( array $items ): array {
-		foreach ( self::$my_account_pages as $endpoint => $page ) {
-			$items[ $endpoint ] = $page;
+
+		$new_items = [];
+
+		foreach ($items as $endpoint => $page) {
+			$new_items[ $endpoint ] = $page;
+			if ( 'orders' === $endpoint ) {
+				foreach ( self::$my_account_pages as $extra_endpoint => $extra_page ) {
+					$new_items[ $extra_endpoint ] = $extra_page;
+				}
+			}
 		}
-		return $items;
+
+		return $new_items;
 	}
 
 	/**
