@@ -67,6 +67,11 @@ final class Api {
 		$user_id = \get_current_user_id();
 		$logs    = \gamipress_get_user_logs( $user_id, [], $since );
 
+		$logs = array_filter(
+			$logs,
+			fn( $log ) => !empty($log->points)
+		);
+
 		$logs = array_values(
 			array_map(
 			function ( $log ) {
