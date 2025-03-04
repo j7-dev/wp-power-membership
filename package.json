@@ -1,6 +1,6 @@
 {
 	"name": "create-power-membership",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"type": "module",
 	"scripts": {
 		"bootstrap": "yarn && composer install --no-interaction",
