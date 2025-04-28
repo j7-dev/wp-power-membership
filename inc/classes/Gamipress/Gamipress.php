@@ -52,6 +52,7 @@ final class GamiPress {
 
 		\add_action('gamipress_insert_log', [ __CLASS__, 'sync_expiration_date_to_log_meta' ], 10, 4);
 
+		\add_filter('woocommerce_update_order_review_fragments', [ $this, 'add_custom_fragments' ], 10, 1);
 		// TEST \add_action( 'init', [ __CLASS__, 'listener' ] );
 	}
 
@@ -539,7 +540,7 @@ final class GamiPress {
 
 		printf(
 		/*html*/'
-		<table class="">
+		<table class="ee_total_award_points">
 			<tbody>
 				<tr>
 					<th>訂單完成後可獲得購物金</th>
@@ -551,6 +552,24 @@ final class GamiPress {
 		</table>',
 		number_format($total_award_points)
 		);
+	}
+
+		/**
+	 * 添加自定义 fragment
+	 *
+	 * @param array<string, string> $fragments 自定义 fragment
+	 * @return array<string, string> 自定义 fragment
+	 */
+	public function add_custom_fragments( array $fragments ): array {
+
+		ob_start();
+		self::display_award_points_text();
+		$html = ob_get_clean();
+
+		// 可添加多个 fragments
+		$fragments['.ee_total_award_points'] = $html;
+
+		return $fragments;
 	}
 }
 
