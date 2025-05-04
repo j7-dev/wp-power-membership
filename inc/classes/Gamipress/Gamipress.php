@@ -360,7 +360,7 @@ final class GamiPress {
 
 			$user_id = $order->get_customer_id();
 
-			$reason = "滿額贈購物金 {$award_points} 元，消費金額 {$order_total} 元，訂單編號 #{$order->get_order_number()}，使用 trigger_id #{$trigger_id}規則";
+			$reason = "滿額贈購物金 {$award_points} 元，消費金額 {$order_total} 元，訂單編號 #{$order->get_order_number()}";
 
 			$expiration_date = self::get_expiration_date($trigger_id);
 
@@ -554,7 +554,7 @@ final class GamiPress {
 		);
 	}
 
-		/**
+	/**
 	 * 添加自定义 fragment
 	 *
 	 * @param array<string, string> $fragments 自定义 fragment
