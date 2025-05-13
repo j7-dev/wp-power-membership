@@ -50,11 +50,16 @@ const disabledDate: DatePickerProps['disabledDate'] = (current) => {
 
 const index = () => {
 	// 預設日期為7天前
-	const [date, setDate] = useState<Dayjs>(dayjs().subtract(7, 'day'))
+	const [date, setDate] = useState<Dayjs>(
+		dayjs().subtract(7, 'day').startOf('day'),
+	)
 
+	const timestamp =
+		date?.unix() || dayjs().subtract(7, 'day').startOf('day').unix()
 	const { data, isLoading } = useQuery<AxiosResponse<TLogRecord[]>>({
-		queryKey: ['logs', date.unix()],
-		queryFn: () => axios.get(`/logs?since=${date.unix()}`),
+		queryKey: ['logs', timestamp],
+		queryFn: () => axios.get(`/logs?since=${timestamp}`),
+		enabled: !!timestamp,
 	} as any)
 
 	const logs = data?.data || []
