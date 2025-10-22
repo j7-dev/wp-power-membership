@@ -37,6 +37,7 @@ final class View {
 	 * 初始化
 	 */
 	public function init(): void {
+
 		global $power_plugins_settings;
 		// \add_action('woocommerce_before_checkout_form', [ $this, 'show_award_deduct' ], 20, 1);
 		\add_action('woocommerce_cart_calculate_fees', [ $this, 'award_deduct' ], 10);
@@ -65,22 +66,16 @@ final class View {
 		if (\is_admin() && !defined('DOING_AJAX')) {
 			return;
 		}
-
-		$custom_fee  = \WC()->session->get('custom_fee');
-		$current_fee = $custom_fee ? (int) $custom_fee['amount'] : 0;
-
-		$user_point       = \gamipress_get_user_points(\get_current_user_id(), 'ee_point');
-		$user_point_price = \wc_price($user_point + $current_fee);
-		$sub_total        = (int) WC()->cart->subtotal;
-
 		$coupons = $this->get_valid_award_deduct_coupons(); // 取得購物車折抵優惠
 		if (empty($coupons)) {
 			return;
 		}
 
 		foreach ($coupons as $coupon) {
-			$deduct_ratio      = $coupon->get_amount() / 100;
-			$max_deduct_amount = \floor($sub_total * $deduct_ratio);
+			$max_deduct_amount = $this->get_max_deduct_amount($coupon);
+			if (!$max_deduct_amount) {
+				continue;
+			}
 
 			$fee_name   = $coupon->get_code(); // 費用名稱
 			$fee_amount = -1 * $max_deduct_amount;
@@ -117,6 +112,23 @@ final class View {
 				]
 				);
 		}
+	}
+
+	/**
+	 * 取得最大可折抵金額
+	 *
+	 * @param \WC_Coupon $coupon 優惠券
+	 * @return float 取得最大可折抵金額
+	 * */
+	private function get_max_deduct_amount( \WC_Coupon $coupon ): float {
+
+		$user_point = (float) \gamipress_get_user_points(\get_current_user_id(), 'ee_point');
+
+		$sub_total = (int) WC()->cart->subtotal;
+
+		$deduct_ratio  = $coupon->get_amount() / 100;
+		$deduct_amount = \floor($sub_total * $deduct_ratio);
+		return \min($user_point, $deduct_amount);
 	}
 
 	/**
