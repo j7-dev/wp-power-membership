@@ -631,17 +631,28 @@ final class View {
 	 * @param \WC_Order $order 訂單
 	 */
 	public function exec_deduct_point( \WC_Order $order ): void {
-		$user_id      = $order->get_customer_id();
-		$value        = WC()->session->get('custom_fee');
-		$point_amount = $value['amount'] ?? 0;
-		if (!$point_amount) {
+
+		$coupons = $this->get_valid_award_deduct_coupons();
+		if (!$coupons) {
 			return;
 		}
+		$user_id      = $order->get_customer_id();
+		$coupon_names = array_map( static fn( $coupon ) => $coupon->get_code(), $coupons );
 
-		$order->update_meta_data('award_deduct_point', $point_amount);
-		$order->save();
+		foreach ( $order->get_fees() as $fee ) {
+			if (!\in_array( $fee->get_name(), $coupon_names, true )) {
+				continue;
+			}
 
-		$updated_user_point = \gamipress_deduct_points_to_user(
+			$point_amount = $fee->get_total() * -1;
+			if (!$point_amount) {
+				return;
+			}
+
+			$order->update_meta_data('award_deduct_point', $point_amount);
+			$order->save();
+
+			$updated_user_point = \gamipress_deduct_points_to_user(
 			$user_id,
 			(int) $point_amount,
 			'ee_point',
@@ -652,8 +663,7 @@ final class View {
 				'log_type'       => 'points_deduct',
 			]
 			);
-
-		\WC()->session->__unset('custom_fee');
+		}
 	}
 
 	/**
