@@ -35,6 +35,7 @@ final class Bootstrap {
 
 		require_once __DIR__ . '/MemberLv/Metabox.php';
 		require_once __DIR__ . '/MemberLv/MembershipUpgrade.php';
+		require_once __DIR__ . '/MemberLv/MemberDiscount.php';
 
 		require_once __DIR__ . '/Woocommerce/Coupons/Metabox.php';
 		require_once __DIR__ . '/Woocommerce/Coupons/View.php';

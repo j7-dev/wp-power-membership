@@ -24,6 +24,7 @@ final class Metabox {
 	public static $default_member_lv_id;
 	const ACTION             = 'power_membership_metabox';
 	const THRESHOLD_META_KEY = 'power_membership_threshold';
+	const DISCOUNT_META_KEY  = 'power_membership_discount';
 
 	/**
 	 * 建構子
@@ -59,11 +60,17 @@ final class Metabox {
 	public function render_metabox( \WP_Post $post ): void {
 		$threshold = \get_post_meta($post->ID, self::THRESHOLD_META_KEY, true);
 		$threshold = empty($threshold) ? 0 : (int) $threshold;
+		$discount  = \get_post_meta($post->ID, self::DISCOUNT_META_KEY, true);
+		$discount  = empty($discount) ? 0 : (int) $discount;
 		?>
 		<div class="tailwindcss">
 			<div class="flex items-center tailwind">
 				<label for="<?php echo self::THRESHOLD_META_KEY; ?>" class="w-[14rem] block">會員累積消費升級門檻</label>
 				<input type="number" value="<?php echo $threshold; ?>" name="<?php echo self::THRESHOLD_META_KEY; ?>" min="0" step="1000" class="ml-8" />
+			</div>
+			<div class="flex items-center tailwind mt-4">
+				<label for="<?php echo self::DISCOUNT_META_KEY; ?>" class="w-[14rem] block">會員折扣 (%)</label>
+				<input type="number" value="<?php echo $discount; ?>" name="<?php echo self::DISCOUNT_META_KEY; ?>" min="0" max="100" step="1" class="ml-8" />
 			</div>
 		</div>
 		<?php
@@ -83,6 +90,11 @@ final class Metabox {
 		$value = isset($_POST[ self::THRESHOLD_META_KEY ]) ? \sanitize_text_field($_POST[ self::THRESHOLD_META_KEY ]) : 0; //phpcs:ignore
 		$value = is_numeric($value) ? $value : 0;
 		\update_post_meta($post_id, self::THRESHOLD_META_KEY, $value);
+
+		$discount = isset($_POST[ self::DISCOUNT_META_KEY ]) ? \sanitize_text_field($_POST[ self::DISCOUNT_META_KEY ]) : 0; //phpcs:ignore
+		$discount = is_numeric($discount) ? (int) $discount : 0;
+		$discount = max(0, min(100, $discount));
+		\update_post_meta($post_id, self::DISCOUNT_META_KEY, $discount);
 	}
 
 
